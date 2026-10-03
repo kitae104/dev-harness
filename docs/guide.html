@@ -71,6 +71,7 @@
 <nav class="toc">
   <p class="toc-title">목차</p>
   <a href="#quickstart"><b>빠른 시작</b></a>
+  <a href="#vscode"><b>VS Code 로 시작하기</b></a>
   <a href="#overview">0. 한눈에 보기</a>
   <a href="#prepare">1. 준비물</a>
   <a href="#get-repo">2. 저장소 받기</a>
@@ -129,6 +130,89 @@ claude</code></pre></div>
   <p>이후 자세한 사용법은 <a href="#work">6단계</a>, 팀원과 함께 쓰기·기존 프로젝트 적용·업데이트는 <a href="#real-project">7단계</a>를 보세요.</p>
 </section>
 
+<section id="vscode">
+  <h2><span class="num">★</span>VS Code 로 시작하기 (한 단계씩)</h2>
+  <p class="lead">VS Code 안에서 Claude Code 확장으로 처음부터 끝까지 진행하는 순서입니다. 1~4는 PC 마다 한 번, 5~9는 프로젝트마다 합니다. Windows 와 macOS 가 다른 곳은 따로 적었습니다.</p>
+
+  <h3>1. 프로그램 설치 (PC 마다 한 번)</h3>
+  <table>
+    <tr><th>프로그램</th><th>메모</th></tr>
+    <tr><td>VS Code</td><td>1.94 이상</td></tr>
+    <tr><td>Git</td><td>Windows 는 <b>Git for Windows</b> 를 기본값으로 설치. 생성된 프로젝트의 훅이 Git Bash 로 실행되므로 Windows 에서는 꼭 필요합니다.</td></tr>
+    <tr><td>Node.js 22 LTS</td><td>생성기, 훅, 프론트엔드</td></tr>
+    <tr><td>Docker Desktop</td><td>설치 후 실행해 둡니다 (작업 표시줄이나 메뉴 막대에 고래 아이콘)</td></tr>
+    <tr><td>JDK 21</td><td>예: Eclipse Temurin 21. 백엔드 테스트와 VS Code Java 확장용</td></tr>
+    <tr><td>uv</td><td>FastAPI 가 들어간 프로젝트(<code>/s-r-f-setup</code>)에서만</td></tr>
+  </table>
+  <p>설치가 끝나면 VS Code 를 열고 메뉴 <b>Terminal → New Terminal</b>(<code>Ctrl+`</code>)에서 확인합니다.</p>
+  <div class="block"><div class="label">VS Code 터미널</div><pre><code>git --version
+node -v
+docker compose version
+java -version</code></pre></div>
+
+  <h3>2. Claude Code 확장 설치와 로그인 (PC 마다 한 번)</h3>
+  <ol class="steps">
+    <li>왼쪽 막대의 확장 아이콘(<code>Ctrl+Shift+X</code>, macOS <code>Cmd+Shift+X</code>)에서 <b>Claude Code</b>(게시자 Anthropic)를 찾아 설치합니다.</li>
+    <li>왼쪽 막대의 ✻ 아이콘을 누르거나 <code>Ctrl+Esc</code>(macOS <code>Cmd+Esc</code>)로 Claude 패널을 엽니다.</li>
+    <li>처음 열면 브라우저가 뜹니다. Claude 계정으로 로그인하고 VS Code 로 돌아옵니다.</li>
+  </ol>
+  <p>확장에 Claude Code 가 들어 있어서 따로 설치할 것은 없습니다. 터미널에서 <code>claude</code> 명령도 쓰고 싶을 때만 CLI 를 추가로 설치합니다 (Windows PowerShell <code>irm https://claude.ai/install.ps1 | iex</code>, macOS <code>curl -fsSL https://claude.ai/install.sh | bash</code>).</p>
+  <p>코드 편집용으로 <b>Extension Pack for Java</b>, <b>Spring Boot Extension Pack</b>, <b>Tailwind CSS IntelliSense</b>, (FastAPI 를 쓰면) <b>Python</b> 확장을 함께 설치하면 편합니다. 없어도 Claude 와 하네스는 동작합니다.</p>
+
+  <h3>3. dev-harness 받기 (PC 마다 한 번)</h3>
+  <ol class="steps">
+    <li><code>Ctrl+Shift+P</code>(macOS <code>Cmd+Shift+P</code>)로 명령 팔레트를 열고 <b>Git: Clone</b> 을 고릅니다.</li>
+    <li>주소에 <code>https://github.com/kitae104/dev-harness.git</code> 을 붙여 넣습니다. 비공개 저장소면 GitHub 로그인을 요청합니다.</li>
+    <li>저장할 위치로 사용자 홈 폴더(Windows <code>C:\Users\내이름</code>, macOS <code>/Users/내이름</code>)를 고르고, 끝나면 <b>Open</b> 을 누릅니다. 작업 영역을 신뢰하는지 물으면 신뢰한다고 답합니다.</li>
+  </ol>
+
+  <h3>4. 스킬 설치 (PC 마다 한 번)</h3>
+  <p>dev-harness 가 열린 창에서 터미널(<code>Ctrl+`</code>)을 열고 실행합니다.</p>
+  <div class="block"><div class="label">Windows (VS Code 기본 터미널인 PowerShell)</div><pre><code>powershell -ExecutionPolicy Bypass -File scripts\install-skills.ps1</code></pre></div>
+  <div class="block"><div class="label">macOS</div><pre><code>scripts/install-skills.sh</code></pre></div>
+  <p>명령 팔레트에서 <b>Developer: Reload Window</b> 로 창을 다시 불러온 뒤, Claude 패널 입력창에 <code>/</code> 를 쳐서 <code>s-r-setup</code> 이 보이면 성공입니다.</p>
+
+  <h3>5. 새 프로젝트 만들기 (프로젝트마다)</h3>
+  <ol class="steps">
+    <li><b>File → Open Folder</b> 에서 홈 폴더에 <code>projects</code> 폴더를 새로 만들고 그 폴더를 엽니다.</li>
+    <li>Claude 패널에 아래처럼 입력합니다. Claude 가 <code>node … generate.mjs</code> 실행 허락을 구하면 허용합니다.</li>
+  </ol>
+  <div class="block prompt"><div class="label">Claude 패널 (셋 중 하나)</div><pre><code>/s-r-setup my-shop com.kitae.myshop</code></pre></div>
+  <p>FastAPI 가 필요하면 <code>/s-r-f-setup my-shop</code>, AI 채팅이 필요하면 <code>/s-r-ai-setup my-shop anthropic</code>. <code>projects/my-shop</code> 폴더가 첫 커밋까지 된 상태로 생깁니다.</p>
+
+  <h3>6. 생성된 프로젝트 폴더 열기 (중요)</h3>
+  <p><b>File → Open Folder</b> 로 <code>projects/my-shop</code> 을 엽니다. Claude 패널은 열린 폴더 기준으로 동작하므로, 이 창에서부터 my-shop 의 <code>CLAUDE.md</code>, 규칙, 훅, <code>/add-domain</code>, <code>/verify</code> 가 적용됩니다. 작업 영역 신뢰 질문에는 신뢰한다고 답합니다.</p>
+
+  <h3>7. 처음 한 번 준비하고 실행</h3>
+  <div class="block"><div class="label">Windows (PowerShell)</div><pre><code>cd frontend; npm install; cd ..
+docker compose up -d --build</code></pre></div>
+  <div class="block"><div class="label">macOS</div><pre><code>cd frontend &amp;&amp; npm install &amp;&amp; cd ..
+make up</code></pre></div>
+  <p><code>npm install</code> 은 린트 훅이 쓰는 도구를 받는 것이라 처음 한 번만 합니다. 브라우저에서 <code>http://localhost:3000</code> 을 열어 회원가입 → 로그인 → 대시보드가 보이면 준비 끝입니다.</p>
+  <div class="note">Windows PowerShell 에서 <code>npm.ps1 파일을 로드할 수 없습니다</code> 오류가 나면 <code>npm.cmd install</code> 로 실행하거나, PowerShell 에서 <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> 를 한 번 실행한 뒤 다시 시도합니다.</div>
+  <p>Windows 에는 <code>make</code> 가 없으니 같은 일을 하는 <code>docker compose</code> 명령을 씁니다.</p>
+  <table>
+    <tr><th>make (macOS)</th><th>Windows 에서</th><th>하는 일</th></tr>
+    <tr><td><code>make up</code></td><td><code>docker compose up -d --build</code></td><td>이 프로젝트만 빌드 후 실행</td></tr>
+    <tr><td><code>make down</code></td><td><code>docker compose down</code></td><td>이 프로젝트만 종료 (DB 데이터 유지)</td></tr>
+    <tr><td><code>make logs</code></td><td><code>docker compose logs -f</code></td><td>로그 보기</td></tr>
+    <tr><td><code>make ps</code></td><td><code>docker compose ps</code></td><td>상태 보기</td></tr>
+    <tr><td><code>make clean</code></td><td><code>docker compose down -v --rmi local</code></td><td>DB 데이터와 이미지까지 삭제</td></tr>
+  </table>
+
+  <h3>8. Claude 패널로 기능 추가</h3>
+  <div class="block prompt"><div class="label">Claude 패널</div><pre><code>/add-domain 게시글 (제목 필수 100자, 내용 필수, 작성자=로그인 사용자). 목록은 최신순 페이지네이션, 수정·삭제는 작성자만.</code></pre></div>
+  <ul>
+    <li>Claude 가 파일을 고치거나 명령을 실행할 때 패널에 변경 내용과 허락 요청이 나옵니다. 확인하고 허용하면 됩니다.</li>
+    <li>작업이 끝날 때 종료 훅이 바뀐 부분의 테스트와 린트를 자동으로 돌리고, 실패하면 Claude 가 이어서 고칩니다.</li>
+    <li>전체를 다시 확인하려면 <code>/verify</code>, 바뀐 파일은 왼쪽의 소스 제어(<code>Ctrl+Shift+G</code>)에서 보고 커밋합니다.</li>
+    <li>더 많은 프롬프트 예시는 <a href="#work">6. 생성된 프로젝트에서 일하기</a>에 있습니다.</li>
+  </ul>
+
+  <h3>9. 끝낼 때</h3>
+  <p>터미널에서 <code>make down</code>(Windows <code>docker compose down</code>)으로 이 프로젝트 컨테이너만 내립니다. 다른 프로젝트는 영향을 받지 않습니다. 내 GitHub 저장소로 올리는 방법은 <a href="#quickstart">빠른 시작 5단계</a>를 보세요.</p>
+</section>
+
 <section id="overview">
   <h2><span class="num">0</span>한눈에 보기</h2>
   <p class="lead">dev-harness 저장소에는 세 가지가 들어 있습니다.</p>
@@ -152,7 +236,7 @@ claude</code></pre></div>
   <p class="lead">한 번만 설치하면 됩니다.</p>
   <table>
     <tr><th>도구</th><th>용도</th><th>확인 명령</th></tr>
-    <tr><td>Claude Code</td><td>스킬 실행, 이후 개발</td><td><code>claude --version</code></td></tr>
+    <tr><td>Claude Code</td><td>스킬 실행, 이후 개발. 터미널 CLI 또는 VS Code 확장(<a href="#vscode">VS Code 로 시작하기</a>)</td><td><code>claude --version</code></td></tr>
     <tr><td>Node.js 20 이상</td><td>생성기, 훅, 프론트엔드</td><td><code>node -v</code></td></tr>
     <tr><td>Docker Desktop</td><td><code>make up</code> 실행</td><td><code>docker compose version</code></td></tr>
     <tr><td>Git</td><td>저장소, 생성된 프로젝트 첫 커밋</td><td><code>git --version</code></td></tr>
@@ -160,7 +244,7 @@ claude</code></pre></div>
     <tr><td>uv (FastAPI 쓸 때)</td><td>Python 의존성, 테스트</td><td><code>uv --version</code></td></tr>
     <tr><td>make (선택)</td><td><code>make up/down</code>. 없으면 Makefile 주석의 <code>docker compose</code> 명령 사용</td><td><code>make -v</code></td></tr>
   </table>
-  <div class="note">Windows 는 Git for Windows(Git Bash 포함)를 설치하세요. 생성된 프로젝트의 훅이 Git Bash 에서 동작합니다.</div>
+  <div class="note">Windows 는 Git for Windows(Git Bash 포함)를 꼭 설치하세요. 생성된 프로젝트의 훅이 Git Bash 에서 동작합니다. Windows 에는 <code>make</code> 가 없으므로 <a href="#vscode">VS Code 로 시작하기 7단계</a>의 <code>docker compose</code> 명령을 쓰면 됩니다.</div>
 </section>
 
 <section id="get-repo">
@@ -379,7 +463,10 @@ scripts/verify-templates.sh 에 조합을 추가해서 통과시켜 줘.</code><
     <tr><td>AI 채팅이 "AI 응답을 받지 못했습니다"</td><td>API 키나 모델 이름 확인 (<code>.env</code>). Ollama 는 <code>make ai-model</code> 로 모델을 먼저 받기</td></tr>
     <tr><td>Windows 에서 <code>gradlew</code> 오류</td><td>PowerShell 에서는 <code>gradlew.bat</code>. 저장소의 <code>.gitattributes</code> 덕분에 줄바꿈은 LF 로 유지됨</td></tr>
     <tr><td>Claude 가 계속 테스트 실패를 고치려 함</td><td>종료 훅이 실패를 알린 것. 3번 연속 실패하면 멈추고 알려 줌. 잠시 끄려면 <code>HARNESS_VERIFY=off claude</code></td></tr>
-    <tr><td><code>/s-r-setup</code> 이 안 보임</td><td>3단계 설치 후 Claude Code 재시작. 또는 dev-harness 폴더에서 Claude Code 실행</td></tr>
+    <tr><td><code>/s-r-setup</code> 이 안 보임</td><td>3단계 설치 후 Claude Code 재시작 (VS Code 는 명령 팔레트의 Developer: Reload Window). 또는 dev-harness 폴더에서 Claude Code 실행</td></tr>
+    <tr><td>Windows 에서 <code>make</code> 를 찾을 수 없음</td><td>Windows 에는 기본으로 없음. <code>make up</code> 대신 <code>docker compose up -d --build</code> 처럼 VS Code 7단계 표의 명령 사용</td></tr>
+    <tr><td>PowerShell 에서 <code>npm.ps1</code> 을 로드할 수 없음</td><td>스크립트 실행 정책 때문. <code>npm.cmd install</code> 로 실행하거나 <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> 후 다시 시도</td></tr>
+    <tr><td>VS Code 의 Claude 가 프로젝트 규칙을 모름</td><td>dev-harness 나 상위 폴더를 연 상태. File → Open Folder 로 생성된 프로젝트 폴더 자체를 열기</td></tr>
     <tr><td><code>./gradlew</code> 가 Java 버전 오류</td><td>Gradle 실행에는 JDK 17 이상 필요. <code>java -version</code> 확인</td></tr>
     <tr><td>로컬 <code>./gradlew bootRun</code> 이 DB 에 못 붙음</td><td><code>make db</code> 로 DB 먼저 실행. <code>DB_PORT</code> 를 바꿨다면 <code>DB_URL</code> 도 지정</td></tr>
   </table>
