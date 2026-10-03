@@ -4,6 +4,7 @@
 #   scripts/verify-templates.sh                 # 모든 조합
 #   scripts/verify-templates.sh base fastapi    # 일부만 (base | fastapi | ai-openai | ai-anthropic | ai-ollama | all)
 #   SKIP_BACKEND=1 scripts/verify-templates.sh  # Gradle 테스트 생략 (빠른 확인)
+#   DOCKER_BUILD=1 scripts/verify-templates.sh all  # Docker 이미지 빌드까지 (Docker 데몬 필요)
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
@@ -38,6 +39,12 @@ for v in "${SELECTED[@]}"; do
   if command -v docker > /dev/null; then
     step "$v: docker compose config"
     (cd "$dir" && docker compose config -q)
+  fi
+
+  if [ -n "${DOCKER_BUILD:-}" ]; then
+    step "$v: docker compose build"
+    (cd "$dir" && docker compose build -q)
+    docker image ls --format '{{.Repository}}' | grep "^verify-$v-" | xargs -r docker image rm > /dev/null || true
   fi
 
   if [ -z "${SKIP_BACKEND:-}" ]; then

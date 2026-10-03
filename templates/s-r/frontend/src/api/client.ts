@@ -1,5 +1,6 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 const TOKEN_KEY = 'accessToken'
+export const AUTH_EXPIRED_EVENT = 'auth:expired'
 
 export interface ApiErrorBody {
   status: number
@@ -36,8 +37,17 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 
   const res = await fetch(`${BASE_URL}${path}`, { ...init, headers })
   if (!res.ok) {
-    const body = (await res.json().catch(() => null)) as ApiErrorBody | null
-    throw new ApiError(body ?? { status: res.status, message: '요청을 처리하지 못했습니다.' })
+    // 토큰을 보냈는데 401 이면 만료·무효 토큰: 지우고 AuthContext 에 알려 로그아웃 상태로 만듭니다.
+    if (res.status === 401 && token) {
+      tokenStorage.clear()
+      window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT))
+    }
+    const body = (await res.json().catch(() => null)) as Partial<ApiErrorBody> | null
+    throw new ApiError({
+      status: body?.status ?? res.status,
+      message: body?.message || '요청을 처리하지 못했습니다.',
+      errors: body?.errors,
+    })
   }
   if (res.status === 204) {
     return undefined as T

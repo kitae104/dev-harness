@@ -1,3 +1,10 @@
+import time
+
+import jwt
+
+from tests.conftest import TEST_SECRET
+
+
 def auth(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
@@ -17,6 +24,16 @@ def test_me_requires_token(client):
 def test_me_rejects_bad_token(client):
     res = client.get("/api/py/me", headers=auth("not-a-jwt"))
     assert res.status_code == 401
+
+
+def test_me_rejects_token_without_exp(client):
+    no_exp = jwt.encode({"sub": "user@example.com", "role": "USER"}, TEST_SECRET, algorithm="HS256")
+    assert client.get("/api/py/me", headers=auth(no_exp)).status_code == 401
+
+
+def test_me_rejects_expired_token(client):
+    expired = jwt.encode({"sub": "user@example.com", "exp": int(time.time()) - 10}, TEST_SECRET, algorithm="HS256")
+    assert client.get("/api/py/me", headers=auth(expired)).status_code == 401
 
 
 def test_me_with_spring_style_token(client, token):

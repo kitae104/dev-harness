@@ -41,5 +41,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: cp .env.example .env && docker compose config -q
+      - run: docker compose build
 
   # @addon:ci-jobs

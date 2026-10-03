@@ -25,3 +25,6 @@ jobs:
           node-version: '22'
       - uses: astral-sh/setup-uv@v6
       - run: scripts/verify-templates.sh ${{ matrix.variant }}
+        env:
+          # 이미지 빌드는 모든 Dockerfile 이 들어가는 조합에서만 (시간 절약)
+          DOCKER_BUILD: ${{ matrix.variant == 'all' && '1' || '' }}

@@ -2,6 +2,8 @@ package com.example.app.config;
 
 import com.example.app.common.ErrorResponse;
 import com.example.app.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -45,15 +47,21 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**", "/actuator/health", "/error").permitAll()
                         .anyRequest().authenticated())
-                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, e) -> {
-                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    response.setCharacterEncoding("UTF-8");
-                    objectMapper.writeValue(response.getWriter(),
-                            ErrorResponse.of(HttpStatus.UNAUTHORIZED.value(), "인증이 필요합니다."));
-                }))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, e) ->
+                                writeError(response, HttpStatus.UNAUTHORIZED, "인증이 필요합니다."))
+                        .accessDeniedHandler((request, response, e) ->
+                                writeError(response, HttpStatus.FORBIDDEN, "권한이 없습니다.")))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    /** 필터 단계(컨트롤러 밖)의 인증·인가 실패도 같은 에러 형식으로 응답합니다. */
+    private void writeError(HttpServletResponse response, HttpStatus status, String message) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        objectMapper.writeValue(response.getWriter(), ErrorResponse.of(status.value(), message));
     }
 
     @Bean

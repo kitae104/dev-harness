@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { authApi, type LoginInput, type User } from '../api/auth.ts'
-import { tokenStorage } from '../api/client.ts'
+import { AUTH_EXPIRED_EVENT, tokenStorage } from '../api/client.ts'
 
 interface AuthState {
   user: User | null
@@ -23,6 +23,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(setUser)
       .catch(() => tokenStorage.clear())
       .finally(() => setLoading(false))
+  }, [])
+
+  // API 가 토큰 만료(401)를 알리면 로그아웃 상태로 바꿉니다. ProtectedRoute 가 로그인 화면으로 보냅니다.
+  useEffect(() => {
+    const onExpired = () => setUser(null)
+    window.addEventListener(AUTH_EXPIRED_EVENT, onExpired)
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, onExpired)
   }, [])
 
   const login = useCallback(async (input: LoginInput) => {

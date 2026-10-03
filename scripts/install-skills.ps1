@@ -1,4 +1,4 @@
-# dev-harness 스킬을 %USERPROFILE%\.claude\skills 에 디렉터리 정션으로 설치합니다 (관리자 권한 불필요).
+﻿# dev-harness 스킬을 %USERPROFILE%\.claude\skills 에 디렉터리 정션으로 설치합니다 (관리자 권한 불필요).
 # 사용: powershell -ExecutionPolicy Bypass -File scripts\install-skills.ps1
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path

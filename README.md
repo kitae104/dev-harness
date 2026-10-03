@@ -30,7 +30,8 @@ cd dev-harness
   node scripts/new-project.mjs --name my-shop --package com.kitae.myshop --addons fastapi,spring-ai --ai-provider anthropic --out ~/projects/my-shop
   ```
 
-필요한 도구: Node 20+ (생성기), Docker (실행), 로컬 개발 시 JDK 21 · uv(FastAPI).
+필요한 도구: Node 20+ (생성기), Docker (실행), 로컬 개발 시 JDK(버전 무관, Gradle 이 21 을 받아 씀) · uv(FastAPI).
+Windows 는 스킬 설치에 `install-skills.ps1` 을 쓰고, 생성된 프로젝트의 훅은 Git Bash 가 있으면 그대로 동작합니다.
 
 ## 생성된 프로젝트에 들어가는 것
 

@@ -21,4 +21,5 @@
 scripts/verify-templates.sh               # 모든 조합 생성 + 빌드 + 테스트
 scripts/verify-templates.sh base fastapi  # 일부만
 SKIP_BACKEND=1 scripts/verify-templates.sh  # Gradle 생략 빠른 확인
+DOCKER_BUILD=1 scripts/verify-templates.sh all  # Docker 이미지 빌드까지 (Dockerfile, nginx 를 고쳤을 때)
 ```

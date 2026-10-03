@@ -30,8 +30,24 @@ const ADDONS_DIR = path.join(TEMPLATES, 'addons')
 // 복사하지 않을 경로 (어느 깊이에서든 이름이 일치하면 제외)
 const SKIP_NAMES = new Set([
   'node_modules', 'dist', 'build', '.gradle', 'bin', 'out', '.venv', '__pycache__',
-  '.pytest_cache', '.ruff_cache', '.idea', '.DS_Store', '.env', '.verify-cache',
+  '.pytest_cache', '.ruff_cache', '.idea', '.vscode', '.DS_Store', 'Thumbs.db', '.env', '.verify-cache',
+  'settings.local.json', // Claude Code 개인 설정
 ])
+// 템플릿 폴더에서 직접 실행·빌드해 본 흔적 (.env.local, *.tsbuildinfo, 로그 등)
+const SKIP_PATTERNS = [/^\.env\..+/, /\.tsbuildinfo$/, /\.log$/]
+const isSkipped = (name) => SKIP_NAMES.has(name) || (name !== '.env.example' && SKIP_PATTERNS.some((re) => re.test(name)))
+
+// 줄바꿈을 CRLF 로 유지해야 하는 Windows 전용 파일. 나머지 텍스트 파일은 LF 로 맞춥니다
+// (Windows 에서 저장소를 받아 CRLF 가 되었더라도 gradlew 등이 리눅스 컨테이너에서 동작하도록).
+const CRLF_FILES = /\.(bat|cmd|ps1)$/i
+// 실행 권한이 필요한 파일 (Windows 에서는 파일 권한이 없어 이름으로 지정)
+const EXECUTABLE = /(^|[\\/])(gradlew|[^\\/]+\.sh)$/
+
+// Java 예약어는 패키지 이름에 쓸 수 없습니다.
+const JAVA_RESERVED = new Set(`abstract assert boolean break byte case catch char class const continue default do double
+else enum extends final finally float for goto if implements import instanceof int interface long native new package
+private protected public return short static strictfp super switch synchronized this throw throws transient try void
+volatile while true false null _ var record yield sealed permits`.split(/\s+/))
 
 const MARKER = /@addon:([a-z0-9-]+)/
 
@@ -49,6 +65,9 @@ export function deriveNames({ name, pkg }) {
   }
   if (name.length > 40) fail('프로젝트 이름은 40자 이하로 지어 주세요.')
   const compact = name.replace(/-/g, '')
+  if (!pkg && JAVA_RESERVED.has(compact)) {
+    fail(`"${compact}" 은 Java 예약어라 패키지 이름이 될 수 없습니다. --package 로 직접 지정하거나 다른 이름을 쓰세요.`)
+  }
   const snake = name.replace(/-/g, '_')
   const words = name.split('-')
   const pascal = words.map((w) => w[0].toUpperCase() + w.slice(1)).join('')
@@ -57,6 +76,8 @@ export function deriveNames({ name, pkg }) {
   if (!/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(javaPackage)) {
     fail(`Java 패키지 형식이 아닙니다: "${javaPackage}" (예: com.acme.myshop)`)
   }
+  const reserved = javaPackage.split('.').find((part) => JAVA_RESERVED.has(part))
+  if (reserved) fail(`Java 패키지에 예약어 "${reserved}" 를 쓸 수 없습니다: "${javaPackage}"`)
   const group = javaPackage.split('.').slice(0, -1).join('.')
   return {
     name, // my-shop        : Compose 프로젝트, 컨테이너 접두어, rootProject, spring.application.name
@@ -125,7 +146,7 @@ export function collectSlots(addons, options) {
 
 function walk(dir, base = dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_NAMES.has(entry.name)) continue
+    if (isSkipped(entry.name)) continue
     const full = path.join(dir, entry.name)
     if (entry.isDirectory()) walk(full, base, out)
     else if (entry.isFile()) out.push(path.relative(base, full))
@@ -194,6 +215,10 @@ export function renameContent(rel, text, n) {
       .replace(/^(\s+name:) app$/m, `$1 ${n.name}`)
       .replace('localhost:5432/app}', `localhost:5432/${n.snake}}`)
       .replace(/\$\{(DB_USERNAME|DB_PASSWORD):app\}/g, `\${$1:${n.snake}}`)
+  } else if (p === 'README.md') {
+    s = s
+      .replace(/^# .*$/m, `# ${n.title}`)
+      .replaceAll('com/example/app/', `${n.javaPackage.split('.').join('/')}/`)
   } else if (p === 'frontend/index.html') {
     s = s.replace('<title>App</title>', `<title>${n.title}</title>`)
   } else if (p === 'frontend/src/components/Layout.tsx') {
@@ -266,10 +291,11 @@ export function generate(opts) {
       result.set(target, { buf, mode })
       continue
     }
-    let text = buf.toString('utf8')
+    let text = buf.toString('utf8').replace(/\r\n/g, '\n')
     text = injectSlots(text, slots, usedSlots)
     text = renameContent(rel, text, names)
-    result.set(target, { buf: Buffer.from(text, 'utf8'), mode })
+    if (CRLF_FILES.test(rel)) text = text.replace(/\n/g, '\r\n')
+    result.set(target, { buf: Buffer.from(text, 'utf8'), mode: EXECUTABLE.test(rel) ? 0o755 : mode })
   }
   const unused = [...slots.keys()].filter((s) => !usedSlots.has(s))
   if (unused.length) fail(`템플릿에서 찾지 못한 slot: ${unused.join(', ')} (templates/s-r 의 @addon 표시를 확인하세요)`)
@@ -321,8 +347,14 @@ function gitHead(dir) {
 function initGit(dir) {
   try {
     const run = (...args) => execFileSync('git', ['-C', dir, ...args], { stdio: 'ignore' })
-    run('init', '-q', '-b', 'main')
+    run('init', '-q')
+    run('symbolic-ref', 'HEAD', 'refs/heads/main') // git 2.28 미만은 init -b 가 없음
     run('add', '-A')
+    // Windows 에서는 파일 권한이 기록되지 않으므로 실행 파일을 명시 (CI 의 ./gradlew 용)
+    const executables = execFileSync('git', ['-C', dir, 'ls-files'], { encoding: 'utf8' })
+      .split('\n')
+      .filter((f) => EXECUTABLE.test(f))
+    if (executables.length) run('update-index', '--chmod=+x', '--', ...executables)
     try {
       run('commit', '-q', '-m', 'Initial commit from dev-harness template')
       return 'committed'

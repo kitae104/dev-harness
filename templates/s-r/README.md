@@ -14,10 +14,12 @@
 ## 바로 실행 (Docker Compose)
 
 ```bash
-cp .env.example .env   # COMPOSE_PROJECT_NAME, 포트, JWT_SECRET 수정
 make up                # = docker compose up -d --build
 make down              # = docker compose down  (DB 데이터는 유지)
 ```
+
+- `.env` 는 생성할 때 임의의 `JWT_SECRET` 으로 이미 만들어져 있습니다. **`.env.example` 로 덮어쓰지 마세요** (공개된 기본 비밀값이 됩니다). `.env` 가 없을 때만 `cp .env.example .env` 후 `JWT_SECRET` 을 바꾸세요 (`openssl rand -base64 48`).
+- `JWT_SECRET` 이 비어 있으면 `docker compose` 가 시작하지 않고 알려 줍니다.
 
 - 프론트엔드: http://localhost:3000 (nginx 가 `/api` 를 백엔드로 프록시)
 - 백엔드: http://localhost:8080 (`/actuator/health`)
@@ -42,6 +44,10 @@ cd backend && ./gradlew bootRun
 # 3) 프론트엔드 (http://localhost:5173, /api 는 8080 으로 프록시)
 cd frontend && npm install && npm run dev
 ```
+
+- Windows(PowerShell/cmd)에서는 `./gradlew` 대신 `gradlew.bat` 을 씁니다. `make` 가 없으면 Makefile 주석의 `docker compose` 명령을 그대로 쓰면 됩니다.
+- `./gradlew bootRun` 은 `.env` 를 읽지 않습니다. `.env` 에서 `DB_PORT` 를 바꿨다면 `DB_URL=jdbc:postgresql://localhost:<DB_PORT>/<DB_NAME>` 을 함께 지정해서 실행하세요.
+- 로컬 JDK 가 21 이 아니어도 Gradle 이 JDK 21 을 자동으로 내려받아 씁니다 (foojay 툴체인).
 
 ## 검증 명령
 
@@ -95,7 +101,6 @@ frontend/src/
 
 - 액세스 토큰만 사용하며 `localStorage` 에 저장합니다. 리프레시 토큰은 포함하지 않았습니다.
 - 스키마는 `JPA_DDL_AUTO=update` 로 자동 생성됩니다. 운영 전에는 Flyway 같은 마이그레이션 도구로 바꾸는 것을 권장합니다.
-- 패키지명 `com.example.app` 과 프로젝트명 `app` 은 스킬이 프로젝트 생성 시 바꿀 자리입니다.
 
 <!-- @addon:readme -->
 

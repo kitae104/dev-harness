@@ -15,7 +15,7 @@ paths:
 - 엔티티: Lombok `@Getter`, `@NoArgsConstructor(access = PROTECTED)`, 생성은 `@Builder` 또는 정적 팩토리. `@Setter` 는 쓰지 않고 의미 있는 변경 메서드를 둡니다.
 - 의존성 주입은 생성자 주입(`@RequiredArgsConstructor` + `private final`). 필드 `@Autowired` 금지.
 - 서비스 트랜잭션은 메서드 단위: 조회 `@Transactional(readOnly = true)`, 변경 `@Transactional` (`auth/AuthService.java` 참고).
-- 실패는 `throw new ApiException(HttpStatus.XXX, "사용자에게 보여줄 한국어 메시지")`. 새 예외 타입이 필요하면 `GlobalExceptionHandler` 에 처리기를 추가해 같은 `ErrorResponse` 형식으로 응답합니다.
+- 실패는 `throw new ApiException(HttpStatus.XXX, "사용자에게 보여줄 한국어 메시지")`. `GlobalExceptionHandler` 가 Spring 기본 예외(잘못된 JSON 400, 타입 불일치 400, 404, 405, 403, 무결성 위반 409)와 나머지(500, 로그만 남기고 내부 정보 숨김)를 같은 `ErrorResponse` 형식으로 바꿉니다. 새 예외 타입이 필요하면 여기에 처리기를 추가합니다.
 - 현재 사용자: 컨트롤러 파라미터 `@AuthenticationPrincipal UserDetails principal` (`principal.getUsername()` 은 이메일).
 - JSON 은 Jackson 3 (`tools.jackson.*`). `com.fasterxml.jackson.databind` 를 import 하지 않습니다.
 - 공개 API 를 추가하면 `SecurityConfig` 의 `permitAll` 목록에 명시적으로 넣습니다. 기본은 인증 필요.

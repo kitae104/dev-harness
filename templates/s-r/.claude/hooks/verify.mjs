@@ -17,13 +17,19 @@ const STATE_FILE = path.join(CACHE_DIR, 'state.json')
 if (process.env.HARNESS_VERIFY === 'off') process.exit(0)
 const input = await readInput()
 
-const status = run('git', ['status', '--porcelain', '--untracked-files=all'], ROOT)
+// -z: 경로를 따옴표·이스케이프 없이 NUL 로 구분 (한글 파일 이름도 그대로)
+const status = run('git', ['status', '--porcelain=v1', '-z', '--untracked-files=all'], ROOT)
 if (!status.ok) process.exit(0) // git 저장소가 아니면 건너뜀
 
-const changed = status.output
-  .split('\n')
-  .filter(Boolean)
-  .map((line) => line.slice(3).replace(/^.* -> /, '').replace(/^"|"$/g, ''))
+const changed = []
+const entries = status.output.split('\0')
+for (let i = 0; i < entries.length; i++) {
+  const entry = entries[i]
+  if (entry.length < 4) continue
+  changed.push(entry.slice(3))
+  // 이름 변경(R)·복사(C)는 다음 항목이 원래 경로
+  if (entry[0] === 'R' || entry[0] === 'C') changed.push(entries[++i])
+}
 
 const AREAS = {
   backend: {

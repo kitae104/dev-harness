@@ -21,7 +21,9 @@ export function run(cmd, args, cwd) {
   return { ok: res.status === 0, output: `${res.stdout ?? ''}${res.stderr ?? ''}`, missing: res.error?.code === 'ENOENT' }
 }
 
+// 명령이 설치되어 있는지. Windows 는 shell 을 거치면 ENOENT 가 나지 않으므로 where 로 찾습니다.
 export function has(cmd) {
+  if (WIN) return spawnSync('where', [cmd], { stdio: 'ignore' }).status === 0
   return !run(cmd, ['--version'], ROOT).missing
 }
 

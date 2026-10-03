@@ -16,6 +16,8 @@ paths:
 - 새 볼륨: `name: ${COMPOSE_PROJECT_NAME:-...}-<용도>` 를 반드시 지정합니다.
 - 포트: `"127.0.0.1:${<서비스>_PORT:-기본값}:<컨테이너 포트>"`. 변수는 `.env.example` 에도 추가합니다. 0.0.0.0 으로 열지 않습니다.
 - 외부 `docker` 명령으로 이름 없는 리소스를 만들지 않고, 다른 프로젝트 리소스를 지우는 명령(`docker system prune`, `docker volume prune` 등)은 쓰지 않습니다.
-- 프론트엔드에서 새 백엔드 서비스로 가는 경로가 필요하면 `frontend/nginx.conf` 와 `frontend/vite.config.ts` 의 프록시를 함께 추가합니다.
+- 프론트엔드에서 새 백엔드 서비스로 가는 경로가 필요하면 `frontend/nginx.conf` 와 `frontend/vite.config.ts` 의 프록시를 함께 추가합니다. nginx 는 기존 블록처럼 `set $xxx_upstream http://<서비스>:<포트>; proxy_pass $xxx_upstream;` 과 `proxy_set_header Host $http_host;` 를 씁니다 (컨테이너를 다시 만들어도 502 가 나지 않고, 포트를 바꿔도 CORS 에 걸리지 않음).
+- HTTP 서비스에는 `healthcheck` 를 두고, 다른 서비스가 기다려야 하면 `depends_on: <서비스>: condition: service_healthy` 로 연결합니다.
+- 컨테이너는 root 가 아닌 사용자로 실행합니다 (기존 Dockerfile 의 `USER app` 참고).
 - `make` 대상을 추가하면 주석(`## 설명`)을 붙입니다.
 - 확인: `docker compose config -q` (문법), `make up && make ps`.

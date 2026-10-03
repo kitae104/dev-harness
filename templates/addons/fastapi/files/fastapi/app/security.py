@@ -26,7 +26,13 @@ def get_current_user(
     if credentials is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "인증이 필요합니다.")
     try:
-        claims = jwt.decode(credentials.credentials, settings.jwt_secret, algorithms=ALGORITHMS)
+        # 만료(exp)와 사용자(sub)가 없는 토큰은 받지 않습니다.
+        claims = jwt.decode(
+            credentials.credentials,
+            settings.jwt_secret,
+            algorithms=ALGORITHMS,
+            options={"require": ["exp", "sub"]},
+        )
     except jwt.PyJWTError as e:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "인증이 필요합니다.") from e
     return CurrentUser(email=claims["sub"], role=claims.get("role", "USER"))

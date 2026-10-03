@@ -21,6 +21,8 @@ argument-hint: "<프로젝트이름> [패키지] [위치] [openai|anthropic|olla
 
 예: `/s-r-ai-setup my-shop`, `/s-r-ai-setup my-shop com.kitae.shop ~/projects/my-shop`, `/s-r-ai-setup my-bot anthropic`
 
+FastAPI 와 Spring AI 를 **둘 다** 원하면 실행할 때 `--addons fastapi,spring-ai` 를 덧붙입니다 (뒤에 준 값이 기본값을 대신합니다).
+
 ## 2. 생성
 
 이 스킬의 기본 디렉터리(Base directory)에 있는 `generate.mjs` 를 실행합니다.
