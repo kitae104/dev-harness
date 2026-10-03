@@ -31,6 +31,7 @@
   nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
   nav.toc .toc-title { font-weight: 700; color: var(--text); margin: 0 0 8px 10px; }
   main { min-width: 0; }
+  main a { color: var(--accent); }
   header.hero { margin-bottom: 32px; }
   header.hero h1 { font-size: 30px; line-height: 1.3; margin: 0 0 8px; }
   header.hero p { color: var(--muted); margin: 0; }
@@ -69,6 +70,7 @@
 <div class="layout">
 <nav class="toc">
   <p class="toc-title">목차</p>
+  <a href="#quickstart"><b>빠른 시작</b></a>
   <a href="#overview">0. 한눈에 보기</a>
   <a href="#prepare">1. 준비물</a>
   <a href="#get-repo">2. 저장소 받기</a>
@@ -76,9 +78,10 @@
   <a href="#create">4. 새 프로젝트 만들기</a>
   <a href="#run">5. 실행과 종료</a>
   <a href="#work">6. 생성된 프로젝트에서 일하기</a>
-  <a href="#rebuild">7. 처음부터 직접 만들기</a>
-  <a href="#maintain">8. 하네스 키우기</a>
-  <a href="#trouble">9. 문제 해결</a>
+  <a href="#real-project">7. 실제 프로젝트로 키우기</a>
+  <a href="#rebuild">8. 처음부터 직접 만들기</a>
+  <a href="#maintain">9. 하네스 키우기</a>
+  <a href="#trouble">10. 문제 해결</a>
 </nav>
 
 <main>
@@ -87,6 +90,45 @@
   <h1>dev-harness 따라하기</h1>
   <p>Spring Boot + React 프로젝트를 명령 하나로 만들고, 그 위에서 Claude Code 로 일관되게 기능을 추가하는 방법을 순서대로 정리했습니다. 보라색 테두리 상자는 Claude Code 에 그대로 붙여 넣는 프롬프트, 검은 상자는 터미널 명령입니다.</p>
 </header>
+
+<section id="quickstart">
+  <h2><span class="num">★</span>빠른 시작: GitHub 에 올린 뒤 실제 프로젝트에 쓰기</h2>
+  <p class="lead">dev-harness 를 GitHub 에 올린 다음, 실제 프로젝트 하나를 시작하기까지의 전체 흐름입니다. 1~2는 PC 마다 한 번, 3~6은 프로젝트마다 합니다.</p>
+  <div class="note"><b>하네스는 두 곳에 있습니다.</b> dev-harness 저장소는 프로젝트를 <b>만드는 도구</b>(템플릿, 생성기, <code>/s-r-setup</code> 스킬)이고, 실제 작업 규칙과 훅은 <b>생성된 프로젝트 안</b>(<code>CLAUDE.md</code>, <code>.claude/</code>)에 복사되어 들어갑니다. 그래서 생성된 프로젝트는 dev-harness 없이도 혼자 동작하고, 그 프로젝트를 GitHub 에 올리면 팀원도 같은 규칙으로 일합니다.</div>
+
+  <h3>1. dev-harness 받기 (PC 마다 한 번)</h3>
+  <div class="block"><div class="label">터미널</div><pre><code>cd ~
+git clone https://github.com/kitae104/dev-harness.git</code></pre></div>
+  <p>아직 GitHub 에 올리지 않았다면 <a href="#get-repo">2단계의 번들 방법</a>으로 받습니다.</p>
+
+  <h3>2. 스킬 설치 (PC 마다 한 번)</h3>
+  <div class="block"><div class="label">터미널 (macOS / Linux / Git Bash. Windows PowerShell 은 scripts\install-skills.ps1)</div><pre><code>~/dev-harness/scripts/install-skills.sh</code></pre></div>
+  <p>Claude Code 를 다시 시작하면 어느 폴더에서나 <code>/s-r-setup</code> 이 보입니다.</p>
+
+  <h3>3. 새 프로젝트 만들기 (프로젝트마다)</h3>
+  <div class="block"><div class="label">터미널</div><pre><code>mkdir -p ~/projects && cd ~/projects
+claude</code></pre></div>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트 (셋 중 하나)</div><pre><code>/s-r-setup my-shop com.kitae.myshop</code></pre></div>
+  <p>FastAPI 가 필요하면 <code>/s-r-f-setup</code>, AI 채팅이 필요하면 <code>/s-r-ai-setup my-shop anthropic</code>. <code>~/projects/my-shop</code> 에 첫 커밋까지 된 프로젝트가 생깁니다.</p>
+
+  <h3>4. 실행해서 확인</h3>
+  <div class="block"><div class="label">터미널</div><pre><code>cd ~/projects/my-shop
+make up        # http://localhost:3000 에서 회원가입 → 로그인 → 대시보드 확인
+make down      # 끝낼 때 (이 프로젝트만 종료)</code></pre></div>
+
+  <h3>5. 내 GitHub 저장소로 올리기</h3>
+  <p>GitHub 에서 <b>빈 저장소</b>(README 없이)를 <code>my-shop</code> 이름으로 만든 뒤:</p>
+  <div class="block"><div class="label">터미널</div><pre><code>git remote add origin https://github.com/kitae104/my-shop.git
+git push -u origin main</code></pre></div>
+  <p>올리면 GitHub Actions(<code>.github/workflows/ci.yml</code>)가 백엔드 테스트, 프론트엔드 린트·빌드, Docker 빌드를 자동으로 돌립니다. <code>.env</code> 는 올라가지 않습니다(비밀값 보호).</p>
+
+  <h3>6. 그 프로젝트에서 Claude Code 로 개발</h3>
+  <div class="block"><div class="label">터미널</div><pre><code>cd ~/projects/my-shop
+cd frontend &amp;&amp; npm install &amp;&amp; cd ..   # 린트 훅이 쓰는 도구 설치 (처음 한 번)
+claude</code></pre></div>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트</div><pre><code>/add-domain 게시글 (제목 필수 100자, 내용 필수, 작성자=로그인 사용자). 목록은 최신순 페이지네이션, 수정·삭제는 작성자만.</code></pre></div>
+  <p>이후 자세한 사용법은 <a href="#work">6단계</a>, 팀원과 함께 쓰기·기존 프로젝트 적용·업데이트는 <a href="#real-project">7단계</a>를 보세요.</p>
+</section>
 
 <section id="overview">
   <h2><span class="num">0</span>한눈에 보기</h2>
@@ -101,7 +143,8 @@
     <li>저장소를 받고 스킬을 한 번 설치합니다 (2~3단계).</li>
     <li>새 프로젝트가 필요할 때마다 <code>/s-r-setup 이름</code> 으로 만들고 <code>make up</code> 으로 실행합니다 (4~5단계).</li>
     <li>만든 프로젝트 폴더에서 Claude Code 를 열고 기능을 추가합니다. 규칙과 훅이 자동으로 적용됩니다 (6단계).</li>
-    <li>dev-harness 자체를 다른 저장소에서 처음부터 다시 만들고 싶다면 7단계의 프롬프트를 순서대로 씁니다.</li>
+    <li>만든 프로젝트를 내 GitHub 저장소에 올리고 팀원과 함께 쓰는 방법은 7단계에 있습니다.</li>
+    <li>dev-harness 자체를 다른 저장소에서 처음부터 다시 만들고 싶다면 8단계의 프롬프트를 순서대로 씁니다.</li>
   </ol>
 </section>
 
@@ -215,8 +258,53 @@ make clean   # 이 프로젝트의 DB 볼륨과 이미지까지 삭제</code></p
   <div class="note">검증 훅을 잠시 끄려면 <code>HARNESS_VERIFY=off claude</code> 로 실행합니다.</div>
 </section>
 
+<section id="real-project">
+  <h2><span class="num">7</span>실제 프로젝트로 키우기</h2>
+  <p class="lead">생성된 프로젝트를 저장소로 관리하고, 팀원과 나누고, dev-harness 의 개선을 반영하는 방법입니다.</p>
+
+  <h3>팀원이 처음 받을 때</h3>
+  <p><code>.env</code> 는 저장소에 없으므로 각자 만듭니다. 비밀값은 사람마다 새로 생성하세요.</p>
+  <div class="block"><div class="label">터미널</div><pre><code>git clone https://github.com/kitae104/my-shop.git &amp;&amp; cd my-shop
+cp .env.example .env
+# .env 의 JWT_SECRET 을 아래 값으로 바꾸기 (Windows 는 Git Bash 에서)
+openssl rand -base64 48
+cd frontend &amp;&amp; npm install &amp;&amp; cd ..   # 훅·로컬 개발용
+make up</code></pre></div>
+  <p>그 폴더에서 <code>claude</code> 를 열면 저장소에 들어 있는 <code>CLAUDE.md</code>, 규칙, 훅, <code>/add-domain</code>, <code>/verify</code> 가 그대로 적용됩니다. 팀원에게 dev-harness 설치는 필요 없습니다.</p>
+
+  <h3>개발 흐름 예시</h3>
+  <div class="block prompt"><div class="label">기능 브랜치에서 작업하고 PR 준비</div><pre><code>feature/board 브랜치를 만들고 /add-domain 으로 게시판을 추가해 줘.
+끝나면 /verify 로 전체 검증하고, code-reviewer 에이전트 리뷰 결과까지 반영한 다음 커밋해 줘. 푸시는 내가 확인한 뒤에 할게.</code></pre></div>
+
+  <h3>이미 있는 프로젝트에 하네스만 적용</h3>
+  <p>dev-harness 로 만들지 않은 Spring Boot + React 프로젝트에도 규칙과 훅만 가져올 수 있습니다. 그 프로젝트 폴더에서 Claude Code 를 열고:</p>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트</div><pre><code>~/dev-harness/templates/s-r 의 하네스(CLAUDE.md, .claude/settings.json, .claude/hooks, .claude/rules, .claude/skills, .claude/agents, .github/workflows/ci.yml)를
+이 프로젝트에 맞게 옮겨 줘. 그대로 복사하지 말고:
+- 먼저 이 프로젝트의 폴더 구조, 패키지, 빌드 명령, 에러 응답 형식, Docker 구성을 조사해서 차이를 표로 보여 줘.
+- 규칙 문서는 이 프로젝트의 실제 코드 패턴에 맞게 고쳐 쓰고, 훅의 검증 명령과 폴더 이름도 맞춰 줘.
+- 확인을 받은 뒤에 적용하고, 훅이 실제로 동작하는지 일부러 틀린 코드로 시험해 줘.</code></pre></div>
+
+  <h3>dev-harness 개선을 반영하기</h3>
+  <ul>
+    <li><b>새로 만들 프로젝트</b>: <code>cd ~/dev-harness &amp;&amp; git pull</code> 만 하면 됩니다. 스킬은 링크로 설치되어 함께 최신이 됩니다.</li>
+    <li><b>이미 만든 프로젝트</b>: 자동으로 바뀌지 않습니다. <code>.harness.json</code> 에 만든 시점의 dev-harness 커밋이 기록되어 있으니, 아래 프롬프트로 차이를 반영합니다.</li>
+  </ul>
+  <div class="block prompt"><div class="label">이미 만든 프로젝트에 하네스 개선 반영</div><pre><code>../my-shop 은 .harness.json 에 기록된 대로 예전 dev-harness 로 만든 프로젝트야.
+그 뒤 templates/s-r/.claude, CLAUDE.md 에 바뀐 내용을 비교해서 my-shop 에 반영할 변경 목록을 먼저 보여 주고, 확인하면 적용해 줘.</code></pre></div>
+
+  <h3>운영 배포 전에 확인할 것</h3>
+  <ul>
+    <li><code>JWT_SECRET</code> 은 운영 전용 값으로 (서버의 환경 변수나 비밀 저장소에 보관)</li>
+    <li>DB 스키마: <code>JPA_DDL_AUTO=update</code> 대신 Flyway 같은 마이그레이션 도입 후 <code>validate</code></li>
+    <li>HTTPS 앞단(리버스 프록시나 로드밸런서)과 실제 도메인으로 <code>CORS_ALLOWED_ORIGINS</code> 지정</li>
+    <li>액세스 토큰만 있고 리프레시 토큰은 없습니다. 필요하면 기능으로 추가</li>
+  </ul>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트</div><pre><code>이 프로젝트를 운영에 배포하려고 해. 위 항목(JWT 비밀값, Flyway 도입, CORS, 리프레시 토큰 필요 여부)과 보안 점검 결과를
+목록으로 정리하고, 바꿔야 할 것을 우선순위대로 제안해 줘. 바로 고치지는 말고 계획만 먼저 보여 줘.</code></pre></div>
+</section>
+
 <section id="rebuild">
-  <h2><span class="num">7</span>처음부터 직접 만들기 (별도 프로젝트에서 재현)</h2>
+  <h2><span class="num">8</span>처음부터 직접 만들기 (별도 프로젝트에서 재현)</h2>
   <p class="lead">dev-harness 와 같은 저장소를 새로 만들 때 쓰는 프롬프트입니다. 빈 GitHub 저장소를 만들어 내 PC 에 받은 뒤 그 폴더에서 Claude Code 를 열고 1번부터 차례로 넣으세요. 각 단계가 끝나면 결과를 확인하고 커밋한 뒤 다음으로 넘어갑니다.</p>
   <div class="note">각 프롬프트 앞에 <b>계획 모드</b>(Shift+Tab 두 번)로 계획을 먼저 받아 보면 방향을 잡기 쉽습니다. 버전은 작성 시점(2026-10) 기준입니다. Claude 가 최신 호환 버전을 확인하게 되어 있습니다.</div>
 
@@ -287,7 +375,7 @@ FRONTEND_PORT 를 바꾼 두 번째 프로젝트를 동시에 띄워 서로 영�
 </section>
 
 <section id="maintain">
-  <h2><span class="num">8</span>하네스 키우기 (dev-harness 저장소에서)</h2>
+  <h2><span class="num">9</span>하네스 키우기 (dev-harness 저장소에서)</h2>
   <p class="lead">dev-harness 폴더에서 Claude Code 를 열고 씁니다. 저장소의 CLAUDE.md 가 확장 지점 규칙과 검증 명령을 알려 줍니다.</p>
   <div class="block prompt"><div class="label">새 확장 모듈 추가 (예: Redis)</div><pre><code>templates/addons/redis 확장 모듈을 추가해 줘. redis 컨테이너(이름 규칙, 127.0.0.1 포트, 이름 있는 볼륨, 헬스체크),
 backend 에 spring-boot-starter-data-redis 와 간단한 캐시 예시, .env.example 변수, README·CLAUDE.md 절, .claude/rules/redis.md.
@@ -297,12 +385,10 @@ scripts/verify-templates.sh 에 조합을 추가해서 통과시켜 줘.</code><
 (Maven Central 의 spring-ai 모듈 POM 에서 spring-boot 버전을 확인), 규칙 문서와 README 의 버전 표도 고친 뒤 verify-templates.sh 전체를 돌려 줘.</code></pre></div>
   <div class="block prompt"><div class="label">규칙 바꾸기</div><pre><code>앞으로 모든 생성 프로젝트의 백엔드는 Flyway 마이그레이션을 쓰도록 바꿔 줘. 템플릿 코드, ddl-auto 설정, .claude/rules/backend.md,
 /add-domain 스킬 절차를 함께 고치고 verify-templates.sh 로 확인해 줘.</code></pre></div>
-  <div class="block prompt"><div class="label">이미 만든 프로젝트에 하네스 개선 반영</div><pre><code>../my-shop 은 .harness.json 에 기록된 대로 예전 dev-harness 로 만든 프로젝트야.
-그 뒤 templates/s-r/.claude, CLAUDE.md 에 바뀐 내용을 비교해서 my-shop 에 반영할 변경 목록을 먼저 보여 주고, 확인하면 적용해 줘.</code></pre></div>
 </section>
 
 <section id="trouble">
-  <h2><span class="num">9</span>문제 해결</h2>
+  <h2><span class="num">10</span>문제 해결</h2>
   <table>
     <tr><th>증상</th><th>원인과 해결</th></tr>
     <tr><td><code>required variable JWT_SECRET is missing</code></td><td><code>.env</code> 가 없거나 비어 있음. <code>cp .env.example .env</code> 후 <code>openssl rand -base64 48</code> 값으로 바꾸기</td></tr>
