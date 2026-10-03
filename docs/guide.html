@@ -99,7 +99,6 @@
   <h3>1. dev-harness 받기 (PC 마다 한 번)</h3>
   <div class="block"><div class="label">터미널</div><pre><code>cd ~
 git clone https://github.com/kitae104/dev-harness.git</code></pre></div>
-  <p>아직 GitHub 에 올리지 않았다면 <a href="#get-repo">2단계의 번들 방법</a>으로 받습니다.</p>
 
   <h3>2. 스킬 설치 (PC 마다 한 번)</h3>
   <div class="block"><div class="label">터미널 (macOS / Linux / Git Bash. Windows PowerShell 은 scripts\install-skills.ps1)</div><pre><code>~/dev-harness/scripts/install-skills.sh</code></pre></div>
@@ -166,26 +165,10 @@ claude</code></pre></div>
 
 <section id="get-repo">
   <h2><span class="num">2</span>저장소 받기</h2>
-  <p class="lead">작업 결과는 <code>claude/addons-skills-harness-pkzt4e</code> 브랜치에 있습니다. 두 방법 중 하나를 고르세요.</p>
-
-  <h3>방법 A. GitHub 로 받기 (권장)</h3>
-  <ol class="steps">
-    <li><a href="https://claude.ai/connect-github">claude.ai/connect-github</a> 에서 GitHub 계정을 연결하고 <code>kitae104/dev-harness</code> 저장소에 Claude 앱을 설치합니다.</li>
-    <li>이 프로젝트 스레드에 "푸시하고 PR 열어줘"라고 남기면 Claude 가 브랜치를 올리고 PR 을 엽니다. PR 을 머지합니다.</li>
-    <li>내 PC 에 받습니다.</li>
-  </ol>
+  <p class="lead">모든 내용이 <code>main</code> 브랜치에 있습니다. PC 마다 한 번 받습니다.</p>
   <div class="block"><div class="label">터미널</div><pre><code>git clone https://github.com/kitae104/dev-harness.git
 cd dev-harness</code></pre></div>
-
-  <h3>방법 B. 번들 파일로 받기 (GitHub 연결 없이)</h3>
-  <ol class="steps">
-    <li>프로젝트 파일의 <code>dev-harness/dev-harness.bundle</code> 을 내려받습니다.</li>
-    <li>번들에서 저장소를 만들고, 내 GitHub 저장소로 올립니다 (원격 저장소가 비어 있으므로 main 으로 바로 올려도 됩니다).</li>
-  </ol>
-  <div class="block"><div class="label">터미널</div><pre><code>git clone -b claude/addons-skills-harness-pkzt4e dev-harness.bundle dev-harness
-cd dev-harness
-git remote set-url origin https://github.com/kitae104/dev-harness.git
-git push -u origin HEAD:main</code></pre></div>
+  <p>비공개 저장소라면 처음 받을 때 GitHub 로그인을 요청합니다. VS Code 를 쓴다면 <a href="#vscode">VS Code 로 시작하기</a>의 "Git: Clone" 방법이 가장 쉽습니다. 이후 <code>git pull</code> 로 최신 템플릿과 스킬을 받습니다.</p>
 </section>
 
 <section id="install">
