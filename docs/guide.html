@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dev-harness 따라하기</title>
+<style>
+  :root {
+    --bg: #f8fafc; --surface: #ffffff; --text: #0f172a; --muted: #475569; --border: #e2e8f0;
+    --accent: #4f46e5; --accent-soft: #eef2ff; --code-bg: #0f172a; --code-text: #e2e8f0;
+    --warn-bg: #fffbeb; --warn-border: #f59e0b; --ok: #059669;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1120; --surface: #111827; --text: #e5e7eb; --muted: #9ca3af; --border: #1f2937;
+      --accent: #818cf8; --accent-soft: #1e1b4b; --code-bg: #020617; --code-text: #e2e8f0;
+      --warn-bg: #2a2110; --warn-border: #d97706; --ok: #34d399;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1120; --surface: #111827; --text: #e5e7eb; --muted: #9ca3af; --border: #1f2937;
+    --accent: #818cf8; --accent-soft: #1e1b4b; --code-bg: #020617; --code-text: #e2e8f0;
+    --warn-bg: #2a2110; --warn-border: #d97706; --ok: #34d399;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
+  .layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 32px 16px 80px; }
+  nav.toc { position: sticky; top: 24px; align-self: start; font-size: 14px; }
+  nav.toc a { display: block; padding: 4px 10px; color: var(--muted); text-decoration: none; border-left: 2px solid var(--border); }
+  nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+  nav.toc .toc-title { font-weight: 700; color: var(--text); margin: 0 0 8px 10px; }
+  main { min-width: 0; }
+  header.hero { margin-bottom: 32px; }
+  header.hero h1 { font-size: 30px; line-height: 1.3; margin: 0 0 8px; }
+  header.hero p { color: var(--muted); margin: 0; }
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; margin-bottom: 20px; }
+  section h2 { margin: 0 0 4px; font-size: 21px; display: flex; align-items: center; gap: 10px; }
+  .num { display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 14px; align-items: center; justify-content: center; flex: none; }
+  section > .lead { color: var(--muted); margin: 0 0 16px; }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+  .block { position: relative; margin: 10px 0 14px; }
+  .block .label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  pre { margin: 0; background: var(--code-bg); color: var(--code-text); padding: 14px 16px; border-radius: 10px; overflow-x: auto;
+    font: 13.5px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; word-break: break-word; }
+  pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+  .prompt pre { border-left: 4px solid var(--accent); }
+  button.copy { position: absolute; top: 26px; right: 8px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0;
+    font-size: 12px; padding: 3px 9px; border-radius: 6px; cursor: pointer; }
+  button.copy:hover { background: #334155; }
+  .note { background: var(--warn-bg); border-left: 4px solid var(--warn-border); padding: 10px 14px; border-radius: 8px; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 8px 0 14px; display: block; overflow-x: auto; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+  ol.steps { padding-left: 20px; }
+  ol.steps li { margin-bottom: 6px; }
+  .check { color: var(--ok); font-weight: 600; }
+  .theme-toggle { float: right; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 8px; padding: 4px 10px; cursor: pointer; font-size: 13px; }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    nav.toc { position: static; margin-bottom: 20px; }
+    section { padding: 18px 16px; }
+    header.hero h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+  <p class="toc-title">목차</p>
+  <a href="#overview">0. 한눈에 보기</a>
+  <a href="#prepare">1. 준비물</a>
+  <a href="#get-repo">2. 저장소 받기</a>
+  <a href="#install">3. 스킬 설치</a>
+  <a href="#create">4. 새 프로젝트 만들기</a>
+  <a href="#run">5. 실행과 종료</a>
+  <a href="#work">6. 생성된 프로젝트에서 일하기</a>
+  <a href="#rebuild">7. 처음부터 직접 만들기</a>
+  <a href="#maintain">8. 하네스 키우기</a>
+  <a href="#trouble">9. 문제 해결</a>
+</nav>
+
+<main>
+<header class="hero">
+  <button class="theme-toggle" type="button" onclick="toggleTheme()">밝게 / 어둡게</button>
+  <h1>dev-harness 따라하기</h1>
+  <p>Spring Boot + React 프로젝트를 명령 하나로 만들고, 그 위에서 Claude Code 로 일관되게 기능을 추가하는 방법을 순서대로 정리했습니다. 보라색 테두리 상자는 Claude Code 에 그대로 붙여 넣는 프롬프트, 검은 상자는 터미널 명령입니다.</p>
+</header>
+
+<section id="overview">
+  <h2><span class="num">0</span>한눈에 보기</h2>
+  <p class="lead">dev-harness 저장소에는 세 가지가 들어 있습니다.</p>
+  <table>
+    <tr><th>구성</th><th>내용</th></tr>
+    <tr><td>템플릿</td><td><code>templates/s-r</code> 기본(Spring Boot 4.1.1, Java 21, React 19, Tailwind 4, PostgreSQL 18, JWT 로그인·회원가입·랜딩, Docker Compose)과 확장 모듈 <code>fastapi</code>, <code>spring-ai</code>(2.0.1)</td></tr>
+    <tr><td>생성 명령</td><td><code>/s-r-setup</code>, <code>/s-r-f-setup</code>, <code>/s-r-ai-setup</code> 스킬과 생성기 <code>scripts/new-project.mjs</code></td></tr>
+    <tr><td>하네스</td><td>생성된 프로젝트마다 들어가는 <code>CLAUDE.md</code>, 폴더별 규칙, 린트·검증 훅, <code>/add-domain</code>, <code>/verify</code>, 리뷰 에이전트, CI</td></tr>
+  </table>
+  <ol class="steps">
+    <li>저장소를 받고 스킬을 한 번 설치합니다 (2~3단계).</li>
+    <li>새 프로젝트가 필요할 때마다 <code>/s-r-setup 이름</code> 으로 만들고 <code>make up</code> 으로 실행합니다 (4~5단계).</li>
+    <li>만든 프로젝트 폴더에서 Claude Code 를 열고 기능을 추가합니다. 규칙과 훅이 자동으로 적용됩니다 (6단계).</li>
+    <li>dev-harness 자체를 다른 저장소에서 처음부터 다시 만들고 싶다면 7단계의 프롬프트를 순서대로 씁니다.</li>
+  </ol>
+</section>
+
+<section id="prepare">
+  <h2><span class="num">1</span>준비물</h2>
+  <p class="lead">한 번만 설치하면 됩니다.</p>
+  <table>
+    <tr><th>도구</th><th>용도</th><th>확인 명령</th></tr>
+    <tr><td>Claude Code</td><td>스킬 실행, 이후 개발</td><td><code>claude --version</code></td></tr>
+    <tr><td>Node.js 20 이상</td><td>생성기, 훅, 프론트엔드</td><td><code>node -v</code></td></tr>
+    <tr><td>Docker Desktop</td><td><code>make up</code> 실행</td><td><code>docker compose version</code></td></tr>
+    <tr><td>Git</td><td>저장소, 생성된 프로젝트 첫 커밋</td><td><code>git --version</code></td></tr>
+    <tr><td>JDK 17 이상</td><td>로컬에서 백엔드 테스트 (컴파일용 JDK 21 은 Gradle 이 자동으로 받음)</td><td><code>java -version</code></td></tr>
+    <tr><td>uv (FastAPI 쓸 때)</td><td>Python 의존성, 테스트</td><td><code>uv --version</code></td></tr>
+    <tr><td>make (선택)</td><td><code>make up/down</code>. 없으면 Makefile 주석의 <code>docker compose</code> 명령 사용</td><td><code>make -v</code></td></tr>
+  </table>
+  <div class="note">Windows 는 Git for Windows(Git Bash 포함)를 설치하세요. 생성된 프로젝트의 훅이 Git Bash 에서 동작합니다.</div>
+</section>
+
+<section id="get-repo">
+  <h2><span class="num">2</span>저장소 받기</h2>
+  <p class="lead">작업 결과는 <code>claude/addons-skills-harness-pkzt4e</code> 브랜치에 있습니다. 두 방법 중 하나를 고르세요.</p>
+
+  <h3>방법 A. GitHub 로 받기 (권장)</h3>
+  <ol class="steps">
+    <li><a href="https://claude.ai/connect-github">claude.ai/connect-github</a> 에서 GitHub 계정을 연결하고 <code>kitae104/dev-harness</code> 저장소에 Claude 앱을 설치합니다.</li>
+    <li>이 프로젝트 스레드에 "푸시하고 PR 열어줘"라고 남기면 Claude 가 브랜치를 올리고 PR 을 엽니다. PR 을 머지합니다.</li>
+    <li>내 PC 에 받습니다.</li>
+  </ol>
+  <div class="block"><div class="label">터미널</div><pre><code>git clone https://github.com/kitae104/dev-harness.git
+cd dev-harness</code></pre></div>
+
+  <h3>방법 B. 번들 파일로 받기 (GitHub 연결 없이)</h3>
+  <ol class="steps">
+    <li>프로젝트 파일의 <code>dev-harness/dev-harness.bundle</code> 을 내려받습니다.</li>
+    <li>번들에서 저장소를 만들고, 내 GitHub 저장소로 올립니다 (원격 저장소가 비어 있으므로 main 으로 바로 올려도 됩니다).</li>
+  </ol>
+  <div class="block"><div class="label">터미널</div><pre><code>git clone -b claude/addons-skills-harness-pkzt4e dev-harness.bundle dev-harness
+cd dev-harness
+git remote set-url origin https://github.com/kitae104/dev-harness.git
+git push -u origin HEAD:main</code></pre></div>
+</section>
+
+<section id="install">
+  <h2><span class="num">3</span>스킬 설치</h2>
+  <p class="lead">어느 폴더에서나 <code>/s-r-setup</code> 을 쓰려면 한 번 설치합니다. 저장소를 <code>git pull</code> 하면 스킬도 함께 최신이 됩니다.</p>
+  <div class="block"><div class="label">macOS / Linux / Git Bash</div><pre><code>scripts/install-skills.sh</code></pre></div>
+  <div class="block"><div class="label">Windows PowerShell</div><pre><code>powershell -ExecutionPolicy Bypass -File scripts\install-skills.ps1</code></pre></div>
+  <p>Claude Code 를 다시 시작하고 <code>/</code> 를 입력해 <code>s-r-setup</code>, <code>s-r-f-setup</code>, <code>s-r-ai-setup</code> 이 보이면 성공입니다. 보이지 않으면 dev-harness 폴더에서 Claude Code 를 열어 쓰거나, 환경 변수 <code>DEV_HARNESS_HOME</code> 에 저장소 경로를 지정하세요.</p>
+  <div class="note">설치하지 않아도 <code>dev-harness</code> 폴더에서 Claude Code 를 열면 바로 쓸 수 있습니다. 이 경우 새 프로젝트는 저장소 옆 폴더(<code>../이름</code>)에 만들어집니다.</div>
+</section>
+
+<section id="create">
+  <h2><span class="num">4</span>새 프로젝트 만들기</h2>
+  <p class="lead">프로젝트를 둘 폴더(예: <code>~/projects</code>)에서 Claude Code 를 열고 아래 중 하나를 입력합니다.</p>
+  <table>
+    <tr><th>명령</th><th>결과</th></tr>
+    <tr><td><code>/s-r-setup my-shop</code></td><td>Spring Boot + React + PostgreSQL, 로그인·회원가입·랜딩</td></tr>
+    <tr><td><code>/s-r-f-setup my-shop</code></td><td>위 + FastAPI 서비스 (<code>/api/py/**</code>, 같은 JWT 로 인증)</td></tr>
+    <tr><td><code>/s-r-ai-setup my-bot anthropic</code></td><td>위 기본 + Spring AI 채팅 (<code>/api/ai/chat</code>, <code>/chat</code> 화면). 제공자 <code>openai</code>(기본) | <code>anthropic</code> | <code>ollama</code></td></tr>
+  </table>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트 (패키지와 위치까지 지정)</div><pre><code>/s-r-setup my-shop com.kitae.myshop ~/projects/my-shop</code></pre></div>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트 (FastAPI 와 Spring AI 를 함께)</div><pre><code>/s-r-f-setup my-lab 으로 만들되 Spring AI 도 같이 넣어줘. 모델은 anthropic 으로.</code></pre></div>
+  <p>Claude Code 없이 터미널에서 같은 결과를 만들 수도 있습니다.</p>
+  <div class="block"><div class="label">터미널</div><pre><code>node ~/dev-harness/scripts/new-project.mjs --name my-shop --package com.kitae.myshop \
+  --addons fastapi,spring-ai --ai-provider anthropic --out ~/projects/my-shop</code></pre></div>
+  <p>생성되면 <code>.env</code>(임의의 <code>JWT_SECRET</code> 포함), <code>.harness.json</code>(어떤 템플릿·옵션으로 만들었는지), 첫 git 커밋까지 준비됩니다.</p>
+</section>
+
+<section id="run">
+  <h2><span class="num">5</span>실행과 종료</h2>
+  <div class="block"><div class="label">터미널 (생성된 프로젝트 폴더)</div><pre><code>make up      # 이 프로젝트 컨테이너만 빌드 후 실행
+make ps      # 상태
+make logs    # 로그
+make down    # 이 프로젝트만 종료 (DB 데이터 유지)
+make clean   # 이 프로젝트의 DB 볼륨과 이미지까지 삭제</code></pre></div>
+  <ul>
+    <li>화면 <code>http://localhost:3000</code>, 백엔드 <code>http://localhost:8080/actuator/health</code>, FastAPI 문서 <code>http://localhost:8000/api/py/docs</code></li>
+    <li>컨테이너·네트워크·볼륨 이름이 모두 <code>COMPOSE_PROJECT_NAME</code>(프로젝트 이름)으로 시작해 다른 프로젝트와 섞이지 않습니다.</li>
+    <li>여러 프로젝트를 동시에 띄우려면 <code>.env</code> 의 <code>DB_PORT</code>, <code>BACKEND_PORT</code>, <code>FRONTEND_PORT</code>(필요하면 <code>FASTAPI_PORT</code>, <code>OLLAMA_PORT</code>)를 겹치지 않게 바꾸세요. 로컬 <code>npm run dev</code> 를 쓴다면 <code>frontend/.env</code> 의 <code>VITE_API_PROXY_TARGET</code>, <code>VITE_FASTAPI_PROXY_TARGET</code> 도 맞춰 주세요.</li>
+    <li>Spring AI: <code>.env</code> 에 <code>OPENAI_API_KEY</code> 또는 <code>ANTHROPIC_API_KEY</code> 를 넣고 <code>make up</code>. Ollama 는 처음 한 번 <code>make ai-model</code>. 키가 없어도 앱은 뜨고 채팅만 실패 메시지를 보여 줍니다.</li>
+  </ul>
+  <div class="note"><code>.env</code> 를 <code>.env.example</code> 로 덮어쓰지 마세요. 생성할 때 만든 임의 비밀값이 공개 기본값으로 바뀝니다.</div>
+</section>
+
+<section id="work">
+  <h2><span class="num">6</span>생성된 프로젝트에서 일하기</h2>
+  <p class="lead">반드시 <b>생성된 프로젝트 폴더에서</b> Claude Code 를 여세요. 그래야 그 프로젝트의 CLAUDE.md, 규칙, 훅이 적용됩니다.</p>
+  <table>
+    <tr><th>하네스</th><th>하는 일</th></tr>
+    <tr><td><code>CLAUDE.md</code></td><td>구성, 명령, 작업 규칙 (검증 후 완료, 기능은 백엔드~화면까지, 에러 형식 하나, 비밀값은 .env 만, Docker 이름 규칙)</td></tr>
+    <tr><td><code>.claude/rules/*.md</code></td><td>backend, frontend, docker, fastapi, spring-ai 별 세부 규칙. 해당 파일을 다룰 때만 적용</td></tr>
+    <tr><td>파일 수정 훅</td><td>TS/TSX 는 oxlint, Python 은 ruff 로 고친 파일만 즉시 검사</td></tr>
+    <tr><td>종료 훅</td><td>작업을 끝낼 때 바뀐 영역(backend/frontend/fastapi)의 테스트·린트 실행. 실패하면 Claude 가 이어서 고침 (최대 3번)</td></tr>
+    <tr><td>권한</td><td><code>.env</code> 읽기·수정 금지, <code>make clean</code>·<code>git push</code> 등은 실행 전 확인</td></tr>
+  </table>
+
+  <h3>자주 쓰는 프롬프트</h3>
+  <div class="block prompt"><div class="label">도메인 기능 추가</div><pre><code>/add-domain 게시글 (제목 필수 100자, 내용 필수, 작성자=로그인 사용자). 목록은 최신순 페이지네이션, 수정·삭제는 작성자만.</code></pre></div>
+  <div class="block prompt"><div class="label">전체 검증</div><pre><code>/verify</code></pre></div>
+  <div class="block prompt"><div class="label">리뷰</div><pre><code>code-reviewer 에이전트로 지금 변경 사항을 리뷰해 줘. 고치지 말고 문제만 심각도 순으로 알려 줘.</code></pre></div>
+  <div class="block prompt"><div class="label">기능 하나를 계획부터</div><pre><code>주문 기능을 추가하려고 해. 바로 코드 쓰지 말고 먼저 계획을 세워 줘:
+- 필요한 엔티티와 관계, API 목록, 화면 목록
+- 기존 user/auth 패턴과 .claude/rules 규칙 중 이번 작업에 해당하는 것
+- 테스트 계획
+계획을 확인한 뒤에 /add-domain 절차대로 구현해 줘.</code></pre></div>
+  <div class="block prompt"><div class="label">FastAPI 쪽 기능 (s-r-f 프로젝트)</div><pre><code>fastapi 에 CSV 업로드를 받아 열별 통계를 돌려주는 /api/py/csv/stats 엔드포인트를 추가해 줘.
+.claude/rules/fastapi.md 를 따르고, 대시보드에 업로드 카드를 붙여 줘. pytest 로 정상·401·400 을 확인해 줘.</code></pre></div>
+  <div class="block prompt"><div class="label">Spring AI 기능 (s-r-ai 프로젝트)</div><pre><code>AI 채팅이 우리 서비스의 게시글을 검색해서 답할 수 있게 @Tool 로 게시글 검색 도구를 추가해 줘.
+.claude/rules/spring-ai.md 를 따르고, 테스트는 ChatModel 을 목으로 바꿔서 작성해 줘.</code></pre></div>
+  <div class="note">검증 훅을 잠시 끄려면 <code>HARNESS_VERIFY=off claude</code> 로 실행합니다.</div>
+</section>
+
+<section id="rebuild">
+  <h2><span class="num">7</span>처음부터 직접 만들기 (별도 프로젝트에서 재현)</h2>
+  <p class="lead">dev-harness 와 같은 저장소를 새로 만들 때 쓰는 프롬프트입니다. 빈 GitHub 저장소를 만들어 내 PC 에 받은 뒤 그 폴더에서 Claude Code 를 열고 1번부터 차례로 넣으세요. 각 단계가 끝나면 결과를 확인하고 커밋한 뒤 다음으로 넘어갑니다.</p>
+  <div class="note">각 프롬프트 앞에 <b>계획 모드</b>(Shift+Tab 두 번)로 계획을 먼저 받아 보면 방향을 잡기 쉽습니다. 버전은 작성 시점(2026-10) 기준입니다. Claude 가 최신 호환 버전을 확인하게 되어 있습니다.</div>
+
+  <div class="block prompt"><div class="label">1단계. 기본 템플릿</div><pre><code>이 저장소에 재사용할 프로젝트 템플릿을 만들 거야. 먼저 templates/s-r 에 그 자체로 실행 가능한 기본 템플릿을 만들어 줘.
+
+스택과 버전
+- backend: Spring Boot 4.1.x(최신 패치), Java 21, Gradle(wrapper 포함), Spring Security + JWT(jjwt), JPA, validation, actuator, Lombok. Jackson 3(tools.jackson) 사용.
+- frontend: React 19 + TypeScript + Vite + Tailwind CSS v4 + React Router, 린트는 oxlint.
+- db: PostgreSQL 18 (postgres:18-alpine, 볼륨은 /var/lib/postgresql 에 마운트).
+- 자리표시자 이름: 패키지 com.example.app, 프로젝트 이름 app. 나중에 생성기가 바꿀 거야.
+
+기능
+- 회원가입 POST /api/auth/signup, 로그인 POST /api/auth/login(액세스 토큰), GET /api/users/me, /actuator/health.
+- 모든 에러 응답은 { status, message, errors, timestamp } 하나의 형식, 메시지는 한국어. Spring 기본 예외(잘못된 JSON, 404, 405, 403, 500)도 이 형식으로.
+- 화면: 랜딩, 로그인, 회원가입, 대시보드(로그인 필요), 404. 토큰 만료(401) 시 자동 로그아웃.
+
+Docker (중요: 같은 PC 에서 다른 프로젝트와 함께 씀)
+- 프로젝트 하나 = Compose 프로젝트 하나. name, container_name, image, 네트워크·볼륨 name 이 모두 ${COMPOSE_PROJECT_NAME}- 로 시작.
+- 포트는 .env 변수로 127.0.0.1 에만 바인딩. Makefile 에 up/down/ps/logs/db/clean (이 프로젝트만 대상).
+- nginx 가 /api 를 백엔드로 프록시. resolver 127.0.0.11 + 변수 proxy_pass 로 컨테이너 재생성에도 502 가 안 나게, Host 는 $http_host 로.
+- 헬스체크와 depends_on condition, 컨테이너는 root 가 아닌 사용자로 실행. JWT_SECRET 은 compose 에서 필수(${JWT_SECRET:?}).
+- Gradle 툴체인은 foojay resolver 로 JDK 21 자동 다운로드 (Gradle 실행은 JDK 17+).
+
+검증: backend 통합 테스트(H2), frontend lint + build 를 실제로 돌려서 통과시켜 줘. 끝나면 README 에 실행 방법과 API 표를 써 줘.</code></pre></div>
+
+  <div class="block prompt"><div class="label">2단계. 확장 모듈과 생성기</div><pre><code>templates/s-r 위에 덧붙이는 확장 모듈 두 개와 생성기를 만들어 줘.
+
+생성기 scripts/new-project.mjs (Node 표준 라이브러리만)
+- templates/s-r 를 복사 → 선택한 확장 모듈의 files/ 를 덮어쓰기 → 기본 템플릿 곳곳의 "@addon:&lt;slot&gt;" 주석 줄을 확장 모듈 addon.json 의 slots 에 연결된 조각 파일로 교체(선택 안 하면 줄 삭제, 쓰이지 않는 slot 은 오류).
+- 자리표시자 com.example.app, AppApplication, app 을 파일별로 좁은 규칙으로 바꾸기(전역 치환 금지). 패키지 폴더 이동.
+- 옵션: --name, --package, --addons, --ai-provider, --out, --no-git, --dry-run. 이름·패키지 검증(Java 예약어 거부).
+- 임의 JWT_SECRET 으로 .env 생성, .harness.json 기록, git init + 첫 커밋(gradlew 실행 권한 포함), CRLF → LF 정규화.
+
+확장 모듈 templates/addons/fastapi
+- fastapi/ 서비스(Python 3.13, uv, pyproject + uv.lock), 경로는 모두 /api/py/**.
+- Spring 이 발급한 JWT 를 같은 JWT_SECRET 으로 검증(HS256/384/512, exp·sub 필수). 에러 형식은 Spring 과 동일.
+- compose 서비스(같은 이름 규칙, 헬스체크), nginx·Vite 프록시, 대시보드 확인 카드, pytest, ruff.
+
+확장 모듈 templates/addons/spring-ai
+- Spring AI 는 반드시 템플릿의 Spring Boot 버전으로 빌드된 버전을 고를 것. Maven Central 의 모듈 POM 에서 spring-boot 버전을 확인하고 BOM 으로 관리.
+- 제공자 옵션 openai(기본) | anthropic | ollama. 코드는 ChatClient 만 사용, 사용자별 ChatMemory.
+- POST /api/ai/chat, DELETE /api/ai/chat, /chat 화면. 키가 없어도 앱은 뜨고 채팅만 502.
+- Ollama 는 이 프로젝트 전용 컨테이너 + make ai-model, spring.ai.retry 를 짧게(2회, 최대 5초). nginx 의 /api/ai/ 는 타임아웃 300초.
+- 테스트는 ChatModel 을 목으로.
+
+scripts/verify-templates.sh 로 모든 조합(base, fastapi, ai-openai, ai-anthropic, ai-ollama, all)을 실제로 생성해 backend test, frontend lint/build, fastapi pytest, docker compose config 까지 돌려 통과시켜 줘.</code></pre></div>
+
+  <div class="block prompt"><div class="label">3단계. 생성 명령(스킬)</div><pre><code>.claude/skills 에 /s-r-setup, /s-r-f-setup, /s-r-ai-setup 스킬을 만들어 줘.
+- 각 스킬 폴더에 SKILL.md 와 generate.mjs. generate.mjs 는 자기 실제 경로(realpath)로 저장소를 찾아 scripts/new-project.mjs 를 고정된 확장 모듈로 실행하는 얇은 실행기(DEV_HARNESS_HOME 으로 덮어쓰기 가능).
+- SKILL.md: 인자에서 이름·패키지·위치(·제공자)를 읽고, 이름이 없을 때만 묻기. 실패 메시지 그대로 전달, 기존 폴더는 지우지 않기. 끝나면 위치, 실행 방법, 포트 변경 안내, "생성된 폴더에서 Claude Code 를 새로 열라"는 안내.
+- scripts/install-skills.sh(심볼릭 링크, Git Bash 는 정션)와 install-skills.ps1(정션, BOM 포함 UTF-8)로 ~/.claude/skills 에 설치.
+- dev-harness 폴더 안에서 실행하면 새 프로젝트는 저장소 옆에 만들어지게.</code></pre></div>
+
+  <div class="block prompt"><div class="label">4단계. 생성된 프로젝트용 하네스</div><pre><code>templates/s-r 에 생성된 프로젝트마다 들어갈 Claude Code 하네스를 넣어 줘. 확장 모듈은 slot 과 files/ 로 자기 내용을 추가해.
+- CLAUDE.md: 구성, 명령, 작업 규칙(검증 후 완료, 기능은 백엔드~화면까지 세로로, 기존 패턴 따르기, 에러 형식 하나, 비밀값은 .env 만, Docker 이름 규칙, 되돌리기 어려운 명령은 먼저 묻기). 확장 모듈 절은 @addon slot 으로.
+- .claude/rules/{backend,frontend,docker}.md (paths frontmatter 로 범위 지정), 확장 모듈은 fastapi.md, spring-ai.md. 실제 코드 패턴과 일치하게.
+- .claude/settings.json: .env 읽기·수정 거부, make clean·docker compose down -v·git push 는 ask, 자주 쓰는 검증 명령은 allow.
+  비밀값을 출력하는 명령(docker compose config 를 -q 없이 등)은 allow 하지 않기.
+- 훅(Node, Windows Git Bash 호환): PostToolUse 로 고친 파일만 oxlint/ruff, Stop 훅으로 git 기준 바뀐 영역만 테스트·린트(통과한 변경은 캐시, 연속 3번 실패하면 사람에게 넘김, HARNESS_VERIFY=off 로 끄기).
+- 스킬 /add-domain(도메인 기능을 엔티티~화면~테스트까지), /verify(전체 검증 표), 서브에이전트 code-reviewer.
+- .github/workflows/ci.yml (확장 모듈은 job 을 slot 으로 추가).
+훅은 일부러 틀린 코드를 넣어 실제로 막히는지 확인하고, verify-templates.sh 를 다시 돌려 줘.</code></pre></div>
+
+  <div class="block prompt"><div class="label">5단계. 마무리 점검</div><pre><code>전체를 한 번 더 점검해 줘. 서브에이전트로 생성기, 훅, Docker 설정, 보안, 문서와 코드 불일치, Windows 사용자 문제를 나눠서 리뷰하고, 실제 문제만 고쳐 줘.
+Docker 가 있으면 all 조합을 생성해서 make up 으로 띄우고 회원가입 → 로그인 → /api/py/me → /api/ai/chat 을 curl 로 확인하고,
+FRONTEND_PORT 를 바꾼 두 번째 프로젝트를 동시에 띄워 서로 영향이 없는지, make down 후 데이터가 남는지, make clean 이 그 프로젝트 것만 지우는지 확인해 줘.
+마지막으로 README 와 CLAUDE.md(이 저장소 작업 규칙과 검증 명령)를 정리해 줘.</code></pre></div>
+</section>
+
+<section id="maintain">
+  <h2><span class="num">8</span>하네스 키우기 (dev-harness 저장소에서)</h2>
+  <p class="lead">dev-harness 폴더에서 Claude Code 를 열고 씁니다. 저장소의 CLAUDE.md 가 확장 지점 규칙과 검증 명령을 알려 줍니다.</p>
+  <div class="block prompt"><div class="label">새 확장 모듈 추가 (예: Redis)</div><pre><code>templates/addons/redis 확장 모듈을 추가해 줘. redis 컨테이너(이름 규칙, 127.0.0.1 포트, 이름 있는 볼륨, 헬스체크),
+backend 에 spring-boot-starter-data-redis 와 간단한 캐시 예시, .env.example 변수, README·CLAUDE.md 절, .claude/rules/redis.md.
+기존 @addon slot 을 쓰고, 필요하면 templates/s-r 에 slot 을 추가해. 그다음 /s-r-setup 계열에서 --addons redis 로 쓸 수 있게 하고
+scripts/verify-templates.sh 에 조합을 추가해서 통과시켜 줘.</code></pre></div>
+  <div class="block prompt"><div class="label">버전 올리기</div><pre><code>Spring Boot 를 최신 안정 버전으로 올려 줘. Spring AI 도 그 Boot 버전으로 빌드된 버전으로 함께 올리고
+(Maven Central 의 spring-ai 모듈 POM 에서 spring-boot 버전을 확인), 규칙 문서와 README 의 버전 표도 고친 뒤 verify-templates.sh 전체를 돌려 줘.</code></pre></div>
+  <div class="block prompt"><div class="label">규칙 바꾸기</div><pre><code>앞으로 모든 생성 프로젝트의 백엔드는 Flyway 마이그레이션을 쓰도록 바꿔 줘. 템플릿 코드, ddl-auto 설정, .claude/rules/backend.md,
+/add-domain 스킬 절차를 함께 고치고 verify-templates.sh 로 확인해 줘.</code></pre></div>
+  <div class="block prompt"><div class="label">이미 만든 프로젝트에 하네스 개선 반영</div><pre><code>../my-shop 은 .harness.json 에 기록된 대로 예전 dev-harness 로 만든 프로젝트야.
+그 뒤 templates/s-r/.claude, CLAUDE.md 에 바뀐 내용을 비교해서 my-shop 에 반영할 변경 목록을 먼저 보여 주고, 확인하면 적용해 줘.</code></pre></div>
+</section>
+
+<section id="trouble">
+  <h2><span class="num">9</span>문제 해결</h2>
+  <table>
+    <tr><th>증상</th><th>원인과 해결</th></tr>
+    <tr><td><code>required variable JWT_SECRET is missing</code></td><td><code>.env</code> 가 없거나 비어 있음. <code>cp .env.example .env</code> 후 <code>openssl rand -base64 48</code> 값으로 바꾸기</td></tr>
+    <tr><td><code>port is already allocated</code></td><td>다른 프로젝트가 같은 포트 사용 중. <code>.env</code> 의 포트 변수를 바꾸고 <code>make up</code></td></tr>
+    <tr><td>AI 채팅이 "AI 응답을 받지 못했습니다"</td><td>API 키나 모델 이름 확인 (<code>.env</code>). Ollama 는 <code>make ai-model</code> 로 모델을 먼저 받기</td></tr>
+    <tr><td>Windows 에서 <code>gradlew</code> 오류</td><td>PowerShell 에서는 <code>gradlew.bat</code>. 저장소의 <code>.gitattributes</code> 덕분에 줄바꿈은 LF 로 유지됨</td></tr>
+    <tr><td>Claude 가 계속 테스트 실패를 고치려 함</td><td>종료 훅이 실패를 알린 것. 3번 연속 실패하면 멈추고 알려 줌. 잠시 끄려면 <code>HARNESS_VERIFY=off claude</code></td></tr>
+    <tr><td><code>/s-r-setup</code> 이 안 보임</td><td>3단계 설치 후 Claude Code 재시작. 또는 dev-harness 폴더에서 Claude Code 실행</td></tr>
+    <tr><td><code>./gradlew</code> 가 Java 버전 오류</td><td>Gradle 실행에는 JDK 17 이상 필요. <code>java -version</code> 확인</td></tr>
+    <tr><td>로컬 <code>./gradlew bootRun</code> 이 DB 에 못 붙음</td><td><code>make db</code> 로 DB 먼저 실행. <code>DB_PORT</code> 를 바꿨다면 <code>DB_URL</code> 도 지정</td></tr>
+  </table>
+</section>
+</main>
+</div>
+<script>
+  document.querySelectorAll('.block').forEach(function (block) {
+    var pre = block.querySelector('pre');
+    if (!pre) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy';
+    btn.type = 'button';
+    btn.textContent = '복사';
+    btn.addEventListener('click', function () {
+      var text = pre.innerText;
+      var done = function () { btn.textContent = '복사됨'; setTimeout(function () { btn.textContent = '복사'; }, 1500); };
+      if (navigator.clipboard) { navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); }); }
+      else { fallback(text); done(); }
+    });
+    block.appendChild(btn);
+  });
+  function fallback(text) {
+    var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+  function toggleTheme() {
+    var root = document.documentElement;
+    var dark = root.getAttribute('data-theme') === 'dark' ||
+      (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    root.setAttribute('data-theme', dark ? 'light' : 'dark');
+  }
+</script>
+</body>
+</html>

@@ -13,6 +13,7 @@
     "landing-features": "slots/landing-features.tsx",
     "readme": "slots/readme.md",
     "claude-md": "slots/claude-md.md",
-    "ci-jobs": "slots/ci-jobs.yml"
+    "ci-jobs": "slots/ci-jobs.yml",
+    "frontend-env": "slots/frontend-env"
   }
 }

@@ -9,14 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.ErrorResponseException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /** 모든 API 에러를 { status, message, errors, timestamp } 형식으로 응답합니다. */
@@ -78,20 +80,44 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.CONFLICT, "이미 존재하거나 다른 데이터와 충돌합니다.");
     }
 
-    /** ResponseStatusException 등 상태 코드를 가진 Spring 예외는 그 상태를 그대로 씁니다. */
-    @ExceptionHandler(ErrorResponseException.class)
-    public ResponseEntity<ErrorResponse> handleErrorResponse(ErrorResponseException e) {
-        int status = e.getStatusCode().value();
-        String detail = e.getBody().getDetail();
-        String message = detail != null && status < 500 ? detail : "요청을 처리하지 못했습니다.";
-        return ResponseEntity.status(status).body(ErrorResponse.of(status, message));
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException e) {
+        return error(HttpStatus.UNAUTHORIZED, "인증이 필요합니다.");
     }
 
-    /** 예상하지 못한 오류: 원인은 로그에만 남기고 응답에는 내부 정보를 넣지 않습니다. */
+    /**
+     * 나머지 예외. 상태 코드를 가진 Spring 예외(ResponseStatusException, 406, 413 등)는 그 상태를 쓰고,
+     * 그 밖의 예상하지 못한 오류는 원인을 로그에만 남기고 응답에는 내부 정보를 넣지 않습니다.
+     */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
+    public ResponseEntity<ErrorResponse> handleOther(Exception e) {
+        if (e instanceof AsyncRequestNotUsableException) {
+            log.debug("클라이언트 연결이 끊겨 응답을 보내지 못했습니다: {}", e.getMessage());
+            return null;
+        }
+        if (e instanceof org.springframework.web.ErrorResponse springError) {
+            int status = springError.getStatusCode().value();
+            if (status >= 500) {
+                log.error("요청 처리 실패", e);
+            }
+            String reason = e instanceof ResponseStatusException rse ? rse.getReason() : null;
+            String message = reason != null && status < 500 ? reason : defaultMessage(status);
+            return ResponseEntity.status(status).body(ErrorResponse.of(status, message));
+        }
         log.error("처리하지 못한 예외", e);
-        return error(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        return error(HttpStatus.INTERNAL_SERVER_ERROR, defaultMessage(500));
+    }
+
+    private static String defaultMessage(int status) {
+        return switch (status) {
+            case 400 -> "요청 값을 확인해 주세요.";
+            case 401 -> "인증이 필요합니다.";
+            case 403 -> "권한이 없습니다.";
+            case 404 -> "요청한 경로를 찾을 수 없습니다.";
+            case 406 -> "지원하지 않는 응답 형식입니다.";
+            case 413 -> "요청 크기가 너무 큽니다.";
+            default -> status >= 500 ? "서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." : "요청을 처리하지 못했습니다.";
+        };
     }
 
     private static ResponseEntity<ErrorResponse> error(HttpStatus status, String message) {

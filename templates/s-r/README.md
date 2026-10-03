@@ -47,7 +47,7 @@ cd frontend && npm install && npm run dev
 
 - Windows(PowerShell/cmd)에서는 `./gradlew` 대신 `gradlew.bat` 을 씁니다. `make` 가 없으면 Makefile 주석의 `docker compose` 명령을 그대로 쓰면 됩니다.
 - `./gradlew bootRun` 은 `.env` 를 읽지 않습니다. `.env` 에서 `DB_PORT` 를 바꿨다면 `DB_URL=jdbc:postgresql://localhost:<DB_PORT>/<DB_NAME>` 을 함께 지정해서 실행하세요.
-- 로컬 JDK 가 21 이 아니어도 Gradle 이 JDK 21 을 자동으로 내려받아 씁니다 (foojay 툴체인).
+- Gradle 실행에는 JDK 17 이상이 필요합니다. 컴파일용 JDK 21 이 없으면 Gradle 이 자동으로 내려받습니다 (foojay 툴체인).
 
 ## 검증 명령
 

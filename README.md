@@ -2,6 +2,8 @@
 
 늘 비슷한 형태로 시작하는 프로젝트를 명령 하나로 만들고, 그 위에서 Claude Code 가 일관되게 기능을 추가하도록 규칙(하네스)까지 함께 넣어 주는 템플릿 모음입니다.
 
+처음이라면 [docs/guide.html](docs/guide.html) (단계별 따라하기와 Claude Code 프롬프트 모음)을 브라우저로 열어 보세요.
+
 ## 명령
 
 | 명령 | 만들어지는 프로젝트 |
@@ -30,7 +32,7 @@ cd dev-harness
   node scripts/new-project.mjs --name my-shop --package com.kitae.myshop --addons fastapi,spring-ai --ai-provider anthropic --out ~/projects/my-shop
   ```
 
-필요한 도구: Node 20+ (생성기), Docker (실행), 로컬 개발 시 JDK(버전 무관, Gradle 이 21 을 받아 씀) · uv(FastAPI).
+필요한 도구: Node 20+ (생성기), Docker (실행), 로컬 개발 시 JDK 17 이상(빌드용 JDK 21 은 Gradle 이 자동으로 받음) · uv(FastAPI).
 Windows 는 스킬 설치에 `install-skills.ps1` 을 쓰고, 생성된 프로젝트의 훅은 Git Bash 가 있으면 그대로 동작합니다.
 
 ## 생성된 프로젝트에 들어가는 것

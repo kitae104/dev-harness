@@ -24,10 +24,10 @@ FastAPI 와 Spring AI 를 **둘 다** 원하면 실행할 때 `--addons fastapi,
 
 ## 2. 생성
 
-이 스킬의 기본 디렉터리(Base directory)에 있는 `generate.mjs` 를 실행합니다.
+이 스킬 폴더의 `generate.mjs` 를 실행합니다. `${CLAUDE_SKILL_DIR}` 가 이 스킬 폴더 경로로 바뀌어 보입니다 (바뀌지 않았다면 스킬을 불러올 때 안내된 Base directory 를 쓰세요).
 
 ```bash
-node "<이 스킬의 기본 디렉터리>/generate.mjs" --name <이름> [--package <패키지>] [--out <위치>]
+node "${CLAUDE_SKILL_DIR}/generate.mjs" --name <이름> [--package <패키지>] [--out <위치>]
 ```
 
 - 실패 메시지(✖)가 나오면 원인을 사용자에게 그대로 알리고 고칠 값을 묻습니다. 대상 폴더가 비어 있지 않다는 오류면 다른 위치를 제안합니다. 기존 폴더를 지우지 않습니다.

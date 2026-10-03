@@ -17,8 +17,9 @@ for dir in "$REPO"/.claude/skills/s-r-*/; do
   case "$(uname -s)" in
     MINGW*|MSYS*|CYGWIN*)
       # Git Bash 의 ln -s 는 기본적으로 복사본을 만들어 저장소를 찾지 못하므로 디렉터리 정션을 씁니다.
-      if [ -e "$target" ]; then cmd //c rmdir "$(cygpath -w "$target")" > /dev/null; fi  # 기존 정션만 제거
-      cmd //c mklink /J "$(cygpath -w "$target")" "$(cygpath -w "${dir%/}")" > /dev/null ;;
+      # MSYS_NO_PATHCONV: /c, /J 같은 인자를 Git Bash 가 경로로 바꾸지 않게 함
+      if [ -e "$target" ]; then MSYS_NO_PATHCONV=1 cmd /c rmdir "$(cygpath -w "$target")" > /dev/null; fi  # 기존 정션만 제거
+      MSYS_NO_PATHCONV=1 cmd /c mklink /J "$(cygpath -w "$target")" "$(cygpath -w "${dir%/}")" > /dev/null ;;
     *)
       ln -sfn "${dir%/}" "$target" ;;
   esac

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { authApi, type LoginInput, type User } from '../api/auth.ts'
-import { AUTH_EXPIRED_EVENT, tokenStorage } from '../api/client.ts'
+import { ApiError, AUTH_EXPIRED_EVENT, tokenStorage } from '../api/client.ts'
 
 interface AuthState {
   user: User | null
@@ -21,7 +21,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authApi
       .me()
       .then(setUser)
-      .catch(() => tokenStorage.clear())
+      // 토큰이 무효(401)일 때만 지웁니다. 백엔드 재시작 중의 네트워크 오류로 로그아웃되지 않게.
+      .catch((e: unknown) => {
+        if (e instanceof ApiError && e.status === 401) tokenStorage.clear()
+      })
       .finally(() => setLoading(false))
   }, [])
 
