@@ -6,26 +6,35 @@
 
 | 구분 | 기술 |
 | --- | --- |
-| backend | Spring Boot 3.5, Java 21, Gradle, Spring Security, JWT (jjwt), JPA |
+| backend | Spring Boot 4.1, Java 21, Gradle, Spring Security, JWT (jjwt), JPA |
 | frontend | React 19, TypeScript, Vite, Tailwind CSS v4, React Router |
-| db | PostgreSQL 17 |
+| db | PostgreSQL 18 |
 | 실행 | Docker Compose |
 
 ## 바로 실행 (Docker Compose)
 
 ```bash
-cp .env.example .env   # 필요 시 값 수정 (특히 JWT_SECRET)
-docker compose up --build
+cp .env.example .env   # COMPOSE_PROJECT_NAME, 포트, JWT_SECRET 수정
+make up                # = docker compose up -d --build
+make down              # = docker compose down  (DB 데이터는 유지)
 ```
 
 - 프론트엔드: http://localhost:3000 (nginx 가 `/api` 를 백엔드로 프록시)
 - 백엔드: http://localhost:8080 (`/actuator/health`)
 
+### 다른 프로젝트와 함께 쓸 때
+
+- 컨테이너(`<이름>-db`, `<이름>-backend`, `<이름>-frontend`), 네트워크(`<이름>-net`), 볼륨(`<이름>-db-data`)이 모두 `COMPOSE_PROJECT_NAME` 으로 시작합니다. 프로젝트마다 이름을 다르게 두면 서로 섞이지 않습니다.
+- `make up` / `make down` 은 이 프로젝트의 컨테이너만 올리고 내립니다. 다른 프로젝트 컨테이너는 건드리지 않습니다.
+- 동시에 여러 프로젝트를 띄우려면 `.env` 의 `DB_PORT`, `BACKEND_PORT`, `FRONTEND_PORT` 를 겹치지 않게 바꾸세요. 포트는 `127.0.0.1` 에만 열립니다.
+- `make clean` 은 이 프로젝트의 DB 볼륨과 이미지까지 지웁니다 (데이터 초기화).
+- `make` 가 없으면 주석에 적힌 `docker compose` 명령을 그대로 쓰면 됩니다.
+
 ## 로컬 개발
 
 ```bash
 # 1) DB 만 컨테이너로
-docker compose up -d db
+make db              # = docker compose up -d db
 
 # 2) 백엔드 (http://localhost:8080)
 cd backend && ./gradlew bootRun
@@ -73,6 +82,14 @@ frontend/src/
 
 - 백엔드: 도메인별 패키지(`com.example.app.<도메인>`)를 만들고 Controller → Service → Repository 순으로 둡니다. 인증이 필요 없는 경로는 `SecurityConfig` 의 `permitAll` 에 추가합니다.
 - 프론트엔드: API 호출은 `src/api/<도메인>.ts` 에 두고 `api()` 래퍼를 사용합니다 (토큰 자동 첨부). 로그인이 필요한 페이지는 `App.tsx` 에서 `ProtectedRoute` 아래에 둡니다.
+
+## 버전 기준
+
+이 템플릿의 기준 버전입니다. 확장 모듈(예: Spring AI)은 이 버전에 맞춰 고릅니다.
+
+- Spring Boot 4.1.1 (Spring Framework 7, Jackson 3), Java 21, Gradle 9.8
+- PostgreSQL 18
+- React 19, Vite 8, Tailwind CSS 4
 
 ## 참고
 

@@ -2,7 +2,7 @@ package com.example.app.config;
 
 import com.example.app.common.ErrorResponse;
 import com.example.app.security.JwtAuthenticationFilter;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

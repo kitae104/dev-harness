@@ -6,9 +6,9 @@
 
 | 템플릿 | 명령 (예정) | 내용 | 상태 |
 | --- | --- | --- | --- |
-| [`templates/s-r`](templates/s-r) | `/s-r-setup` | Spring Boot + React(Tailwind), JWT 로그인·회원가입, 랜딩, Docker Compose | ✅ |
+| [`templates/s-r`](templates/s-r) | `/s-r-setup` | Spring Boot 4.1 + React(Tailwind) + PostgreSQL 18, JWT 로그인·회원가입, 랜딩, Docker Compose | ✅ |
 | `templates/s-r` + FastAPI 모듈 | `/s-r-f-setup` | 기본 템플릿 + FastAPI 서비스 | 예정 |
-| `templates/s-r` + Spring AI 모듈 | `/s-r-ai-setup` | 기본 템플릿 + Spring AI | 예정 |
+| `templates/s-r` + Spring AI 모듈 | `/s-r-ai-setup` | 기본 템플릿 + Spring AI (Spring Boot 4.1 호환 버전) | 예정 |
 
 ## 로드맵
 
