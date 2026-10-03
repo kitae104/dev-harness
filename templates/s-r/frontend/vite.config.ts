@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       proxy: {
+        // @addon:vite-proxy
         '/api': {
           target: env.VITE_API_PROXY_TARGET || 'http://localhost:8080',
           changeOrigin: true,

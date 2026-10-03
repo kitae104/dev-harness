@@ -5,6 +5,7 @@ const features = [
   { title: 'Spring Boot', description: 'Java 21 기반 REST API와 Spring Security JWT 인증' },
   { title: 'React + Tailwind', description: 'Vite, TypeScript, Tailwind CSS로 구성된 프론트엔드' },
   { title: 'Docker Compose', description: 'PostgreSQL, 백엔드, 프론트엔드를 한 번에 실행' },
+  // @addon:landing-features
 ]
 
 export default function LandingPage() {

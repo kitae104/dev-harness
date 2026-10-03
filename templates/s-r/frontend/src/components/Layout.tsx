@@ -28,6 +28,7 @@ export default function Layout() {
                 <NavLink to="/dashboard" className={navClass}>
                   대시보드
                 </NavLink>
+                {/* @addon:nav-links */}
                 <button
                   type="button"
                   onClick={handleLogout}

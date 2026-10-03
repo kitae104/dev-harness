@@ -25,6 +25,7 @@ repositories {
 
 ext {
     jjwtVersion = '0.13.0'
+    // @addon:gradle-ext
 }
 
 dependencies {
@@ -37,6 +38,7 @@ dependencies {
     runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
     runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
     runtimeOnly 'org.postgresql:postgresql'
+    // @addon:gradle-dependencies
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

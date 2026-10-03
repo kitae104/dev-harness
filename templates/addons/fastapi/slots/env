@@ -1,0 +1,3 @@
+
+# FastAPI 서비스 포트 (nginx 와 Vite 는 /api/py 를 이 서비스로 보냅니다)
+FASTAPI_PORT=8000

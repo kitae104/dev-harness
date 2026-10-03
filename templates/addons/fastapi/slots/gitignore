@@ -1,0 +1,5 @@
+# fastapi
+fastapi/.venv/
+fastapi/**/__pycache__/
+fastapi/.pytest_cache/
+fastapi/.ruff_cache/

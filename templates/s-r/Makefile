@@ -22,3 +22,5 @@ db:        ## 로컬 개발용으로 DB 만 실행
 
 clean:     ## 중지 + DB 볼륨과 이미지까지 삭제 (데이터 초기화)
 	$(COMPOSE) down -v --rmi local
+
+# @addon:make-targets

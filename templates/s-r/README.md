@@ -1,6 +1,6 @@
-# s-r 템플릿 (Spring Boot + React)
+# 프로젝트 (Spring Boot + React)
 
-로그인, 회원가입, 랜딩 페이지가 준비된 기본 프로젝트 템플릿입니다. `/s-r-setup` 스킬이 이 폴더를 새 프로젝트로 복사합니다.
+로그인, 회원가입, 랜딩 페이지가 준비된 상태로 시작하는 프로젝트입니다. [dev-harness](https://github.com/kitae104/dev-harness) 템플릿으로 생성했습니다 (`.harness.json`).
 
 ## 구성
 
@@ -96,3 +96,24 @@ frontend/src/
 - 액세스 토큰만 사용하며 `localStorage` 에 저장합니다. 리프레시 토큰은 포함하지 않았습니다.
 - 스키마는 `JPA_DDL_AUTO=update` 로 자동 생성됩니다. 운영 전에는 Flyway 같은 마이그레이션 도구로 바꾸는 것을 권장합니다.
 - 패키지명 `com.example.app` 과 프로젝트명 `app` 은 스킬이 프로젝트 생성 시 바꿀 자리입니다.
+
+<!-- @addon:readme -->
+
+## Claude Code 하네스
+
+이 프로젝트에는 Claude Code 가 일관되게 기능을 추가하도록 돕는 설정이 들어 있습니다.
+
+| 파일 | 역할 |
+| --- | --- |
+| `CLAUDE.md` | 구성, 명령, 작업 규칙 (Claude 가 매번 읽음) |
+| `.claude/rules/*.md` | 폴더별 세부 규칙. 해당 파일을 다룰 때만 적용 (backend, frontend, docker …) |
+| `.claude/settings.json` | 권한(.env 읽기 금지, 위험 명령은 확인)과 훅 |
+| `.claude/hooks/lint-file.mjs` | 파일 수정 직후 그 파일만 린트 (oxlint, ruff) |
+| `.claude/hooks/verify.mjs` | 작업을 끝낼 때 바뀐 영역의 테스트·린트 실행, 실패하면 Claude 가 이어서 고침 |
+| `.claude/skills/add-domain` | `/add-domain 게시글(제목, 내용)` 처럼 도메인 기능을 백엔드~화면까지 추가 |
+| `.claude/skills/verify` | `/verify` 전체 검증 후 표로 보고 |
+| `.claude/agents/code-reviewer.md` | 규칙 기준 코드 리뷰 서브에이전트 |
+| `.github/workflows/ci.yml` | GitHub Actions 에서 같은 검증 실행 |
+
+- 훅은 Node 로 동작합니다 (Windows 는 Git Bash 필요). 검증 훅을 잠시 끄려면 `HARNESS_VERIFY=off claude`.
+- 규칙을 바꾸고 싶으면 `CLAUDE.md` 나 `.claude/rules/` 를 직접 고치면 됩니다. 이후 Claude 의 작업에 바로 반영됩니다.

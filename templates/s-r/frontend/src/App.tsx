@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage.tsx'
 import LoginPage from './pages/LoginPage.tsx'
 import NotFoundPage from './pages/NotFoundPage.tsx'
 import SignupPage from './pages/SignupPage.tsx'
+// @addon:route-imports
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="signup" element={<SignupPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="dashboard" element={<DashboardPage />} />
+          {/* @addon:protected-routes */}
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

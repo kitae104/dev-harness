@@ -1,0 +1,18 @@
+{
+  "description": "FastAPI(Python) 서비스. /api/py/** 경로, Spring 과 같은 JWT 로 인증",
+  "slots": {
+    "compose-services": "slots/compose-services.yml",
+    "compose-frontend-depends": "slots/compose-frontend-depends.yml",
+    "env": "slots/env",
+    "make-targets": "slots/make-targets.mk",
+    "gitignore": "slots/gitignore",
+    "nginx-locations": "slots/nginx-locations.conf",
+    "vite-proxy": "slots/vite-proxy.ts",
+    "dashboard-imports": "slots/dashboard-imports.tsx",
+    "dashboard-cards": "slots/dashboard-cards.tsx",
+    "landing-features": "slots/landing-features.tsx",
+    "readme": "slots/readme.md",
+    "claude-md": "slots/claude-md.md",
+    "ci-jobs": "slots/ci-jobs.yml"
+  }
+}

@@ -1,4 +1,5 @@
 import { useAuth } from '../auth/AuthContext.tsx'
+// @addon:dashboard-imports
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -16,6 +17,7 @@ export default function DashboardPage() {
         <dt className="text-slate-500">가입일</dt>
         <dd className="col-span-2">{new Date(user.createdAt).toLocaleDateString('ko-KR')}</dd>
       </dl>
+      {/* @addon:dashboard-cards */}
     </div>
   )
 }

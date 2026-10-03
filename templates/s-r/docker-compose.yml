@@ -36,6 +36,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-me-please-32bytes-or-more}
       JWT_ACCESS_TOKEN_VALIDITY_SECONDS: ${JWT_ACCESS_TOKEN_VALIDITY_SECONDS:-3600}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      # @addon:compose-backend-env
     ports:
       - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
     networks:
@@ -55,7 +56,10 @@ services:
       - app-net
     depends_on:
       - backend
+      # @addon:compose-frontend-depends
     restart: unless-stopped
+
+  # @addon:compose-services
 
 networks:
   app-net:
@@ -64,3 +68,4 @@ networks:
 volumes:
   db-data:
     name: ${COMPOSE_PROJECT_NAME:-app}-db-data
+  # @addon:compose-volumes

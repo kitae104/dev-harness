@@ -1,0 +1,28 @@
+[project]
+name = "app-fastapi"
+version = "0.1.0"
+description = "FastAPI 서비스 (Spring 백엔드와 같은 JWT 사용)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.142,<1",
+    "uvicorn[standard]>=0.54",
+    "pyjwt>=2.15",
+    "pydantic-settings>=2.15",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1",
+    "httpx>=0.28",
+    "ruff>=0.16",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
