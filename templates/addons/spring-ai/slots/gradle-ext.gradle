@@ -1,0 +1,2 @@
+    // Spring AI 버전은 Spring Boot 버전에 맞춰야 합니다. 2.0.1 은 Spring Boot 4.1.1 로 빌드된 버전입니다.
+    springAiVersion = '2.0.1'

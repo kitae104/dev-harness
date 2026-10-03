@@ -1,0 +1,4 @@
+
+# FastAPI 서비스를 호스트에 여는 포트 (컨테이너 사이에서는 항상 8000).
+# 로컬 npm run dev 의 프록시 대상은 frontend/.env 의 VITE_FASTAPI_PROXY_TARGET 입니다.
+FASTAPI_PORT=8000

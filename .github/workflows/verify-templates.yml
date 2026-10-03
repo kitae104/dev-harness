@@ -1,0 +1,30 @@
+name: verify-templates
+
+# 템플릿·확장 모듈·생성기를 고치면 모든 조합을 실제로 생성해 빌드와 테스트를 돌립니다.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [base, fastapi, ai-openai, ai-anthropic, ai-ollama, all]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: astral-sh/setup-uv@v6
+      - run: scripts/verify-templates.sh ${{ matrix.variant }}
+        env:
+          # 이미지 빌드는 모든 Dockerfile 이 들어가는 조합에서만 (시간 절약)
+          DOCKER_BUILD: ${{ matrix.variant == 'all' && '1' || '' }}

@@ -1,0 +1,2 @@
+  ai:
+    system-prompt: ${AI_SYSTEM_PROMPT:당신은 이 서비스의 친절한 도우미입니다. 한국어로 간결하게 답하세요.}

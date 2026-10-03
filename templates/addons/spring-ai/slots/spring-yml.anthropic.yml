@@ -1,0 +1,8 @@
+  ai:
+    anthropic:
+      # 키가 없어도 애플리케이션은 뜨고, 채팅 요청만 502 로 실패합니다.
+      api-key: ${ANTHROPIC_API_KEY:not-set}
+      chat:
+        options:
+          model: ${ANTHROPIC_MODEL:claude-sonnet-5-5}
+          max-tokens: 1024

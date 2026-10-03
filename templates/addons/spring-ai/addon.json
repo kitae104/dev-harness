@@ -1,0 +1,33 @@
+{
+  "description": "Spring AI 2.0.1 (Spring Boot 4.1.1 기준 빌드) ChatClient 기반 /api/ai/chat 과 채팅 화면",
+  "options": {
+    "aiProvider": {
+      "choices": [
+        "openai",
+        "anthropic",
+        "ollama"
+      ],
+      "default": "openai",
+      "description": "모델 제공자. 생성 후에도 의존성과 설정만 바꾸면 교체할 수 있습니다."
+    }
+  },
+  "slots": {
+    "gradle-ext": "slots/gradle-ext.gradle",
+    "gradle-dependencies": "slots/gradle-dependencies.{aiProvider}.gradle",
+    "spring-yml": "slots/spring-yml.{aiProvider}.yml",
+    "spring-test-yml": "slots/spring-test-yml.{aiProvider}.yml",
+    "app-yml": "slots/app-yml.yml",
+    "compose-backend-env": "slots/compose-backend-env.{aiProvider}.yml",
+    "compose-services": "slots/compose-services.{aiProvider}.yml",
+    "compose-volumes": "slots/compose-volumes.{aiProvider}.yml",
+    "env": "slots/env.{aiProvider}",
+    "make-targets": "slots/make-targets.{aiProvider}.mk",
+    "route-imports": "slots/route-imports.tsx",
+    "protected-routes": "slots/protected-routes.tsx",
+    "nav-links": "slots/nav-links.tsx",
+    "landing-features": "slots/landing-features.tsx",
+    "readme": "slots/readme.md",
+    "claude-md": "slots/claude-md.md",
+    "nginx-locations": "slots/nginx-locations.conf"
+  }
+}

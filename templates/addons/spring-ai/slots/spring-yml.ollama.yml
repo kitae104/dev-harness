@@ -1,0 +1,11 @@
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: ${OLLAMA_MODEL:llama3.2}
+    # 기본 재시도(10회, 최대 3분 간격)는 응답 없이 수십 분을 기다리게 하므로 짧게 줄입니다.
+    retry:
+      max-attempts: 2
+      backoff:
+        max-interval: 5s

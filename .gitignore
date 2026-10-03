@@ -1,0 +1,14 @@
+# 템플릿을 직접 빌드·실행해 본 흔적 (생성기는 이 폴더들을 복사하지 않음)
+node_modules/
+dist/
+build/
+.gradle/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.env
+.claude/settings.local.json
+.claude/.verify-cache/
+.DS_Store
+.idea/
