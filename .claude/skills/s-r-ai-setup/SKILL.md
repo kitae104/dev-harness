@@ -23,6 +23,8 @@ argument-hint: "<프로젝트이름> [패키지] [위치] [openai|anthropic|olla
 
 FastAPI 와 Spring AI 를 **둘 다** 원하면 실행할 때 `--addons fastapi,spring-ai` 를 덧붙입니다 (뒤에 준 값이 기본값을 대신합니다).
 
+프론트엔드를 Next.js 로 하려면 `--frontend next` 를 덧붙입니다 (`/next-setup` 과 같은 구성). 백엔드를 FastAPI 로 하려면 `/f-r-setup`, 다른 조합은 `/stack-setup` 을 쓰세요.
+
 ## 2. 생성
 
 이 스킬 폴더의 `generate.mjs` 를 실행합니다. `${CLAUDE_SKILL_DIR}` 가 이 스킬 폴더 경로로 바뀌어 보입니다 (바뀌지 않았다면 스킬을 불러올 때 안내된 Base directory 를 쓰세요).

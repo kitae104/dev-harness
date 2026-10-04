@@ -1,0 +1,34 @@
+{
+  "description": "AI 채팅 (FastAPI 백엔드). OpenAI·Anthropic·Ollama 를 httpx 로 호출하는 /api/ai/chat 과 채팅 화면",
+  "requires": {
+    "backend": "fastapi"
+  },
+  "requiresHint": "Spring 백엔드에서는 spring-ai 확장 모듈을 쓰세요.",
+  "includes": [
+    "chat-ui"
+  ],
+  "options": {
+    "aiProvider": {
+      "choices": [
+        "openai",
+        "anthropic",
+        "ollama"
+      ],
+      "default": "openai",
+      "description": "모델 제공자. 생성 후에도 AI_PROVIDER 환경 변수로 바꿀 수 있습니다."
+    }
+  },
+  "slots": {
+    "ai-default-provider": "slots/ai-default-provider.{aiProvider}.py",
+    "py-router-imports": "slots/py-router-imports.py",
+    "py-routers": "slots/py-routers.py",
+    "compose-backend-env": "slots/compose-backend-env.{aiProvider}.yml",
+    "compose-services": "slots/compose-services.{aiProvider}.yml",
+    "compose-volumes": "slots/compose-volumes.{aiProvider}.yml",
+    "env": "slots/env.{aiProvider}",
+    "make-targets": "slots/make-targets.{aiProvider}.mk",
+    "landing-features": "slots/landing-features.tsx",
+    "readme": "slots/readme.md",
+    "claude-md": "slots/claude-md.md"
+  }
+}

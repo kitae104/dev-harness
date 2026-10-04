@@ -6,6 +6,7 @@ on:
   pull_request:
 
 jobs:
+  # @block:backend-ci
   backend:
     runs-on: ubuntu-latest
     defaults:
@@ -19,7 +20,9 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
       - run: ./gradlew test
+  # @endblock
 
+  # @block:frontend-ci
   frontend:
     runs-on: ubuntu-latest
     defaults:
@@ -35,6 +38,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+  # @endblock
 
   compose:
     runs-on: ubuntu-latest

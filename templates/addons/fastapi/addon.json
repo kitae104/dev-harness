@@ -1,19 +1,25 @@
 {
   "description": "FastAPI(Python) 서비스. /api/py/** 경로, Spring 과 같은 JWT 로 인증",
+  "requires": {
+    "backend": "spring"
+  },
+  "requiresHint": "FastAPI 백엔드에는 이미 파이썬이 있으니 백엔드에 기능을 추가하세요.",
   "slots": {
     "compose-services": "slots/compose-services.yml",
     "compose-frontend-depends": "slots/compose-frontend-depends.yml",
     "env": "slots/env",
     "make-targets": "slots/make-targets.mk",
     "gitignore": "slots/gitignore",
-    "nginx-locations": "slots/nginx-locations.conf",
-    "vite-proxy": "slots/vite-proxy.ts",
-    "dashboard-imports": "slots/dashboard-imports.tsx",
+    "nginx-locations": "slots/nginx-locations.{frontend}.conf",
+    "vite-proxy": "slots/vite-proxy.{frontend}.ts",
+    "dashboard-imports": "slots/dashboard-imports.{frontend}.tsx",
     "dashboard-cards": "slots/dashboard-cards.tsx",
     "landing-features": "slots/landing-features.tsx",
     "readme": "slots/readme.md",
     "claude-md": "slots/claude-md.md",
     "ci-jobs": "slots/ci-jobs.yml",
-    "frontend-env": "slots/frontend-env"
+    "frontend-env": "slots/frontend-env.{frontend}",
+    "next-rewrites": "slots/next-rewrites.{frontend}.ts",
+    "next-docker-env": "slots/next-docker-env.{frontend}"
   }
 }

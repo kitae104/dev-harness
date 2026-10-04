@@ -3,15 +3,19 @@
 .env.*
 !.env.example
 
+# @block:backend-gitignore
 # backend
 backend/build/
 backend/.gradle/
 backend/bin/
 backend/out/
+# @endblock
 
+# @block:frontend-gitignore
 # frontend
 frontend/node_modules/
 frontend/dist/
+# @endblock
 
 # @addon:gitignore
 

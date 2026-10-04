@@ -1,0 +1,10 @@
+{
+  "description": "AI 채팅 화면 (/chat). spring-ai, llm 확장 모듈이 함께 씁니다. /api/ai/chat 계약: { message } → { reply }",
+  "hidden": true,
+  "slots": {
+    "route-imports": "slots/route-imports.{frontend}.tsx",
+    "protected-routes": "slots/protected-routes.{frontend}.tsx",
+    "nav-links": "slots/nav-links.{frontend}.tsx",
+    "nginx-locations": "slots/nginx-locations.{frontend}.conf"
+  }
+}

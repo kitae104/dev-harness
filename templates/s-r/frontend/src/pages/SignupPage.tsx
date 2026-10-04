@@ -3,7 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { authApi } from '../api/auth.ts'
 import { ApiError } from '../api/client.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
-import FormField from '../components/FormField.tsx'
+import Alert from '../components/ui/Alert.tsx'
+import Button from '../components/ui/Button.tsx'
+import Card from '../components/ui/Card.tsx'
+import FormField from '../components/ui/FormField.tsx'
+import { linkClass } from '../components/ui/styles.ts'
 
 export default function SignupPage() {
   const { login } = useAuth()
@@ -44,51 +48,49 @@ export default function SignupPage() {
   return (
     <div className="mx-auto max-w-md px-4 py-16">
       <h1 className="text-2xl font-bold">회원가입</h1>
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <FormField label="이름" name="name" required value={form.name} onChange={update('name')} error={fieldErrors.name} />
-        <FormField
-          label="이메일"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          value={form.email}
-          onChange={update('email')}
-          error={fieldErrors.email}
-        />
-        <FormField
-          label="비밀번호 (8자 이상)"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={8}
-          value={form.password}
-          onChange={update('password')}
-          error={fieldErrors.password}
-        />
-        <FormField
-          label="비밀번호 확인"
-          name="passwordConfirm"
-          type="password"
-          autoComplete="new-password"
-          required
-          value={form.passwordConfirm}
-          onChange={update('passwordConfirm')}
-          error={fieldErrors.passwordConfirm}
-        />
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-md bg-indigo-600 py-2.5 font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
-        >
-          {submitting ? '가입 중...' : '가입하기'}
-        </button>
-      </form>
-      <p className="mt-4 text-center text-sm text-slate-600">
+      <Card className="mt-8">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <FormField label="이름" name="name" required value={form.name} onChange={update('name')} error={fieldErrors.name} />
+          <FormField
+            label="이메일"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={form.email}
+            onChange={update('email')}
+            error={fieldErrors.email}
+          />
+          <FormField
+            label="비밀번호 (8자 이상)"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            required
+            minLength={8}
+            value={form.password}
+            onChange={update('password')}
+            error={fieldErrors.password}
+          />
+          <FormField
+            label="비밀번호 확인"
+            name="passwordConfirm"
+            type="password"
+            autoComplete="new-password"
+            required
+            value={form.passwordConfirm}
+            onChange={update('passwordConfirm')}
+            error={fieldErrors.passwordConfirm}
+          />
+          {error && <Alert>{error}</Alert>}
+          <Button type="submit" disabled={submitting} block>
+            {submitting ? '가입 중...' : '가입하기'}
+          </Button>
+        </form>
+      </Card>
+      <p className="mt-4 text-center text-sm text-muted-foreground">
         이미 계정이 있으신가요?{' '}
-        <Link to="/login" className="font-medium text-indigo-600 hover:underline">
+        <Link to="/login" className={linkClass}>
           로그인
         </Link>
       </p>

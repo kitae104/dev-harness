@@ -1,0 +1,24 @@
+{
+  "description": "FastAPI 백엔드 (Python 3.13, SQLAlchemy 2, Alembic, JWT). Spring 백엔드와 같은 API 계약",
+  "blocks": {
+    "backend-service": "blocks/compose-service.yml",
+    "backend-ci": "blocks/ci.yml",
+    "backend-gitignore": "blocks/gitignore",
+    "backend-claude-row": "blocks/claude-row.md",
+    "backend-claude-commands": "blocks/claude-commands.sh",
+    "backend-readme-row": "blocks/readme-row.md",
+    "backend-readme-url": "blocks/readme-url.md",
+    "backend-readme-dev": "blocks/readme-dev.sh",
+    "backend-readme-dev-notes": "blocks/readme-dev-notes.md",
+    "backend-readme-verify": "blocks/readme-verify.sh",
+    "backend-readme-health": "blocks/readme-health.md",
+    "backend-readme-tree": "blocks/readme-tree.txt",
+    "backend-readme-howto": "blocks/readme-howto.md",
+    "backend-readme-versions": "blocks/readme-versions.md",
+    "backend-readme-notes": "blocks/readme-notes.md",
+    "landing-backend": "blocks/landing.tsx"
+  },
+  "slots": {
+    "make-targets": "slots/make-targets.mk"
+  }
+}

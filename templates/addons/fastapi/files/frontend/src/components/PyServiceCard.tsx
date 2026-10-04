@@ -1,6 +1,10 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { ApiError } from '../api/client.ts'
 import { pyApi, type PyUser, type TextStats } from '../api/py.ts'
+import { cn } from '../lib/cn.ts'
+import Button from './ui/Button.tsx'
+import Input from './ui/Input.tsx'
+import { cardClass } from './ui/styles.ts'
 
 // FastAPI 서비스 연결 확인용 카드. 실제 기능을 만들면 지워도 됩니다.
 export default function PyServiceCard() {
@@ -27,28 +31,24 @@ export default function PyServiceCard() {
   }
 
   return (
-    <section className="mt-8 max-w-lg rounded-xl border border-slate-200 bg-white p-6 text-sm shadow-sm">
+    <section className={cn(cardClass, 'mt-8 max-w-lg p-6 text-sm')}>
       <h2 className="font-semibold">FastAPI 서비스</h2>
-      <p className="mt-1 text-slate-600">
+      <p className="mt-1 text-muted-foreground">
         {pyUser ? `같은 토큰으로 인증됨: ${pyUser.email} (${pyUser.role})` : error ? error : '연결 확인 중…'}
       </p>
       <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
-        <input
+        <Input
+          className="flex-1"
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="분석할 문장"
-          className="flex-1 rounded-md border border-slate-300 px-3 py-2"
         />
-        <button
-          type="submit"
-          disabled={!text.trim()}
-          className="rounded-md bg-indigo-600 px-3 py-2 font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={!text.trim()}>
           분석
-        </button>
+        </Button>
       </form>
       {stats && (
-        <p className="mt-3 text-slate-700">
+        <p className="mt-3 text-foreground">
           글자 {stats.characters} · 단어 {stats.words} · 줄 {stats.lines}
         </p>
       )}

@@ -1,0 +1,22 @@
+# dependencies
+node_modules
+
+# Next.js 빌드 결과
+.next
+out
+# npm run dev / build 가 만드는 타입 선언 (자동 생성)
+next-env.d.ts
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# 로컬 설정 (.env.example 을 복사해 만듭니다)
+.env*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store

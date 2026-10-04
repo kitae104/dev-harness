@@ -1,0 +1,1 @@
+- 백엔드: http://localhost:8080 (`/api/health`, API 문서 `/api/docs`)

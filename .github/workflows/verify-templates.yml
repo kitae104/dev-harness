@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [base, fastapi, ai-openai, ai-anthropic, ai-ollama, all]
+        variant: [base, fastapi, ai-openai, ai-anthropic, ai-ollama, all, next, next-all, f-r, f-n, f-ai, f-ai-anthropic, f-n-ai-ollama, ml-cuda]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -26,5 +26,5 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: scripts/verify-templates.sh ${{ matrix.variant }}
         env:
-          # 이미지 빌드는 모든 Dockerfile 이 들어가는 조합에서만 (시간 절약)
-          DOCKER_BUILD: ${{ matrix.variant == 'all' && '1' || '' }}
+          # 이미지 빌드는 Dockerfile 종류가 모두 들어가는 조합에서만 (시간 절약)
+          DOCKER_BUILD: ${{ contains(fromJSON('["all", "next-all", "f-n-ai-ollama"]'), matrix.variant) && '1' || '' }}

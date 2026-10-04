@@ -1,0 +1,10 @@
+# ml (데이터와 학습한 모델은 용량이 커서 올리지 않습니다)
+ml/.venv/
+ml/**/__pycache__/
+ml/.pytest_cache/
+ml/.ruff_cache/
+ml/**/.ipynb_checkpoints/
+ml/data/*
+!ml/data/.gitkeep
+ml/models/*
+!ml/models/.gitkeep

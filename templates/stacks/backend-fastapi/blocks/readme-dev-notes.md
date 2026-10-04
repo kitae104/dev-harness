@@ -1,0 +1,2 @@
+- 파이썬 도구는 uv 를 씁니다 (https://docs.astral.sh/uv/ , Windows: `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`). Python 3.13 이 없으면 uv 가 내려받습니다.
+- 로컬 백엔드는 프로젝트 루트의 `.env` 를 읽어 DB 주소(`DB_PORT`, `DB_NAME` …)와 `JWT_SECRET` 을 맞춥니다. 다른 DB 를 쓰려면 `DATABASE_URL` 을 지정하세요.

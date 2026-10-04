@@ -1,0 +1,1 @@
+- 스키마는 Alembic 마이그레이션(`backend/migrations/`)으로 관리하고, 컨테이너가 시작할 때 `alembic upgrade head` 를 실행합니다.

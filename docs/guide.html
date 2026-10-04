@@ -38,6 +38,7 @@
   section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; margin-bottom: 20px; }
   section h2 { margin: 0 0 4px; font-size: 21px; display: flex; align-items: center; gap: 10px; }
   .num { display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 14px; align-items: center; justify-content: center; flex: none; }
+  .num.sub { font-size: 11px; width: auto; min-width: 28px; padding: 0 6px; border-radius: 14px; }
   section > .lead { color: var(--muted); margin: 0 0 16px; }
   h3 { font-size: 17px; margin: 22px 0 6px; }
   code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
@@ -77,8 +78,11 @@
   <a href="#get-repo">2. 저장소 받기</a>
   <a href="#install">3. 스킬 설치</a>
   <a href="#create">4. 새 프로젝트 만들기</a>
+  <a href="#combos">4-1. 조합 고르기 (Next.js, FastAPI)</a>
   <a href="#run">5. 실행과 종료</a>
   <a href="#work">6. 생성된 프로젝트에서 일하기</a>
+  <a href="#design"><b>6-1. 디자인 바꾸기 (Stitch)</b></a>
+  <a href="#ai">6-2. AI·딥러닝 세팅</a>
   <a href="#real-project">7. 실제 프로젝트로 키우기</a>
   <a href="#rebuild">8. 처음부터 직접 만들기</a>
   <a href="#maintain">9. 하네스 키우기</a>
@@ -89,7 +93,7 @@
 <header class="hero">
   <button class="theme-toggle" type="button" onclick="toggleTheme()">밝게 / 어둡게</button>
   <h1>dev-harness 따라하기</h1>
-  <p>Spring Boot + React 프로젝트를 명령 하나로 만들고, 그 위에서 Claude Code 로 일관되게 기능을 추가하는 방법을 순서대로 정리했습니다. 보라색 테두리 상자는 Claude Code 에 그대로 붙여 넣는 프롬프트, 검은 상자는 터미널 명령입니다.</p>
+  <p>Spring Boot 또는 FastAPI 백엔드와 React 또는 Next.js 화면으로 된 프로젝트를 명령 하나로 만들고, 디자인을 Google Stitch 등에서 가져와 입히고, 그 위에서 Claude Code 로 일관되게 기능을 추가하는 방법을 순서대로 정리했습니다. 보라색 테두리 상자는 Claude Code 에 그대로 붙여 넣는 프롬프트, 검은 상자는 터미널 명령입니다.</p>
 </header>
 
 <section id="quickstart">
@@ -109,7 +113,7 @@ git clone https://github.com/kitae104/dev-harness.git</code></pre></div>
   <div class="block"><div class="label">터미널</div><pre><code>mkdir -p ~/projects && cd ~/projects
 claude</code></pre></div>
   <div class="block prompt"><div class="label">Claude Code 프롬프트 (셋 중 하나)</div><pre><code>/s-r-setup my-shop com.kitae.myshop</code></pre></div>
-  <p>FastAPI 가 필요하면 <code>/s-r-f-setup</code>, AI 채팅이 필요하면 <code>/s-r-ai-setup my-shop anthropic</code>. <code>~/projects/my-shop</code> 에 첫 커밋까지 된 프로젝트가 생깁니다.</p>
+  <p>Next.js 화면이면 <code>/next-setup</code>, 파이썬(FastAPI) 백엔드면 <code>/f-r-setup</code>·<code>/f-n-setup</code>, AI·딥러닝이면 <code>/ai-setup</code> (전체 목록은 <a href="#combos">4-1</a>). <code>~/projects/my-shop</code> 에 첫 커밋까지 된 프로젝트가 생깁니다.</p>
 
   <h3>4. 실행해서 확인</h3>
   <div class="block"><div class="label">터미널</div><pre><code>cd ~/projects/my-shop
@@ -178,7 +182,7 @@ java -version</code></pre></div>
     <li>Claude 패널에 아래처럼 입력합니다. Claude 가 <code>node … generate.mjs</code> 실행 허락을 구하면 허용합니다.</li>
   </ol>
   <div class="block prompt"><div class="label">Claude 패널 (셋 중 하나)</div><pre><code>/s-r-setup my-shop com.kitae.myshop</code></pre></div>
-  <p>FastAPI 가 필요하면 <code>/s-r-f-setup my-shop</code>, AI 채팅이 필요하면 <code>/s-r-ai-setup my-shop anthropic</code>. <code>projects/my-shop</code> 폴더가 첫 커밋까지 된 상태로 생깁니다.</p>
+  <p>Next.js 화면이면 <code>/next-setup my-shop</code>, 파이썬 백엔드면 <code>/f-r-setup my-shop</code>, AI·딥러닝이면 <code>/ai-setup my-lab</code> (전체 목록은 <a href="#combos">4-1</a>). <code>projects/my-shop</code> 폴더가 첫 커밋까지 된 상태로 생깁니다.</p>
 
   <h3>6. 생성된 프로젝트 폴더 열기 (중요)</h3>
   <p><b>File → Open Folder</b> 로 <code>projects/my-shop</code> 을 엽니다. Claude 패널은 열린 폴더 기준으로 동작하므로, 이 창에서부터 my-shop 의 <code>CLAUDE.md</code>, 규칙, 훅, <code>/add-domain</code>, <code>/verify</code> 가 적용됩니다. 작업 영역 신뢰 질문에는 신뢰한다고 답합니다.</p>
@@ -218,9 +222,10 @@ make up</code></pre></div>
   <p class="lead">dev-harness 저장소에는 세 가지가 들어 있습니다.</p>
   <table>
     <tr><th>구성</th><th>내용</th></tr>
-    <tr><td>템플릿</td><td><code>templates/s-r</code> 기본(Spring Boot 4.1.1, Java 21, React 19, Tailwind 4, PostgreSQL 18, JWT 로그인·회원가입·랜딩, Docker Compose)과 확장 모듈 <code>fastapi</code>, <code>spring-ai</code>(2.0.1)</td></tr>
-    <tr><td>생성 명령</td><td><code>/s-r-setup</code>, <code>/s-r-f-setup</code>, <code>/s-r-ai-setup</code> 스킬과 생성기 <code>scripts/new-project.mjs</code></td></tr>
-    <tr><td>하네스</td><td>생성된 프로젝트마다 들어가는 <code>CLAUDE.md</code>, 폴더별 규칙, 린트·검증 훅, <code>/add-domain</code>, <code>/verify</code>, 리뷰 에이전트, CI</td></tr>
+    <tr><td>템플릿</td><td><code>templates/s-r</code> 기본(Spring Boot 4.1.1, Java 21, React 19, Tailwind 4, PostgreSQL 18, JWT 로그인·회원가입·랜딩, Docker Compose), 바꿔 끼우는 스택 <code>backend-fastapi</code>, <code>frontend-next</code>(Next.js 16), 확장 모듈 <code>fastapi</code>, <code>spring-ai</code>(2.0.1), <code>llm</code>, <code>ml</code></td></tr>
+    <tr><td>생성 명령</td><td><code>/s-r-setup</code>, <code>/s-r-f-setup</code>, <code>/s-r-ai-setup</code>, <code>/next-setup</code>, <code>/f-r-setup</code>, <code>/f-n-setup</code>, <code>/ai-setup</code>, <code>/stack-setup</code> 스킬과 생성기 <code>scripts/new-project.mjs</code></td></tr>
+    <tr><td>하네스</td><td>생성된 프로젝트마다 들어가는 <code>CLAUDE.md</code>, 폴더별 규칙, 린트·검증 훅, <code>/add-domain</code>, <code>/apply-design</code>, <code>/verify</code>, 리뷰 에이전트, CI</td></tr>
+    <tr><td>디자인 구조</td><td>디자인 토큰(<code>theme.css</code>) + 공통 UI 컴포넌트 + <code>design/</code> 원본 폴더. Stitch 등에서 가져온 디자인을 <code>/apply-design</code> 으로 적용 (<a href="#design">6-1</a>)</td></tr>
   </table>
   <ol class="steps">
     <li>저장소를 받고 스킬을 한 번 설치합니다 (2~3단계).</li>
@@ -241,7 +246,8 @@ make up</code></pre></div>
     <tr><td>Docker Desktop</td><td><code>make up</code> 실행</td><td><code>docker compose version</code></td></tr>
     <tr><td>Git</td><td>저장소, 생성된 프로젝트 첫 커밋</td><td><code>git --version</code></td></tr>
     <tr><td>JDK 17 이상</td><td>로컬에서 백엔드 테스트 (컴파일용 JDK 21 은 Gradle 이 자동으로 받음)</td><td><code>java -version</code></td></tr>
-    <tr><td>uv (FastAPI 쓸 때)</td><td>Python 의존성, 테스트</td><td><code>uv --version</code></td></tr>
+    <tr><td>uv (FastAPI·AI·딥러닝 쓸 때)</td><td>Python 의존성, 테스트. Python 은 uv 가 알아서 받음</td><td><code>uv --version</code></td></tr>
+    <tr><td>NVIDIA 드라이버 + Container Toolkit (선택)</td><td>딥러닝 GPU 사용 (<code>--ml-device cuda</code>). Windows 는 Docker Desktop + WSL2</td><td><code>nvidia-smi</code></td></tr>
     <tr><td>make (선택)</td><td><code>make up/down</code>. 없으면 Makefile 주석의 <code>docker compose</code> 명령 사용</td><td><code>make -v</code></td></tr>
   </table>
   <div class="note">Windows 는 Git for Windows(Git Bash 포함)를 꼭 설치하세요. 생성된 프로젝트의 훅이 Git Bash 에서 동작합니다. Windows 에는 <code>make</code> 가 없으므로 <a href="#vscode">VS Code 로 시작하기 7단계</a>의 <code>docker compose</code> 명령을 쓰면 됩니다.</div>
@@ -260,7 +266,7 @@ cd dev-harness</code></pre></div>
   <p class="lead">어느 폴더에서나 <code>/s-r-setup</code> 을 쓰려면 한 번 설치합니다. 저장소를 <code>git pull</code> 하면 스킬도 함께 최신이 됩니다.</p>
   <div class="block"><div class="label">macOS / Linux / Git Bash</div><pre><code>scripts/install-skills.sh</code></pre></div>
   <div class="block"><div class="label">Windows PowerShell</div><pre><code>powershell -ExecutionPolicy Bypass -File scripts\install-skills.ps1</code></pre></div>
-  <p>Claude Code 를 다시 시작하고 <code>/</code> 를 입력해 <code>s-r-setup</code>, <code>s-r-f-setup</code>, <code>s-r-ai-setup</code> 이 보이면 성공입니다. 보이지 않으면 dev-harness 폴더에서 Claude Code 를 열어 쓰거나, 환경 변수 <code>DEV_HARNESS_HOME</code> 에 저장소 경로를 지정하세요.</p>
+  <p>Claude Code 를 다시 시작하고 <code>/</code> 를 입력해 <code>s-r-setup</code>, <code>next-setup</code>, <code>f-r-setup</code>, <code>ai-setup</code> 등이 보이면 성공입니다. 새 명령이 추가된 뒤에는 <code>git pull</code> 후 설치 스크립트를 한 번 더 실행하세요. 보이지 않으면 dev-harness 폴더에서 Claude Code 를 열어 쓰거나, 환경 변수 <code>DEV_HARNESS_HOME</code> 에 저장소 경로를 지정하세요.</p>
   <div class="note">설치하지 않아도 <code>dev-harness</code> 폴더에서 Claude Code 를 열면 바로 쓸 수 있습니다. 이 경우 새 프로젝트는 저장소 옆 폴더(<code>../이름</code>)에 만들어집니다.</div>
 </section>
 
@@ -272,14 +278,62 @@ cd dev-harness</code></pre></div>
     <tr><td><code>/s-r-setup my-shop</code></td><td>Spring Boot + React + PostgreSQL, 로그인·회원가입·랜딩</td></tr>
     <tr><td><code>/s-r-f-setup my-shop</code></td><td>위 + FastAPI 서비스 (<code>/api/py/**</code>, 같은 JWT 로 인증)</td></tr>
     <tr><td><code>/s-r-ai-setup my-bot anthropic</code></td><td>위 기본 + Spring AI 채팅 (<code>/api/ai/chat</code>, <code>/chat</code> 화면). 제공자 <code>openai</code>(기본) | <code>anthropic</code> | <code>ollama</code></td></tr>
+    <tr><td><code>/next-setup my-shop</code></td><td>Spring Boot + Next.js 16</td></tr>
+    <tr><td><code>/f-r-setup my-shop</code>, <code>/f-n-setup my-shop</code></td><td>FastAPI 백엔드 + React / Next.js</td></tr>
+    <tr><td><code>/ai-setup my-lab</code></td><td>FastAPI + AI 채팅 + 딥러닝 작업 공간 (<a href="#ai">6-2</a>)</td></tr>
+    <tr><td><code>/stack-setup my-app &lt;구성 설명&gt;</code></td><td>원하는 조합 (<a href="#combos">4-1</a>)</td></tr>
   </table>
   <div class="block prompt"><div class="label">Claude Code 프롬프트 (패키지와 위치까지 지정)</div><pre><code>/s-r-setup my-shop com.kitae.myshop ~/projects/my-shop</code></pre></div>
   <div class="block prompt"><div class="label">Claude Code 프롬프트 (FastAPI 와 Spring AI 를 함께)</div><pre><code>/s-r-f-setup my-lab 으로 만들되 Spring AI 도 같이 넣어줘. 모델은 anthropic 으로.</code></pre></div>
   <p>Claude Code 없이 터미널에서 같은 결과를 만들 수도 있습니다.</p>
   <div class="block"><div class="label">터미널</div><pre><code>node ~/dev-harness/scripts/new-project.mjs --name my-shop --package com.kitae.myshop \
   --addons fastapi,spring-ai --ai-provider anthropic --out ~/projects/my-shop</code></pre></div>
-  <p>생성되면 <code>.env</code>(임의의 <code>JWT_SECRET</code> 포함), <code>.harness.json</code>(어떤 템플릿·옵션으로 만들었는지), 첫 git 커밋까지 준비됩니다.</p>
+  <p>생성되면 <code>.env</code>(임의의 <code>JWT_SECRET</code> 포함), <code>.harness.json</code>(어떤 백엔드·프론트엔드·옵션으로 만들었는지), 첫 git 커밋까지 준비됩니다.</p>
 </section>
+
+<section id="combos">
+  <h2><span class="num sub">4-1</span>조합 고르기: Next.js, FastAPI, 그 밖의 조합</h2>
+  <p class="lead">백엔드(Spring Boot 또는 FastAPI)와 프론트엔드(React 또는 Next.js)를 골라 만들 수 있습니다. 어떤 조합이든 랜딩·회원가입·로그인·대시보드, JWT 인증, PostgreSQL 18, Docker Compose, 디자인 토큰 구조, Claude Code 하네스가 똑같이 들어갑니다.</p>
+  <table>
+    <tr><th>명령</th><th>백엔드</th><th>프론트엔드</th><th>이럴 때</th></tr>
+    <tr><td><code>/s-r-setup my-shop</code></td><td>Spring Boot 4.1</td><td>React 19 (Vite)</td><td>기본. 자바 백엔드 + 가벼운 SPA</td></tr>
+    <tr><td><code>/next-setup my-shop</code></td><td>Spring Boot 4.1</td><td>Next.js 16</td><td>자바 백엔드 + 파일 기반 라우팅, 나중에 SEO·서버 렌더링이 필요할 때</td></tr>
+    <tr><td><code>/f-r-setup my-shop</code></td><td>FastAPI</td><td>React 19</td><td>파이썬 백엔드. 데이터·AI 기능을 백엔드에 바로 붙일 때</td></tr>
+    <tr><td><code>/f-n-setup my-shop</code></td><td>FastAPI</td><td>Next.js 16</td><td>파이썬 백엔드 + Next.js</td></tr>
+    <tr><td><code>/ai-setup my-lab</code></td><td>FastAPI</td><td>React (Next 선택)</td><td>AI 채팅 + 딥러닝 작업 공간 (<a href="#ai">6-2</a>)</td></tr>
+    <tr><td><code>/stack-setup my-app ...</code></td><td>골라서</td><td>골라서</td><td>위에 없는 조합. 원하는 구성을 말로 적으면 옵션으로 바꿔 줌</td></tr>
+  </table>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트 (예시)</div><pre><code>/next-setup my-shop com.kitae.myshop</code></pre></div>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트 (자유 조합)</div><pre><code>/stack-setup my-app 파이썬 백엔드에 Next.js 화면, AI 채팅은 로컬 모델(Ollama)로 넣어줘</code></pre></div>
+  <div class="block"><div class="label">터미널 (Claude Code 없이)</div><pre><code>node ~/dev-harness/scripts/new-project.mjs --name my-app --backend fastapi --frontend next --addons llm --ai-provider ollama
+node ~/dev-harness/scripts/new-project.mjs --list-addons   # 고를 수 있는 값과 조건</code></pre></div>
+
+  <h3>고를 수 있는 확장 모듈</h3>
+  <table>
+    <tr><th>확장 모듈</th><th>내용</th><th>조건</th></tr>
+    <tr><td><code>fastapi</code></td><td>Python 보조 서비스 (<code>/api/py/**</code>, Spring 과 같은 JWT)</td><td>백엔드가 Spring 일 때</td></tr>
+    <tr><td><code>spring-ai</code></td><td>Spring AI 2.0.1 채팅 API·화면</td><td>백엔드가 Spring 일 때</td></tr>
+    <tr><td><code>llm</code></td><td>AI 채팅 API·화면 (OpenAI·Anthropic·Ollama)</td><td>백엔드가 FastAPI 일 때</td></tr>
+    <tr><td><code>ml</code></td><td>딥러닝 작업 공간 <code>ml/</code> (PyTorch, Jupyter, GPU 선택)</td><td>어느 조합이든</td></tr>
+  </table>
+
+  <h3>조합마다 달라지는 것</h3>
+  <table>
+    <tr><th></th><th>Spring Boot 백엔드</th><th>FastAPI 백엔드</th></tr>
+    <tr><td>로컬 실행</td><td><code>cd backend &amp;&amp; ./gradlew bootRun</code></td><td><code>make backend-dev</code> (uv 필요)</td></tr>
+    <tr><td>테스트</td><td><code>./gradlew test</code></td><td><code>uv run pytest</code></td></tr>
+    <tr><td>DB 스키마</td><td>JPA <code>ddl-auto: update</code></td><td>Alembic 마이그레이션 (<code>uv run alembic revision --autogenerate</code>)</td></tr>
+    <tr><td>헬스 체크 / 문서</td><td><code>/actuator/health</code></td><td><code>/api/health</code>, <code>http://localhost:8080/api/docs</code></td></tr>
+  </table>
+  <table>
+    <tr><th></th><th>React (Vite)</th><th>Next.js</th></tr>
+    <tr><td>로컬 실행</td><td><code>npm run dev</code> → http://localhost:5173</td><td><code>npm run dev</code> → http://localhost:3000 (Docker 와 같은 포트라 둘 중 하나만)</td></tr>
+    <tr><td>화면 파일</td><td><code>src/pages/XxxPage.tsx</code> + <code>App.tsx</code> 라우트</td><td><code>src/app/&lt;경로&gt;/page.tsx</code> (로그인 필요 화면은 <code>src/app/(protected)/</code>)</td></tr>
+    <tr><td>/api 전달</td><td>Vite 프록시, Docker 에서는 nginx</td><td><code>next.config.ts</code> 의 rewrites</td></tr>
+  </table>
+  <p>두 백엔드는 API(경로, JSON 이름, 에러 형식, JWT)가 같고, 두 프론트엔드는 API 호출·로그인·UI 컴포넌트·디자인 토큰 파일 위치가 같습니다. 그래서 <code>/add-domain</code>, <code>/apply-design</code> 같은 명령을 어느 조합에서나 똑같이 씁니다.</p>
+</section>
+
 
 <section id="run">
   <h2><span class="num">5</span>실행과 종료</h2>
@@ -289,9 +343,9 @@ make logs    # 로그
 make down    # 이 프로젝트만 종료 (DB 데이터 유지)
 make clean   # 이 프로젝트의 DB 볼륨과 이미지까지 삭제</code></pre></div>
   <ul>
-    <li>화면 <code>http://localhost:3000</code>, 백엔드 <code>http://localhost:8080/actuator/health</code>, FastAPI 문서 <code>http://localhost:8000/api/py/docs</code></li>
+    <li>화면 <code>http://localhost:3000</code>, 백엔드 <code>http://localhost:8080/actuator/health</code>(Spring) 또는 <code>http://localhost:8080/api/docs</code>(FastAPI 백엔드), FastAPI 보조 서비스 문서 <code>http://localhost:8000/api/py/docs</code>, Jupyter <code>http://localhost:8888</code>(<code>make ml-up</code> 했을 때)</li>
     <li>컨테이너·네트워크·볼륨 이름이 모두 <code>COMPOSE_PROJECT_NAME</code>(프로젝트 이름)으로 시작해 다른 프로젝트와 섞이지 않습니다.</li>
-    <li>여러 프로젝트를 동시에 띄우려면 <code>.env</code> 의 <code>DB_PORT</code>, <code>BACKEND_PORT</code>, <code>FRONTEND_PORT</code>(필요하면 <code>FASTAPI_PORT</code>, <code>OLLAMA_PORT</code>)를 겹치지 않게 바꾸세요. 로컬 <code>npm run dev</code> 를 쓴다면 <code>frontend/.env</code> 의 <code>VITE_API_PROXY_TARGET</code>, <code>VITE_FASTAPI_PROXY_TARGET</code> 도 맞춰 주세요.</li>
+    <li>여러 프로젝트를 동시에 띄우려면 <code>.env</code> 의 <code>DB_PORT</code>, <code>BACKEND_PORT</code>, <code>FRONTEND_PORT</code>(필요하면 <code>FASTAPI_PORT</code>, <code>OLLAMA_PORT</code>, <code>JUPYTER_PORT</code>)를 겹치지 않게 바꾸세요. 로컬 <code>npm run dev</code> 를 쓴다면 <code>frontend/.env</code> 의 <code>VITE_API_PROXY_TARGET</code>, <code>VITE_FASTAPI_PROXY_TARGET</code> 도 맞춰 주세요.</li>
     <li>Spring AI: <code>.env</code> 에 <code>OPENAI_API_KEY</code> 또는 <code>ANTHROPIC_API_KEY</code> 를 넣고 <code>make up</code>. Ollama 는 처음 한 번 <code>make ai-model</code>. 키가 없어도 앱은 뜨고 채팅만 실패 메시지를 보여 줍니다.</li>
   </ul>
   <div class="note"><code>.env</code> 를 <code>.env.example</code> 로 덮어쓰지 마세요. 생성할 때 만든 임의 비밀값이 공개 기본값으로 바뀝니다.</div>
@@ -303,14 +357,15 @@ make clean   # 이 프로젝트의 DB 볼륨과 이미지까지 삭제</code></p
   <table>
     <tr><th>하네스</th><th>하는 일</th></tr>
     <tr><td><code>CLAUDE.md</code></td><td>구성, 명령, 작업 규칙 (검증 후 완료, 기능은 백엔드~화면까지, 에러 형식 하나, 비밀값은 .env 만, Docker 이름 규칙)</td></tr>
-    <tr><td><code>.claude/rules/*.md</code></td><td>backend, frontend, docker, fastapi, spring-ai 별 세부 규칙. 해당 파일을 다룰 때만 적용</td></tr>
+    <tr><td><code>.claude/rules/*.md</code></td><td>backend, frontend, design, docker, fastapi, spring-ai, ai, ml 별 세부 규칙. 해당 파일을 다룰 때만 적용</td></tr>
     <tr><td>파일 수정 훅</td><td>TS/TSX 는 oxlint, Python 은 ruff 로 고친 파일만 즉시 검사</td></tr>
-    <tr><td>종료 훅</td><td>작업을 끝낼 때 바뀐 영역(backend/frontend/fastapi)의 테스트·린트 실행. 실패하면 Claude 가 이어서 고침 (최대 3번)</td></tr>
+    <tr><td>종료 훅</td><td>작업을 끝낼 때 바뀐 영역(backend/frontend/fastapi/ml)의 테스트·린트(디자인 규칙 검사 포함) 실행. 실패하면 Claude 가 이어서 고침 (최대 3번)</td></tr>
     <tr><td>권한</td><td><code>.env</code> 읽기·수정 금지, <code>make clean</code>·<code>git push</code> 등은 실행 전 확인</td></tr>
   </table>
 
   <h3>자주 쓰는 프롬프트</h3>
   <div class="block prompt"><div class="label">도메인 기능 추가</div><pre><code>/add-domain 게시글 (제목 필수 100자, 내용 필수, 작성자=로그인 사용자). 목록은 최신순 페이지네이션, 수정·삭제는 작성자만.</code></pre></div>
+  <div class="block prompt"><div class="label">디자인 적용 (<a href="#design">6-1</a>)</div><pre><code>/apply-design</code></pre></div>
   <div class="block prompt"><div class="label">전체 검증</div><pre><code>/verify</code></pre></div>
   <div class="block prompt"><div class="label">리뷰</div><pre><code>code-reviewer 에이전트로 지금 변경 사항을 리뷰해 줘. 고치지 말고 문제만 심각도 순으로 알려 줘.</code></pre></div>
   <div class="block prompt"><div class="label">기능 하나를 계획부터</div><pre><code>주문 기능을 추가하려고 해. 바로 코드 쓰지 말고 먼저 계획을 세워 줘:
@@ -324,6 +379,97 @@ make clean   # 이 프로젝트의 DB 볼륨과 이미지까지 삭제</code></p
 .claude/rules/spring-ai.md 를 따르고, 테스트는 ChatModel 을 목으로 바꿔서 작성해 줘.</code></pre></div>
   <div class="note">검증 훅을 잠시 끄려면 <code>HARNESS_VERIFY=off claude</code> 로 실행합니다.</div>
 </section>
+
+<section id="design">
+  <h2><span class="num sub">6-1</span>디자인 바꾸기 (Google Stitch, 그 밖의 사이트)</h2>
+  <p class="lead">생성된 프로젝트의 화면은 색을 직접 쓰지 않고 <b>디자인 토큰</b>만 씁니다. 그래서 토큰 파일 하나를 바꾸면 전체 화면이 바뀌고, Stitch 같은 외부 디자인도 같은 구조로 들어옵니다.</p>
+
+  <h3>구조 (세 층)</h3>
+  <table>
+    <tr><th>층</th><th>파일</th><th>바꾸면</th></tr>
+    <tr><td>토큰</td><td><code>frontend/src/styles/theme.css</code></td><td>색(<code>--primary</code>, <code>--background</code> …), 글꼴, 모서리, 그림자가 모든 화면에서 바뀜</td></tr>
+    <tr><td>UI 컴포넌트</td><td><code>frontend/src/components/ui/</code> (Button, Card, Input, FormField, Alert, <code>styles.ts</code>)</td><td>버튼·카드·입력칸 모양이 모든 화면에서 바뀜</td></tr>
+    <tr><td>화면</td><td>페이지, 헤더·푸터</td><td>배치와 구성</td></tr>
+    <tr><td>원본</td><td><code>design/</code> (stitch, theme, references)</td><td>화면에 직접 쓰이지 않음. <code>/apply-design</code> 이 읽어서 위 세 층에 옮김</td></tr>
+  </table>
+  <p>화면 코드에서는 <code>bg-primary</code>, <code>text-muted-foreground</code>, <code>border-border</code>, <code>rounded-card</code> 같은 토큰 클래스만 씁니다. <code>bg-blue-500</code>, <code>#3b82f6</code> 같은 직접 색 지정은 <code>npm run lint</code> 가 찾아서 막고, Claude 의 종료 훅도 이 검사를 돌립니다. 토큰 이름은 shadcn/ui 와 같아서 그쪽 테마를 거의 그대로 가져올 수 있습니다.</p>
+
+  <h3>Google Stitch 디자인 적용 (추천 순서)</h3>
+  <ol class="steps">
+    <li><a href="https://stitch.withgoogle.com">stitch.withgoogle.com</a> 에서 화면을 만듭니다. 프로젝트에 있는 화면 이름(랜딩, 로그인, 회원가입, 대시보드)으로 만들고, 한 프로젝트 안에서 같은 스타일로 만들면 토큰이 깔끔하게 나옵니다.</li>
+    <li>화면마다 내보내기(Export)에서 <b>코드(HTML)</b> 와 <b>화면 이미지(PNG)</b> 를 받습니다. 여러 화면을 zip 으로 받았다면 풀어 둡니다. (메뉴 이름은 Stitch 업데이트에 따라 조금 다를 수 있습니다.)</li>
+    <li>생성된 프로젝트의 <code>design/stitch/</code> 아래에 화면별 폴더로 넣습니다.
+      <div class="block"><div class="label">폴더 예시</div><pre><code>design/stitch/landing/code.html
+design/stitch/landing/screen.png
+design/stitch/login/code.html
+design/stitch/login/screen.png
+design/stitch/dashboard/code.html</code></pre></div></li>
+    <li>그 프로젝트 폴더에서 Claude Code 를 열고 실행합니다.</li>
+  </ol>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트 (전체 적용)</div><pre><code>/apply-design</code></pre></div>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트 (먼저 색과 글꼴만)</div><pre><code>/apply-design 색과 글꼴만</code></pre></div>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트 (화면 하나씩)</div><pre><code>/apply-design design/stitch/landing</code></pre></div>
+  <p><code>/apply-design</code> 은 Stitch HTML 안의 <code>tailwind.config</code>(색, 글꼴, 모서리)를 먼저 <code>theme.css</code> 토큰으로 옮기고, 반복되는 버튼·카드 모양을 UI 컴포넌트에, 화면 구조를 각 페이지에 옮깁니다. 로그인·회원가입·API 호출 같은 동작 코드는 그대로 두고, 끝나면 린트·빌드를 돌린 뒤 "원본 값 → 토큰" 대응표를 보고합니다. 적용 후 <code>npm run dev</code>(또는 <code>make up</code>)로 화면을 열어 이미지와 비교하고, 다른 점은 말로 고쳐 달라고 하면 됩니다.</p>
+  <div class="note">처음에는 <b>"색과 글꼴만" → 화면 하나 → 나머지 화면</b> 순서로 나눠 적용하면 확인하기 쉽고, 마음에 들지 않을 때 되돌리기도 쉽습니다. 단계마다 커밋하세요.</div>
+
+  <h3>Stitch 를 쓰지 않을 때 추천 사이트</h3>
+  <table>
+    <tr><th>하고 싶은 것</th><th>추천</th><th>프로젝트에 넣는 곳</th></tr>
+    <tr><td>색·글꼴·모서리 테마만 (가장 쉬움)</td><td><a href="https://tweakcn.com">tweakcn</a>: shadcn 테마 편집기. 변수 이름이 이 프로젝트 토큰과 같아 거의 그대로 들어감</td><td>내보낸 CSS 를 <code>design/theme/theme.css</code> 로 저장</td></tr>
+    <tr><td>어울리는 색 조합 찾기</td><td><a href="https://www.realtimecolors.com">Realtime Colors</a>: 실제 화면에 색을 입혀 보며 고르고 CSS 로 내보내기</td><td><code>design/theme/</code></td></tr>
+    <tr><td>문장으로 화면 만들기 (Stitch 대신 AI)</td><td><a href="https://v0.app">v0</a>: React + Tailwind 코드로 화면 생성</td><td>코드를 <code>design/references/&lt;화면&gt;.tsx</code></td></tr>
+    <tr><td>랜딩·로그인 블록 고르기</td><td><a href="https://www.hyperui.dev">HyperUI</a>, <a href="https://flowbite.com/blocks">Flowbite Blocks</a>: 무료 Tailwind 블록</td><td>코드를 <code>design/references/&lt;화면&gt;.html</code></td></tr>
+    <tr><td>디자이너 시안</td><td>Figma (Community 파일 포함)</td><td>화면 캡처를 <code>design/references/</code>, 색·글꼴 값은 프롬프트에</td></tr>
+    <tr><td>한글 글꼴</td><td><a href="https://github.com/orioncactus/pretendard">Pretendard</a>, <a href="https://noonnu.cc">눈누</a>, <a href="https://fonts.google.com">Google Fonts</a></td><td>글꼴 이름을 프롬프트에</td></tr>
+  </table>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트 (tweakcn 테마)</div><pre><code>design/theme/theme.css 는 tweakcn 에서 받은 테마야. /apply-design 으로 토큰에 적용하고 다크 모드 값도 옮겨줘.</code></pre></div>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트 (참고 이미지)</div><pre><code>design/references/ 의 캡처처럼 차분한 남색 계열, 모서리 크게, 그림자 약하게 바꾸고 싶어.
+/apply-design 으로 토큰과 UI 컴포넌트만 먼저 바꾸고, 정한 값을 표로 보여줘. 글꼴은 Pretendard.</code></pre></div>
+
+  <h3>직접 조금 바꾸기</h3>
+  <ul>
+    <li>주 색: <code>frontend/src/styles/theme.css</code> 의 <code>--primary</code> (hex 도 됨: <code>--primary: #0f766e;</code>). 위에 올라가는 글자색은 <code>--primary-foreground</code>.</li>
+    <li>어두운 테마: 같은 파일의 <code>.dark { ... }</code> 값. <code>&lt;html class="dark"&gt;</code> 로 켭니다.</li>
+    <li>버튼 둥글기·크기: <code>--control-radius</code> 또는 <code>components/ui/styles.ts</code> 의 <code>buttonClass</code>.</li>
+    <li>서비스 이름·소개 문구: <code>frontend/src/config/site.ts</code>.</li>
+  </ul>
+</section>
+
+<section id="ai">
+  <h2><span class="num sub">6-2</span>AI·딥러닝 세팅</h2>
+  <p class="lead"><code>/ai-setup</code> 은 FastAPI 백엔드에 두 가지를 얹습니다. 따로 쓰려면 다른 조합에 <code>--addons llm</code> 또는 <code>--addons ml</code> 을 붙입니다.</p>
+  <table>
+    <tr><th>구성</th><th>들어가는 것</th></tr>
+    <tr><td>AI 채팅 (<code>llm</code>)</td><td><code>/api/ai/chat</code> API(사용자별 최근 대화 기억)와 <code>/chat</code> 화면. 제공자 SDK 없이 HTTP 로 불러서 <code>AI_PROVIDER</code> 하나로 OpenAI·Anthropic·Ollama(로컬, 무료)를 바꿈. OpenAI 호환 서버(Groq, vLLM, LM Studio 등)는 <code>OPENAI_BASE_URL</code> 만 바꾸면 됨</td></tr>
+    <tr><td>딥러닝 작업 공간 (<code>ml</code>)</td><td><code>ml/</code> 폴더: PyTorch, 예제 데이터·모델·학습 코드(<code>src/ml/</code>), 노트북, 테스트. Jupyter Lab 컨테이너는 따로 켜고(<code>make ml-up</code>), GPU(CUDA) 빌드 선택 가능</td></tr>
+  </table>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트</div><pre><code>/ai-setup my-lab anthropic</code></pre></div>
+  <div class="block prompt"><div class="label">Claude Code 프롬프트 (NVIDIA GPU, 로컬 모델, Next.js)</div><pre><code>/ai-setup my-lab 로컬 모델(ollama)로, GPU(cuda) 쓰고, 화면은 Next.js 로</code></pre></div>
+
+  <h3>처음 실행</h3>
+  <div class="block"><div class="label">터미널 (생성된 프로젝트 폴더)</div><pre><code># 1) .env 에 키 넣기: OPENAI_API_KEY 또는 ANTHROPIC_API_KEY (Ollama 는 키 없음)
+make up                 # 웹 서비스 전체 → http://localhost:3000 에서 로그인 후 "AI 채팅"
+make ai-model           # Ollama 를 골랐다면 처음 한 번 모델 내려받기
+
+# 2) 딥러닝
+make ml-train           # 예제 모델 학습 (처음에는 PyTorch 설치로 오래 걸림), ml/models/digits.pt 저장
+make ml-up              # Jupyter Lab → http://localhost:8888/lab?token=&lt;.env 의 JUPYTER_TOKEN&gt;
+make ml-down            # Jupyter 만 종료 (make down 은 전체를 함께 내림)</code></pre></div>
+  <ul>
+    <li>Windows 에서 make 가 없으면: <code>docker compose --profile ml up -d --build jupyter</code>, <code>cd ml; uv run python -m ml.train</code>.</li>
+    <li>GPU: <code>--ml-device cuda</code> 로 만들면 CUDA 12.8 빌드 PyTorch 를 받고 Jupyter 컨테이너에 GPU 를 연결합니다. 호스트에 NVIDIA 드라이버와 NVIDIA Container Toolkit(Windows 는 Docker Desktop + WSL2)이 필요합니다. Apple Silicon 은 자동으로 MPS 를 씁니다. <code>cd ml &amp;&amp; uv run python -m ml.device</code> 로 확인합니다.</li>
+    <li>데이터는 <code>ml/data/</code>, 모델 파일은 <code>ml/models/</code> 에 두며 git 에 올라가지 않습니다. 처음 생긴 <code>ml/uv.lock</code> 은 커밋하세요.</li>
+  </ul>
+
+  <h3>AI 기능 프롬프트 예시</h3>
+  <div class="block prompt"><div class="label">LLM 기능 추가 (요약)</div><pre><code>게시글 내용을 3줄로 요약하는 POST /api/ai/summarize 를 추가해 줘. .claude/rules/ai.md 대로 ChatModelDep 를 쓰고,
+테스트는 가짜 모델로 작성해 줘. 게시글 상세 화면에 "요약" 버튼도 붙여 줘.</code></pre></div>
+  <div class="block prompt"><div class="label">딥러닝 실험</div><pre><code>ml/ 에 리뷰 감성 분류 실험을 추가해 줘. 데이터는 ml/data/reviews.csv (text, label) 이고,
+.claude/rules/ml.md 대로 data_reviews.py, model_reviews.py, train_reviews.py 와 테스트, 결과를 보는 노트북을 만들어 줘.</code></pre></div>
+  <div class="block prompt"><div class="label">학습한 모델을 서비스로</div><pre><code>ml/models/digits.pt 를 ONNX 로 내보내는 스크립트를 만들고, 백엔드에 onnxruntime 으로 추론하는 POST /api/ml/predict 를 추가해 줘.
+백엔드에 PyTorch 는 넣지 말고, 테스트와 대시보드 카드까지 만들어 줘.</code></pre></div>
+</section>
+
 
 <section id="real-project">
   <h2><span class="num">7</span>실제 프로젝트로 키우기</h2>
@@ -362,7 +508,7 @@ make up</code></pre></div>
   <h3>운영 배포 전에 확인할 것</h3>
   <ul>
     <li><code>JWT_SECRET</code> 은 운영 전용 값으로 (서버의 환경 변수나 비밀 저장소에 보관)</li>
-    <li>DB 스키마: <code>JPA_DDL_AUTO=update</code> 대신 Flyway 같은 마이그레이션 도입 후 <code>validate</code></li>
+    <li>DB 스키마: Spring 은 <code>JPA_DDL_AUTO=update</code> 대신 Flyway 같은 마이그레이션 도입 후 <code>validate</code> (FastAPI 백엔드는 이미 Alembic)</li>
     <li>HTTPS 앞단(리버스 프록시나 로드밸런서)과 실제 도메인으로 <code>CORS_ALLOWED_ORIGINS</code> 지정</li>
     <li>액세스 토큰만 있고 리프레시 토큰은 없습니다. 필요하면 기능으로 추가</li>
   </ul>
@@ -448,6 +594,10 @@ FRONTEND_PORT 를 바꾼 두 번째 프로젝트를 동시에 띄워 서로 영�
 backend 에 spring-boot-starter-data-redis 와 간단한 캐시 예시, .env.example 변수, README·CLAUDE.md 절, .claude/rules/redis.md.
 기존 @addon slot 을 쓰고, 필요하면 templates/s-r 에 slot 을 추가해. 그다음 /s-r-setup 계열에서 --addons redis 로 쓸 수 있게 하고
 scripts/verify-templates.sh 에 조합을 추가해서 통과시켜 줘.</code></pre></div>
+  <div class="block prompt"><div class="label">새 스택 추가 (예: Vue)</div><pre><code>templates/stacks/frontend-vue 스택을 추가해 줘. templates/stacks/frontend-next 를 본보기로,
+공용 경로(src/api/client.ts, src/auth, src/components/ui, src/styles/theme.css, src/config/site.ts, scripts/check-design.mjs)와 화면을 같게 맞추고,
+기본 템플릿의 @block:frontend-* 를 모두 채우고, 확장 모듈의 {frontend} 조각(nav-links, dashboard-imports 등)도 vue 용으로 추가해 줘.
+verify-templates.sh 에 조합을 넣어 통과시켜 줘.</code></pre></div>
   <div class="block prompt"><div class="label">버전 올리기</div><pre><code>Spring Boot 를 최신 안정 버전으로 올려 줘. Spring AI 도 그 Boot 버전으로 빌드된 버전으로 함께 올리고
 (Maven Central 의 spring-ai 모듈 POM 에서 spring-boot 버전을 확인), 규칙 문서와 README 의 버전 표도 고친 뒤 verify-templates.sh 전체를 돌려 줘.</code></pre></div>
   <div class="block prompt"><div class="label">규칙 바꾸기</div><pre><code>앞으로 모든 생성 프로젝트의 백엔드는 Flyway 마이그레이션을 쓰도록 바꿔 줘. 템플릿 코드, ddl-auto 설정, .claude/rules/backend.md,
@@ -468,6 +618,10 @@ scripts/verify-templates.sh 에 조합을 추가해서 통과시켜 줘.</code><
     <tr><td>PowerShell 에서 <code>npm.ps1</code> 을 로드할 수 없음</td><td>스크립트 실행 정책 때문. <code>npm.cmd install</code> 로 실행하거나 <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> 후 다시 시도</td></tr>
     <tr><td>VS Code 의 Claude 가 프로젝트 규칙을 모름</td><td>dev-harness 나 상위 폴더를 연 상태. File → Open Folder 로 생성된 프로젝트 폴더 자체를 열기</td></tr>
     <tr><td><code>./gradlew</code> 가 Java 버전 오류</td><td>Gradle 실행에는 JDK 17 이상 필요. <code>java -version</code> 확인</td></tr>
+    <tr><td><code>npm run lint</code> 가 "디자인 토큰 대신 색을 직접 쓴 곳"</td><td>화면에 <code>bg-blue-500</code> 같은 색을 직접 씀. 알려 준 줄을 토큰 클래스로 바꾸기 (<a href="#design">6-1</a>). 꼭 필요하면 그 줄 끝에 <code>// design-allow</code></td></tr>
+    <tr><td><code>make ml-train</code> 이 오래 걸림</td><td>처음 한 번 PyTorch(수백 MB, CUDA 는 수 GB)를 받는 중. 이후에는 빠름</td></tr>
+    <tr><td>Jupyter 에서 파일 저장이 안 됨 (Linux)</td><td>컨테이너 사용자 UID(기본 1000)와 호스트 사용자가 다름. <code>ml/Dockerfile</code> 의 <code>UID</code> 를 <code>id -u</code> 값으로</td></tr>
+    <tr><td>GPU 를 못 찾음 (<code>cpu</code> 로 나옴)</td><td><code>--ml-device cuda</code> 로 만들었는지(<code>ml/pyproject.toml</code> 의 <code>cu128</code>), <code>nvidia-smi</code>, NVIDIA Container Toolkit 설치 확인</td></tr>
     <tr><td>로컬 <code>./gradlew bootRun</code> 이 DB 에 못 붙음</td><td><code>make db</code> 로 DB 먼저 실행. <code>DB_PORT</code> 를 바꿨다면 <code>DB_URL</code> 도 지정</td></tr>
   </table>
 </section>

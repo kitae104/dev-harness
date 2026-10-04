@@ -29,3 +29,15 @@ paths:
 
 ## DB
 - 지금은 `ddl-auto: update` 입니다. 운영 배포 전에는 Flyway 를 도입하고 `validate` 로 바꿉니다 (도입 시 이 문서를 갱신).
+
+## 새 도메인 추가
+
+`backend/src/main/java/<패키지>/<도메인>/` 에 아래 순서로 만듭니다.
+
+1. `Xxx.java` 엔티티 (+ 작성자면 `@ManyToOne(fetch = LAZY) User owner`)
+2. `XxxRepository.java` (`JpaRepository<Xxx, Long>`)
+3. `dto/XxxCreateRequest.java`, `dto/XxxUpdateRequest.java` (검증 + 한국어 메시지), `dto/XxxResponse.java` (`from`)
+4. `XxxService.java` (없으면 `ApiException(NOT_FOUND, ...)`, 권한 없으면 `FORBIDDEN`)
+5. `XxxController.java`
+6. 테스트 `backend/src/test/java/<패키지>/<도메인>/XxxControllerTest.java`: 생성→조회→수정→삭제 흐름, 401, 400, 403, 404
+7. `cd backend && ./gradlew test` 통과 확인

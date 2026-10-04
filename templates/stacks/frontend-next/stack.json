@@ -1,0 +1,15 @@
+{
+  "description": "Next.js 16 프론트엔드 (App Router, React 19, Tailwind CSS 4). React(Vite) 프론트엔드와 같은 화면·API 사용",
+  "blocks": {
+    "frontend-service": "blocks/compose-service.yml",
+    "frontend-ci": "blocks/ci.yml",
+    "frontend-gitignore": "blocks/gitignore",
+    "frontend-claude-row": "blocks/claude-row.md",
+    "frontend-readme-row": "blocks/readme-row.md",
+    "frontend-readme-url": "blocks/readme-url.md",
+    "frontend-readme-dev": "blocks/readme-dev.sh",
+    "frontend-readme-tree": "blocks/readme-tree.txt",
+    "frontend-readme-howto": "blocks/readme-howto.md",
+    "frontend-readme-versions": "blocks/readme-versions.md"
+  }
+}
