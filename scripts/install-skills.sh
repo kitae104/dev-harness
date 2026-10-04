@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dev-harness 스킬(/s-r-setup, /s-r-f-setup, /s-r-ai-setup)을 어느 폴더에서나 쓸 수 있게
+# dev-harness 생성 스킬(/s-r-setup, /next-setup, /f-r-setup, /ai-setup 등)을 어느 폴더에서나 쓸 수 있게
 # ~/.claude/skills 에 심볼릭 링크로 설치합니다. 저장소를 git pull 하면 스킬도 함께 갱신됩니다.
 set -euo pipefail
 
@@ -7,7 +7,8 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 DEST="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills"
 mkdir -p "$DEST"
 
-for dir in "$REPO"/.claude/skills/s-r-*/; do
+for dir in "$REPO"/.claude/skills/*/; do
+  [ -f "$dir/generate.mjs" ] || continue  # 프로젝트 생성 스킬만
   name="$(basename "$dir")"
   target="$DEST/$name"
   if [ -e "$target" ] && [ ! -L "$target" ]; then

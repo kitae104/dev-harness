@@ -1,0 +1,15 @@
+  # Jupyter Lab (딥러닝 작업 공간). make up 으로는 뜨지 않고 make ml-up 으로 따로 켭니다 (profiles).
+  jupyter:
+    build: ./ml
+    image: ${COMPOSE_PROJECT_NAME:-app}-jupyter
+    container_name: ${COMPOSE_PROJECT_NAME:-app}-jupyter
+    profiles: ["ml"]
+    environment:
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:?.env 에 JUPYTER_TOKEN 을 설정하세요}
+    ports:
+      - "127.0.0.1:${JUPYTER_PORT:-8888}:8888"
+    volumes:
+      - ./ml:/workspace
+    networks:
+      - app-net
+    restart: unless-stopped

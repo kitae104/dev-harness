@@ -1,1 +1,1 @@
-                <NavLink href="/chat">AI 채팅</NavLink>
+              <NavLink href="/chat">AI 채팅</NavLink>

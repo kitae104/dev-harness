@@ -1,0 +1,56 @@
+'use client'
+
+import Link from 'next/link'
+import { useAuth } from '@/auth/AuthContext.tsx'
+import Card from '@/components/ui/Card.tsx'
+import { buttonClass } from '@/components/ui/styles.ts'
+import { site } from '@/config/site.ts'
+
+// 랜딩 화면의 기능 소개. 서비스에 맞게 바꾸세요.
+const features = [
+  // @block:landing-backend
+  { title: 'Spring Boot', description: 'Java 21 기반 REST API와 Spring Security JWT 인증' },
+  // @endblock
+  { title: 'Next.js + Tailwind', description: 'Next.js App Router, TypeScript, Tailwind CSS로 구성된 프론트엔드' },
+  { title: 'Docker Compose', description: 'PostgreSQL, 백엔드, 프론트엔드를 한 번에 실행' },
+  // @addon:landing-features
+]
+
+export default function LandingPage() {
+  const { user } = useAuth()
+
+  return (
+    <div>
+      <section className="mx-auto max-w-6xl px-4 py-24 text-center">
+        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+          새 프로젝트를 <span className="text-primary">바로 시작</span>하세요
+        </h1>
+        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">{site.description}</p>
+        <div className="mt-10 flex justify-center gap-4">
+          {user ? (
+            <Link href="/dashboard" className={buttonClass({ size: 'lg' })}>
+              대시보드로 이동
+            </Link>
+          ) : (
+            <>
+              <Link href="/signup" className={buttonClass({ size: 'lg' })}>
+                시작하기
+              </Link>
+              <Link href="/login" className={buttonClass({ variant: 'outline', size: 'lg' })}>
+                로그인
+              </Link>
+            </>
+          )}
+        </div>
+      </section>
+      <section className="mx-auto grid max-w-6xl gap-6 px-4 pb-24 sm:grid-cols-3">
+        {features.map((f) => (
+          <Card key={f.title}>
+            <h2 className="font-semibold">{f.title}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{f.description}</p>
+          </Card>
+        ))}
+      </section>
+    </div>
+  )
+}

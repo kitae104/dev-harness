@@ -1,0 +1,4 @@
+
+# 딥러닝 작업 공간 (make ml-up → http://localhost:<JUPYTER_PORT>/lab?token=<JUPYTER_TOKEN>)
+JUPYTER_PORT=8888
+JUPYTER_TOKEN=change-me

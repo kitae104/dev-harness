@@ -1,0 +1,1 @@
+- 프론트엔드: http://localhost:3000 (Next.js 서버가 `/api` 를 백엔드로 프록시, `next.config.ts` 의 rewrites)

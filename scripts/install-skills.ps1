@@ -6,7 +6,7 @@ $configDir = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-
 $dest = Join-Path $configDir 'skills'
 New-Item -ItemType Directory -Force -Path $dest | Out-Null
 
-Get-ChildItem -Directory (Join-Path $repo '.claude\skills') -Filter 's-r-*' | ForEach-Object {
+Get-ChildItem -Directory (Join-Path $repo '.claude\skills') | Where-Object { Test-Path (Join-Path $_.FullName 'generate.mjs') } | ForEach-Object {
     $target = Join-Path $dest $_.Name
     if (Test-Path $target) {
         $item = Get-Item $target -Force

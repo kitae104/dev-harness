@@ -1,0 +1,1 @@
+- 프론트엔드: API 호출은 `src/api/<도메인>.ts` 에 두고 `api()` 래퍼를 사용합니다 (토큰 자동 첨부). 로그인이 필요한 화면은 `src/app/(protected)/<경로>/page.tsx` 에 두고(`'use client'`), 메뉴는 `src/components/SiteHeader.tsx` 에 `NavLink` 로 추가합니다.

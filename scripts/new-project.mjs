@@ -279,9 +279,16 @@ export function injectSlots(text, slots, usedSlots) {
   if (!text.includes('@addon:')) return text
   const lines = text.split('\n')
   const out = []
+  let dropBlank = false
   for (const line of lines) {
     const m = line.match(MARKER)
     if (!m) {
+      // 지운 표시 줄의 앞뒤가 모두 빈 줄이면 빈 줄 하나만 남깁니다 (원래 있던 빈 줄 개수는 그대로).
+      if (dropBlank && line.trim() === '') {
+        dropBlank = false
+        continue
+      }
+      dropBlank = false
       out.push(line)
       continue
     }
@@ -291,10 +298,12 @@ export function injectSlots(text, slots, usedSlots) {
       // 여러 줄짜리 조각(서비스 블록, 문서 절 등)은 빈 줄로 구분합니다.
       const sep = pieces.some((piece) => piece.includes('\n')) ? '\n\n' : '\n'
       out.push(...pieces.join(sep).split('\n'))
+    } else {
+      dropBlank = out.length > 0 && out[out.length - 1].trim() === ''
     }
   }
-  // 표시 줄이 빠지면서 생긴 연속 빈 줄과 파일 끝 빈 줄 정리
-  return out.join('\n').replace(/\n{3,}/g, '\n\n').replace(/\n{2,}$/, '\n')
+  // 파일 끝 빈 줄 정리
+  return out.join('\n').replace(/\n{2,}$/, '\n')
 }
 
 // 자리표시자 → 새 이름. 파일 경로(템플릿 기준 상대 경로)에 따라 적용 규칙이 다릅니다.
@@ -333,7 +342,7 @@ export function renameContent(rel, text, n) {
     // 파이썬 프로젝트 이름: app-fastapi, app-backend, app-ml
     s = s.replace(/^name = "app-(fastapi|backend|ml)"$/m, `name = "${n.name}-$1"`)
   } else if (p === 'backend/app/core/config.py') {
-    s = s.replace('postgresql+psycopg://app:app@localhost:5432/app', `postgresql+psycopg://${n.snake}:${n.snake}@localhost:5432/${n.snake}`)
+    s = s.replace(/^(\s+db_(?:name|username|password): str = )"app"$/gm, `$1"${n.snake}"`)
   } else if (p === 'frontend/package.json' || p === 'frontend/package-lock.json') {
     s = s.replace(/"name": "frontend"/g, `"name": "${n.name}-frontend"`)
   }

@@ -1,5 +1,7 @@
 # 이 프로젝트의 컨테이너만 묶어서 관리합니다. (.env 의 COMPOSE_PROJECT_NAME 기준)
 COMPOSE = docker compose
+# 내릴 때는 따로 켜는 서비스(profiles, 예: jupyter)까지 함께 내립니다.
+COMPOSE_ALL = $(COMPOSE) --profile "*"
 
 .PHONY: up down restart logs ps db clean
 
@@ -7,7 +9,7 @@ up:        ## 전체 스택 빌드 후 백그라운드 실행
 	$(COMPOSE) up -d --build
 
 down:      ## 전체 스택 중지 및 컨테이너·네트워크 제거 (DB 데이터 유지)
-	$(COMPOSE) down
+	$(COMPOSE_ALL) down
 
 restart: down up
 
@@ -21,6 +23,6 @@ db:        ## 로컬 개발용으로 DB 만 실행
 	$(COMPOSE) up -d db
 
 clean:     ## 중지 + DB 볼륨과 이미지까지 삭제 (데이터 초기화)
-	$(COMPOSE) down -v --rmi local
+	$(COMPOSE_ALL) down -v --rmi local
 
 # @addon:make-targets

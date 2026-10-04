@@ -1,0 +1,2 @@
+  ollama-data:
+    name: ${COMPOSE_PROJECT_NAME:-app}-ollama-data

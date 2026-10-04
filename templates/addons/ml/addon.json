@@ -1,0 +1,24 @@
+{
+  "description": "딥러닝 작업 공간 ml/ (PyTorch, Jupyter Lab 컨테이너, 예제 학습 코드). 어느 백엔드와도 함께 씀",
+  "options": {
+    "mlDevice": {
+      "choices": [
+        "cpu",
+        "cuda"
+      ],
+      "default": "cpu",
+      "description": "PyTorch 빌드. cuda 는 NVIDIA GPU(CUDA 12.8)용이고 Jupyter 컨테이너에 GPU 를 연결합니다."
+    }
+  },
+  "slots": {
+    "torch-index": "slots/torch-index.{mlDevice}.toml",
+    "compose-services": "slots/compose-services.{mlDevice}.yml",
+    "env": "slots/env",
+    "make-targets": "slots/make-targets.mk",
+    "gitignore": "slots/gitignore",
+    "ci-jobs": "slots/ci-jobs.yml",
+    "landing-features": "slots/landing-features.tsx",
+    "readme": "slots/readme.md",
+    "claude-md": "slots/claude-md.md"
+  }
+}
