@@ -40,7 +40,7 @@ const RANDOM_SECRETS = { JWT_SECRET: () => randomBytes(48).toString('base64'), J
 // 복사하지 않을 경로 (어느 깊이에서든 이름이 일치하면 제외)
 const SKIP_NAMES = new Set([
   'node_modules', 'dist', 'build', '.gradle', 'bin', 'out', '.venv', '__pycache__',
-  '.pytest_cache', '.ruff_cache', '.idea', '.vscode', '.DS_Store', 'Thumbs.db', '.env', '.verify-cache',
+  '.pytest_cache', '.ruff_cache', '.next', 'next-env.d.ts', '.idea', '.vscode', '.DS_Store', 'Thumbs.db', '.env', '.verify-cache',
   'settings.local.json', // Claude Code 개인 설정
 ])
 // 템플릿 폴더에서 직접 실행·빌드해 본 흔적 (.env.local, *.tsbuildinfo, 로그 등)
