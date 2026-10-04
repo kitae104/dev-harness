@@ -1,0 +1,1 @@
+- 백엔드: 기능별 폴더(`app/<도메인>/`)에 models → schemas → service → router 를 두고 `app/main.py` 에 라우터를 등록합니다. 모델을 바꾸면 `uv run alembic revision --autogenerate -m "..."` 로 마이그레이션을 만듭니다.

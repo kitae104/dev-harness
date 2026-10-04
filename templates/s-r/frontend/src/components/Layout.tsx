@@ -1,8 +1,12 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext.tsx'
+import { site } from '../config/site.ts'
+import { cn } from '../lib/cn.ts'
+import Button from './ui/Button.tsx'
+import { buttonClass } from './ui/styles.ts'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
-  `text-sm font-medium ${isActive ? 'text-indigo-600' : 'text-slate-600 hover:text-slate-900'}`
+  cn('text-sm font-medium', isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground')
 
 const YEAR = new Date().getFullYear()
 
@@ -16,11 +20,11 @@ export default function Layout() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <header className="border-b border-border bg-card">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-          <Link to="/" className="text-lg font-bold text-indigo-600">
-            App
+          <Link to="/" className="font-heading text-lg font-bold text-primary">
+            {site.name}
           </Link>
           <nav className="flex items-center gap-6">
             {user ? (
@@ -29,23 +33,16 @@ export default function Layout() {
                   대시보드
                 </NavLink>
                 {/* @addon:nav-links */}
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-100"
-                >
+                <Button variant="outline" size="sm" onClick={handleLogout}>
                   로그아웃
-                </button>
+                </Button>
               </>
             ) : (
               <>
                 <NavLink to="/login" className={navClass}>
                   로그인
                 </NavLink>
-                <Link
-                  to="/signup"
-                  className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500"
-                >
+                <Link to="/signup" className={buttonClass({ size: 'sm' })}>
                   회원가입
                 </Link>
               </>
@@ -56,8 +53,8 @@ export default function Layout() {
       <main className="flex-1">
         <Outlet />
       </main>
-      <footer className="border-t border-slate-200 py-6 text-center text-xs text-slate-500">
-        © {YEAR} App
+      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
+        © {YEAR} {site.name}
       </footer>
     </div>
   )

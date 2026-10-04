@@ -1,5 +1,12 @@
 {
   "description": "Spring AI 2.0.1 (Spring Boot 4.1.1 기준 빌드) ChatClient 기반 /api/ai/chat 과 채팅 화면",
+  "requires": {
+    "backend": "spring"
+  },
+  "requiresHint": "FastAPI 백엔드에서는 llm 확장 모듈을 쓰세요.",
+  "includes": [
+    "chat-ui"
+  ],
   "options": {
     "aiProvider": {
       "choices": [
@@ -22,12 +29,8 @@
     "compose-volumes": "slots/compose-volumes.{aiProvider}.yml",
     "env": "slots/env.{aiProvider}",
     "make-targets": "slots/make-targets.{aiProvider}.mk",
-    "route-imports": "slots/route-imports.tsx",
-    "protected-routes": "slots/protected-routes.tsx",
-    "nav-links": "slots/nav-links.tsx",
     "landing-features": "slots/landing-features.tsx",
     "readme": "slots/readme.md",
-    "claude-md": "slots/claude-md.md",
-    "nginx-locations": "slots/nginx-locations.conf"
+    "claude-md": "slots/claude-md.md"
   }
 }

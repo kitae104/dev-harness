@@ -1,0 +1,1 @@
+- FastAPI 0.142, Python 3.13, SQLAlchemy 2.1, Alembic 1.20

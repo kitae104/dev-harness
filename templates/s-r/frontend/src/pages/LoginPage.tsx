@@ -2,7 +2,11 @@ import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
-import FormField from '../components/FormField.tsx'
+import Alert from '../components/ui/Alert.tsx'
+import Button from '../components/ui/Button.tsx'
+import Card from '../components/ui/Card.tsx'
+import FormField from '../components/ui/FormField.tsx'
+import { linkClass } from '../components/ui/styles.ts'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -31,37 +35,35 @@ export default function LoginPage() {
   return (
     <div className="mx-auto max-w-md px-4 py-16">
       <h1 className="text-2xl font-bold">로그인</h1>
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <FormField
-          label="이메일"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <FormField
-          label="비밀번호"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-md bg-indigo-600 py-2.5 font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
-        >
-          {submitting ? '로그인 중...' : '로그인'}
-        </button>
-      </form>
-      <p className="mt-4 text-center text-sm text-slate-600">
+      <Card className="mt-8">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <FormField
+            label="이메일"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+          <FormField
+            label="비밀번호"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
+          {error && <Alert>{error}</Alert>}
+          <Button type="submit" disabled={submitting} block>
+            {submitting ? '로그인 중...' : '로그인'}
+          </Button>
+        </form>
+      </Card>
+      <p className="mt-4 text-center text-sm text-muted-foreground">
         계정이 없으신가요?{' '}
-        <Link to="/signup" className="font-medium text-indigo-600 hover:underline">
+        <Link to="/signup" className={linkClass}>
           회원가입
         </Link>
       </p>

@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 
-// 개발 서버에서는 /api 요청을 Spring Boot 백엔드로 프록시합니다.
+// 개발 서버에서는 /api 요청을 백엔드(기본 http://localhost:8080)로 프록시합니다.
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {

@@ -1,7 +1,7 @@
 // Stop 훅: Claude 가 작업을 끝내려 할 때, git 기준으로 바뀐 영역만 검증합니다.
-//   backend/  → ./gradlew test
-//   frontend/ → npm run lint + tsc -b
-//   fastapi/  → ruff check, ruff format --check, pytest
+//   backend/  → Spring: ./gradlew test · FastAPI: ruff check, ruff format --check, pytest
+//   frontend/ → npm run lint (oxlint + 디자인 규칙) + 타입 검사
+//   fastapi/, ml/ → ruff check, ruff format --check, pytest
 // 실패하면 exit 2 로 끝내기를 막고 실패 내용을 Claude 에게 돌려줍니다.
 // 같은 변경으로 이미 통과했다면 다시 돌리지 않습니다 (.claude/.verify-cache).
 // 끄기: HARNESS_VERIFY=off 환경 변수.
@@ -31,29 +31,38 @@ for (let i = 0; i < entries.length; i++) {
   if (entry[0] === 'R' || entry[0] === 'C') changed.push(entries[++i])
 }
 
+// 파이썬 프로젝트(uv) 공통 검사
+const pythonChecks = (cwd) => [
+  { name: 'ruff check', cmd: 'uv', args: ['run', 'ruff', 'check', '.'], cwd },
+  { name: 'ruff format --check', cmd: 'uv', args: ['run', 'ruff', 'format', '--check', '.'], cwd },
+  { name: 'pytest', cmd: 'uv', args: ['run', 'pytest', '-q'], cwd },
+]
+const pythonArea = (dir) => ({
+  match: (p) => p.startsWith(`${dir}/`),
+  available: () => exists(dir, 'pyproject.toml') && has('uv'),
+  checks: pythonChecks(dir),
+})
+const isSpring = exists('backend', 'gradlew')
+// Next.js 는 next build 가 타입 검사를 하지만 오래 걸리므로 tsc 만 돌립니다.
+const typecheck = exists('frontend', 'next.config.ts')
+  ? { name: 'tsc --noEmit', cmd: 'npx', args: ['--no-install', 'tsc', '--noEmit'], cwd: 'frontend' }
+  : { name: 'tsc -b', cmd: 'npx', args: ['--no-install', 'tsc', '-b'], cwd: 'frontend' }
+
 const AREAS = {
-  backend: {
-    match: (p) => p.startsWith('backend/'),
-    available: () => exists('backend', 'gradlew') && has('java'),
-    checks: [{ name: './gradlew test', cmd: gradlew, args: ['test', '-q'], cwd: 'backend' }],
-  },
+  backend: isSpring
+    ? {
+        match: (p) => p.startsWith('backend/'),
+        available: () => has('java'),
+        checks: [{ name: './gradlew test', cmd: gradlew, args: ['test', '-q'], cwd: 'backend' }],
+      }
+    : pythonArea('backend'),
   frontend: {
     match: (p) => p.startsWith('frontend/'),
     available: () => exists('frontend', 'node_modules'),
-    checks: [
-      { name: 'npm run lint', cmd: 'npm', args: ['run', 'lint', '--silent'], cwd: 'frontend' },
-      { name: 'tsc -b', cmd: 'npx', args: ['--no-install', 'tsc', '-b'], cwd: 'frontend' },
-    ],
+    checks: [{ name: 'npm run lint', cmd: 'npm', args: ['run', 'lint', '--silent'], cwd: 'frontend' }, typecheck],
   },
-  fastapi: {
-    match: (p) => p.startsWith('fastapi/'),
-    available: () => exists('fastapi', 'pyproject.toml') && has('uv'),
-    checks: [
-      { name: 'ruff check', cmd: 'uv', args: ['run', 'ruff', 'check', '.'], cwd: 'fastapi' },
-      { name: 'ruff format --check', cmd: 'uv', args: ['run', 'ruff', 'format', '--check', '.'], cwd: 'fastapi' },
-      { name: 'pytest', cmd: 'uv', args: ['run', 'pytest', '-q'], cwd: 'fastapi' },
-    ],
-  },
+  fastapi: pythonArea('fastapi'),
+  ml: pythonArea('ml'),
 }
 
 function fingerprint(files) {

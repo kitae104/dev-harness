@@ -1,0 +1,2 @@
+- 파이썬 도구는 uv 를 씁니다 (https://docs.astral.sh/uv/ , Windows: `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`). Python 3.13 이 없으면 uv 가 내려받습니다.
+- 로컬 백엔드는 루트 `.env` 를 읽지 않습니다. `.env` 에서 `DB_PORT` 등을 바꿨다면 `DATABASE_URL=postgresql+psycopg://<사용자>:<비밀번호>@localhost:<DB_PORT>/<DB_NAME>` 을 지정하거나 `backend/.env` 에 적으세요.

@@ -6,7 +6,7 @@ export default function ProtectedRoute() {
   const location = useLocation()
 
   if (loading) {
-    return <p className="py-20 text-center text-slate-500">불러오는 중...</p>
+    return <p className="py-20 text-center text-muted-foreground">불러오는 중...</p>
   }
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />

@@ -1,0 +1,1 @@
+ENV FASTAPI_PROXY_TARGET=http://fastapi:8000
