@@ -4,6 +4,7 @@
 새 제공자를 붙이려면 ChatModel 을 구현한 클래스를 만들고 get_chat_model 에 연결하세요.
 """
 
+import re
 from typing import Annotated, Protocol
 
 import httpx
@@ -19,7 +20,19 @@ class ModelError(Exception):
 
 
 class ChatModel(Protocol):
-    def complete(self, system: str, messages: list[Message]) -> str: ...
+    def complete(self, system: str, messages: list[Message], *, json_mode: bool = False) -> str:
+        """json_mode=True 면 JSON 객체 하나만 답하도록 요청합니다 (OpenAI·Ollama 는 API 기능, Anthropic 은 지시문).
+        그래도 형식이 깨질 수 있으니 받는 쪽에서 pydantic 으로 검증하고 실패 처리를 하세요."""
+        ...
+
+
+JSON_INSTRUCTION = "\n\n반드시 JSON 객체 하나만 출력하세요. 코드 블록(```)이나 설명 문장을 붙이지 마세요."
+# 추론 모델(qwen3, deepseek-r1 등)이 답 앞에 붙이는 생각 과정
+_THINK = re.compile(r"<think>.*?</think>\s*", re.DOTALL)
+
+
+def _clean(text: str) -> str:
+    return _THINK.sub("", text).strip()
 
 
 class OpenAICompatibleModel:
@@ -31,17 +44,21 @@ class OpenAICompatibleModel:
         self.model = model
         self.settings = settings
 
-    def complete(self, system: str, messages: list[Message]) -> str:
+    def complete(self, system: str, messages: list[Message], *, json_mode: bool = False) -> str:
         if not self.api_key:
             raise ModelError("API 키가 설정되지 않았습니다.")
-        body = {
+        if json_mode:
+            system += JSON_INSTRUCTION
+        body: dict = {
             "model": self.model,
             "messages": [{"role": "system", "content": system}, *messages],
             "max_tokens": self.settings.ai_max_tokens,
         }
+        if json_mode:
+            body["response_format"] = {"type": "json_object"}
         data = _post(self.url, {"Authorization": f"Bearer {self.api_key}"}, body, self.settings)
         try:
-            return data["choices"][0]["message"]["content"] or ""
+            return _clean(data["choices"][0]["message"]["content"] or "")
         except (KeyError, IndexError, TypeError) as e:
             raise ModelError(f"예상하지 못한 응답 형식: {data!r:.200}") from e
 
@@ -53,19 +70,19 @@ class AnthropicModel:
         self.url = settings.anthropic_base_url.rstrip("/") + "/v1/messages"
         self.settings = settings
 
-    def complete(self, system: str, messages: list[Message]) -> str:
+    def complete(self, system: str, messages: list[Message], *, json_mode: bool = False) -> str:
         if not self.settings.anthropic_api_key:
             raise ModelError("API 키가 설정되지 않았습니다.")
         headers = {"x-api-key": self.settings.anthropic_api_key, "anthropic-version": "2023-06-01"}
         body = {
             "model": self.settings.anthropic_model,
-            "system": system,
+            "system": system + JSON_INSTRUCTION if json_mode else system,
             "messages": messages,
             "max_tokens": self.settings.ai_max_tokens,
         }
         data = _post(self.url, headers, body, self.settings)
         try:
-            return "".join(block.get("text", "") for block in data["content"] if block.get("type") == "text")
+            return _clean("".join(block.get("text", "") for block in data["content"] if block.get("type") == "text"))
         except (KeyError, TypeError) as e:
             raise ModelError(f"예상하지 못한 응답 형식: {data!r:.200}") from e
 
@@ -74,9 +91,12 @@ def _post(url: str, headers: dict[str, str], body: dict, settings: AiSettings) -
     try:
         res = httpx.post(url, headers=headers, json=body, timeout=settings.ai_timeout_seconds)
     except httpx.HTTPError as e:
-        raise ModelError(f"연결 실패: {e}") from e
+        raise ModelError(f"연결 실패 ({url}): {e}") from e
     if res.status_code >= 400:
-        raise ModelError(f"HTTP {res.status_code}: {res.text[:300]}")
+        hint = ""
+        if res.status_code == 404 and "model" in res.text.lower():
+            hint = " (모델이 없습니다. Ollama 면 make ai-model 로 OLLAMA_MODEL 을 먼저 내려받으세요)"
+        raise ModelError(f"HTTP {res.status_code}: {res.text[:300]}{hint}")
     return res.json()
 
 

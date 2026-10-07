@@ -39,6 +39,12 @@
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
 
+  /* 상태 표시: 성공(통과·적정), 경고(주의). 판정 배지, 점수 막대 등에 씁니다 */
+  --success: oklch(0.627 0.17 149.214);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.769 0.165 70.08);
+  --warning-foreground: oklch(0.216 0.045 70.08);
+
   /* 선 */
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.869 0.022 252.894);
@@ -72,6 +78,10 @@
   --accent-foreground: oklch(0.785 0.115 274.713);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.129 0.042 264.695);
+  --success: oklch(0.723 0.19 149.579);
+  --success-foreground: oklch(0.129 0.042 264.695);
+  --warning: oklch(0.828 0.189 84.429);
+  --warning-foreground: oklch(0.216 0.045 70.08);
   --border: oklch(0.279 0.041 260.031);
   --input: oklch(0.372 0.044 257.287);
   --ring: oklch(0.673 0.182 276.935);

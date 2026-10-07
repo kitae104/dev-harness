@@ -36,6 +36,7 @@ argument-hint: "[design/ 아래 경로] [범위: 색과 글꼴만 | 화면 이�
 | 테두리 (`gray-200`) / 입력 테두리 (`gray-300`) | `--border` / `--input` |
 | 포커스 링 | `--ring` (보통 primary) |
 | 오류 색 (`red-*`) | `--destructive` |
+| 성공·통과 색 (`green-*`, `emerald-*`) / 경고 색 (`amber-*`, `yellow-*`) | `--success` / `--warning` (+ 각각 `-foreground`) |
 | `fontFamily.display` / `fontFamily.body` (`--font-sans`) | `--font-display` / `--font-body` |
 | `borderRadius.xl` 또는 카드 모서리 (`--radius`) | `--radius` |
 | `borderRadius.DEFAULT`/`lg` 또는 버튼 모서리 | `--control-radius` |
@@ -48,7 +49,7 @@ argument-hint: "[design/ 아래 경로] [범위: 색과 글꼴만 | 화면 이�
 
 ## 3. UI 컴포넌트 (`frontend/src/components/ui/`)
 - 원본에서 반복되는 버튼·카드·입력칸 모양을 `styles.ts` 의 `buttonClass`, `cardClass`, `inputClass` 에 반영합니다 (둥글기, 여백, 글자 굵기, 그림자, hover). 색은 토큰 클래스로만 씁니다.
-- 원본에 있고 여기 없는 반복 요소(배지, 아바타, 구분선 등)는 `components/ui/` 에 새로 만듭니다.
+- 원본에 있고 여기 없는 반복 요소(아바타, 구분선, 탭 등)는 `components/ui/` 에 새로 만듭니다. 배지는 `Badge`(`badgeClass`)에 모양만 반영합니다.
 
 ## 4. 레이아웃과 화면
 - 범위가 "색과 글꼴만"이면 이 단계를 건너뜁니다.

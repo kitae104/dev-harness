@@ -4,6 +4,6 @@ frontend/src/
 ├── api/         # fetch 래퍼(client.ts), 인증 API
 ├── auth/        # AuthContext(토큰 보관, 사용자 복원), RequireAuth
 ├── components/  # SiteHeader, SiteFooter, NavLink
-│   └── ui/      # Button, Card, Input, FormField, Alert (디자인 토큰만 사용)
+│   └── ui/      # Button, Card, Input, FormField, Alert, Badge (디자인 토큰만 사용)
 ├── config/      # site.ts (서비스 이름, 소개 문구)
 └── styles/      # theme.css (디자인 토큰)

@@ -18,7 +18,7 @@ class FakeModel:
         self.fail = fail
         self.calls: list[list[Message]] = []
 
-    def complete(self, system: str, messages: list[Message]) -> str:
+    def complete(self, system: str, messages: list[Message], *, json_mode: bool = False) -> str:
         self.calls.append(messages)
         if self.fail:
             raise ModelError("테스트 실패")
@@ -112,3 +112,45 @@ def test_provider_http_error(monkeypatch):
     monkeypatch.setattr(httpx, "post", lambda *a, **k: httpx.Response(401, text="bad key"))
     with pytest.raises(ModelError):
         AnthropicModel(AiSettings(anthropic_api_key="key")).complete("s", [])
+
+
+def test_json_mode_asks_for_json_object(monkeypatch):
+    seen = {}
+
+    def fake_post(url, headers, json, timeout):
+        seen.update(json=json)
+        return httpx.Response(200, json={"choices": [{"message": {"content": '{"a": 1}'}}]})
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    model = OpenAICompatibleModel("http://x/v1", "key", "m", AiSettings())
+    assert model.complete("sys", [{"role": "user", "content": "q"}], json_mode=True) == '{"a": 1}'
+    assert seen["json"]["response_format"] == {"type": "json_object"}
+    assert "JSON" in seen["json"]["messages"][0]["content"]
+
+
+def test_think_block_is_removed(monkeypatch):
+    content = "<think>\n먼저 생각해 보면...\n</think>\n\n답입니다"
+    monkeypatch.setattr(
+        httpx, "post", lambda *a, **k: httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
+    )
+    assert OpenAICompatibleModel("http://x/v1", "key", "m", AiSettings()).complete("s", []) == "답입니다"
+
+
+def test_ollama_uses_openai_compatible_endpoint(monkeypatch):
+    seen = {}
+
+    def fake_post(url, headers, json, timeout):
+        seen.update(url=url, json=json)
+        return httpx.Response(200, json={"choices": [{"message": {"content": "답"}}]})
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    settings = AiSettings(ai_provider="ollama", ollama_base_url="http://ollama:11434", ollama_model="gemma3:4b")
+    assert get_chat_model(settings).complete("s", []) == "답"
+    assert seen["url"] == "http://ollama:11434/v1/chat/completions"
+    assert seen["json"]["model"] == "gemma3:4b"
+
+
+def test_missing_ollama_model_hint(monkeypatch):
+    monkeypatch.setattr(httpx, "post", lambda *a, **k: httpx.Response(404, text='{"error":"model \'x\' not found"}'))
+    with pytest.raises(ModelError, match="make ai-model"):
+        get_chat_model(AiSettings(ai_provider="ollama")).complete("s", [])

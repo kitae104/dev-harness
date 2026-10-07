@@ -440,14 +440,14 @@ design/stitch/dashboard/code.html</code></pre></div></li>
   <p class="lead"><code>/ai-setup</code> 은 FastAPI 백엔드에 두 가지를 얹습니다. 따로 쓰려면 다른 조합에 <code>--addons llm</code> 또는 <code>--addons ml</code> 을 붙입니다.</p>
   <table>
     <tr><th>구성</th><th>들어가는 것</th></tr>
-    <tr><td>AI 채팅 (<code>llm</code>)</td><td><code>/api/ai/chat</code> API(사용자별 최근 대화 기억)와 <code>/chat</code> 화면. 제공자 SDK 없이 HTTP 로 불러서 <code>AI_PROVIDER</code> 하나로 OpenAI·Anthropic·Ollama(로컬, 무료)를 바꿈. OpenAI 호환 서버(Groq, vLLM, LM Studio 등)는 <code>OPENAI_BASE_URL</code> 만 바꾸면 됨</td></tr>
+    <tr><td>AI 채팅 (<code>llm</code>)</td><td><code>/api/ai/chat</code> API(사용자별 최근 대화 기억)와 <code>/chat</code> 화면. 제공자 SDK 없이 HTTP 로 불러서 <code>.env</code> 의 <code>AI_PROVIDER</code> 하나로 OpenAI·Anthropic·Ollama(로컬, 무료)를 생성 후에도 바꿀 수 있음. 구조화된 답은 <code>json_mode=True</code>. OpenAI 호환 서버(Groq, vLLM, LM Studio 등)는 <code>OPENAI_BASE_URL</code> 만 바꾸면 됨</td></tr>
     <tr><td>딥러닝 작업 공간 (<code>ml</code>)</td><td><code>ml/</code> 폴더: PyTorch, 예제 데이터·모델·학습 코드(<code>src/ml/</code>), 노트북, 테스트. Jupyter Lab 컨테이너는 따로 켜고(<code>make ml-up</code>), GPU(CUDA) 빌드 선택 가능</td></tr>
   </table>
   <div class="block prompt"><div class="label">Claude Code 프롬프트</div><pre><code>/ai-setup my-lab anthropic</code></pre></div>
   <div class="block prompt"><div class="label">Claude Code 프롬프트 (NVIDIA GPU, 로컬 모델, Next.js)</div><pre><code>/ai-setup my-lab 로컬 모델(ollama)로, GPU(cuda) 쓰고, 화면은 Next.js 로</code></pre></div>
 
   <h3>처음 실행</h3>
-  <div class="block"><div class="label">터미널 (생성된 프로젝트 폴더)</div><pre><code># 1) .env 에 키 넣기: OPENAI_API_KEY 또는 ANTHROPIC_API_KEY (Ollama 는 키 없음)
+  <div class="block"><div class="label">터미널 (생성된 프로젝트 폴더)</div><pre><code># 1) .env 에 키 넣기: OPENAI_API_KEY 또는 ANTHROPIC_API_KEY (Ollama 는 키 없음, 아래 "Ollama" 참고)
 make up                 # 웹 서비스 전체 → http://localhost:3000 에서 로그인 후 "AI 채팅"
 make ai-model           # Ollama 를 골랐다면 처음 한 번 모델 내려받기
 
@@ -460,6 +460,22 @@ make ml-down            # Jupyter 만 종료 (make down 은 전체를 함께 내
     <li>GPU: <code>--ml-device cuda</code> 로 만들면 CUDA 12.8 빌드 PyTorch 를 받고 Jupyter 컨테이너에 GPU 를 연결합니다. 호스트에 NVIDIA 드라이버와 NVIDIA Container Toolkit(Windows 는 Docker Desktop + WSL2)이 필요합니다. Apple Silicon 은 자동으로 MPS 를 씁니다. <code>cd ml &amp;&amp; uv run python -m ml.device</code> 로 확인합니다.</li>
     <li>데이터는 <code>ml/data/</code>, 모델 파일은 <code>ml/models/</code> 에 두며 git 에 올라가지 않습니다. 처음 생긴 <code>ml/uv.lock</code> 은 커밋하세요.</li>
   </ul>
+
+  <h3>Ollama 로 무료 로컬 LLM 쓰기 (생성 후 언제든)</h3>
+  <p><code>.env</code> 에서 <code>AI_PROVIDER=ollama</code> 로 바꾸고 Ollama 를 어디서 띄울지 <code>COMPOSE_PROFILES</code> 로 고른 뒤, 다시 실행하고 모델을 받습니다. Ollama 컨테이너는 이 프로젝트의 Compose 안에 들어 있어 <code>make down</code> 으로 함께 내려갑니다.</p>
+  <table>
+    <tr><th>내 PC</th><th><code>.env</code></th><th>비고</th></tr>
+    <tr><td>Windows·macOS·Linux, CPU 만</td><td><code>AI_PROVIDER=ollama</code><br><code>COMPOSE_PROFILES=ollama</code></td><td>가장 쉬움. 기본 모델 <code>gemma3:4b</code>(약 3.3GB) 기준 메모리 8GB 이상 권장</td></tr>
+    <tr><td>Windows·Linux + NVIDIA GPU</td><td><code>AI_PROVIDER=ollama</code><br><code>COMPOSE_PROFILES=ollama-gpu</code></td><td>Windows 는 Docker Desktop(WSL2) + 최신 NVIDIA 드라이버, Linux 는 NVIDIA Container Toolkit. 먼저 <code>docker run --rm --gpus all ubuntu nvidia-smi</code> 가 되는지 확인</td></tr>
+    <tr><td>macOS Apple Silicon 에서 GPU 로</td><td><code>AI_PROVIDER=ollama</code><br><code>COMPOSE_PROFILES=</code> (비움)<br><code>OLLAMA_DOCKER_URL=http://host.docker.internal:11434</code></td><td>Docker 는 Apple GPU 를 못 쓰므로 https://ollama.com 앱을 설치하고 터미널에서 <code>ollama pull gemma3:4b</code></td></tr>
+  </table>
+  <div class="block"><div class="label">macOS (생성된 프로젝트 폴더)</div><pre><code>make up          # COMPOSE_PROFILES 에 따라 Ollama 컨테이너도 함께 실행
+make ai-model    # .env 의 OLLAMA_MODEL 내려받기 (처음 한 번, 수 GB)
+make ai-models   # 받은 모델 목록</code></pre></div>
+  <div class="block"><div class="label">Windows (PowerShell)</div><pre><code>docker compose up -d --build
+docker compose exec ollama ollama pull gemma3:4b      # GPU 프로필이면 ollama 대신 ollama-gpu
+docker compose exec ollama ollama list</code></pre></div>
+  <p>모델은 <code>.env</code> 의 <code>OLLAMA_MODEL</code> 로 바꿉니다 (바꾼 뒤 <code>make ai-model</code> 과 <code>make up</code>): <code>gemma3:4b</code> 기본 · <code>gemma3:12b</code> 한국어 품질 좋음(약 8GB, GPU 권장) · <code>qwen3:8b</code> · <code>exaone3.5:7.8b</code>(LG, 한국어, 라이선스 확인). 처음 요청은 모델을 메모리에 올리느라 느리고 <code>OLLAMA_KEEP_ALIVE</code> 동안은 빠릅니다. 긴 입력이 잘리면 <code>OLLAMA_CONTEXT_LENGTH</code> 를 늘립니다. Spring AI 조합(<code>/s-r-ai-setup</code>)은 제공자별 의존성이 빌드에 들어가므로 만들 때 고른 제공자를 씁니다.</p>
 
   <h3>AI 기능 프롬프트 예시</h3>
   <div class="block prompt"><div class="label">LLM 기능 추가 (요약)</div><pre><code>게시글 내용을 3줄로 요약하는 POST /api/ai/summarize 를 추가해 줘. .claude/rules/ai.md 대로 ChatModelDep 를 쓰고,
