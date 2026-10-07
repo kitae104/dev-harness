@@ -38,6 +38,9 @@ services:
       JWT_ACCESS_TOKEN_VALIDITY_SECONDS: ${JWT_ACCESS_TOKEN_VALIDITY_SECONDS:-3600}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:${FRONTEND_PORT:-3000},http://localhost:5173}
       # @addon:compose-backend-env
+    # 컨테이너에서 PC 의 서비스(예: PC 에 설치한 Ollama)에 host.docker.internal 로 붙을 수 있게 (Linux 에서도)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
     networks:

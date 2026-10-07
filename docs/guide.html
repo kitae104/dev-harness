@@ -468,6 +468,7 @@ make ml-down            # Jupyter 만 종료 (make down 은 전체를 함께 내
     <tr><td>Windows·macOS·Linux, CPU 만</td><td><code>AI_PROVIDER=ollama</code><br><code>COMPOSE_PROFILES=ollama</code></td><td>가장 쉬움. 기본 모델 <code>gemma3:4b</code>(약 3.3GB) 기준 메모리 8GB 이상 권장</td></tr>
     <tr><td>Windows·Linux + NVIDIA GPU</td><td><code>AI_PROVIDER=ollama</code><br><code>COMPOSE_PROFILES=ollama-gpu</code></td><td>Windows 는 Docker Desktop(WSL2) + 최신 NVIDIA 드라이버, Linux 는 NVIDIA Container Toolkit. 먼저 <code>docker run --rm --gpus all ubuntu nvidia-smi</code> 가 되는지 확인</td></tr>
     <tr><td>macOS Apple Silicon 에서 GPU 로</td><td><code>AI_PROVIDER=ollama</code><br><code>COMPOSE_PROFILES=</code> (비움)<br><code>OLLAMA_DOCKER_URL=http://host.docker.internal:11434</code></td><td>Docker 는 Apple GPU 를 못 쓰므로 https://ollama.com 앱을 설치하고 터미널에서 <code>ollama pull gemma3:4b</code></td></tr>
+    <tr><td>다른 서버(원격 GPU 등)의 Ollama 쓰기</td><td><code>AI_PROVIDER=ollama</code><br><code>COMPOSE_PROFILES=</code> (비움)<br><code>OLLAMA_DOCKER_URL</code>·<code>OLLAMA_BASE_URL</code> 둘 다 <code>http://&lt;서버주소&gt;:11434</code></td><td>서버의 Ollama 가 네트워크에 열려 있어야 함(<code>OLLAMA_HOST=0.0.0.0</code>). 안 열려 있으면 <code>ssh -N -L 11434:localhost:11434 사용자@서버</code> 터널을 켜 두고 <code>http://host.docker.internal:11434</code> 를 씀. 모델은 서버에서 <code>ollama pull</code></td></tr>
   </table>
   <div class="block"><div class="label">macOS (생성된 프로젝트 폴더)</div><pre><code>make up          # COMPOSE_PROFILES 에 따라 Ollama 컨테이너도 함께 실행
 make ai-model    # .env 의 OLLAMA_MODEL 내려받기 (처음 한 번, 수 GB)

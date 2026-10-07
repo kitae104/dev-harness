@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>모의 면접 만들기</title>
+<style>
+  :root {
+    --bg: #f8fafc; --surface: #ffffff; --text: #0f172a; --muted: #475569; --border: #e2e8f0;
+    --accent: #4f46e5; --accent-soft: #eef2ff; --code-bg: #0f172a; --code-text: #e2e8f0;
+    --warn-bg: #fffbeb; --warn-border: #f59e0b; --ok: #059669;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1120; --surface: #111827; --text: #e5e7eb; --muted: #9ca3af; --border: #1f2937;
+      --accent: #818cf8; --accent-soft: #1e1b4b; --code-bg: #020617; --code-text: #e2e8f0;
+      --warn-bg: #2a2110; --warn-border: #d97706; --ok: #34d399;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1120; --surface: #111827; --text: #e5e7eb; --muted: #9ca3af; --border: #1f2937;
+    --accent: #818cf8; --accent-soft: #1e1b4b; --code-bg: #020617; --code-text: #e2e8f0;
+    --warn-bg: #2a2110; --warn-border: #d97706; --ok: #34d399;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
+  .layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 32px 16px 80px; }
+  nav.toc { position: sticky; top: 24px; align-self: start; font-size: 14px; }
+  nav.toc a { display: block; padding: 4px 10px; color: var(--muted); text-decoration: none; border-left: 2px solid var(--border); }
+  nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+  nav.toc .toc-title { font-weight: 700; color: var(--text); margin: 0 0 8px 10px; }
+  main { min-width: 0; }
+  main a { color: var(--accent); }
+  header.hero { margin-bottom: 32px; }
+  header.hero h1 { font-size: 30px; line-height: 1.3; margin: 0 0 8px; }
+  header.hero p { color: var(--muted); margin: 0; }
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; margin-bottom: 20px; }
+  section h2 { margin: 0 0 4px; font-size: 21px; display: flex; align-items: center; gap: 10px; }
+  .num { display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 14px; align-items: center; justify-content: center; flex: none; }
+  .num.sub { font-size: 11px; width: auto; min-width: 28px; padding: 0 6px; border-radius: 14px; }
+  section > .lead { color: var(--muted); margin: 0 0 16px; }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+  .block { position: relative; margin: 10px 0 14px; }
+  .block .label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  pre { margin: 0; background: var(--code-bg); color: var(--code-text); padding: 14px 16px; border-radius: 10px; overflow-x: auto;
+    font: 13.5px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; word-break: break-word; }
+  pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+  .prompt pre { border-left: 4px solid var(--accent); }
+  button.copy { position: absolute; top: 26px; right: 8px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0;
+    font-size: 12px; padding: 3px 9px; border-radius: 6px; cursor: pointer; }
+  button.copy:hover { background: #334155; }
+  .note { background: var(--warn-bg); border-left: 4px solid var(--warn-border); padding: 10px 14px; border-radius: 8px; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 8px 0 14px; display: block; overflow-x: auto; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+  ol.steps { padding-left: 20px; }
+  ol.steps li { margin-bottom: 6px; }
+  .check { color: var(--ok); font-weight: 600; }
+  .theme-toggle { float: right; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 8px; padding: 4px 10px; cursor: pointer; font-size: 13px; }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    nav.toc { position: static; margin-bottom: 20px; }
+    section { padding: 18px 16px; }
+    header.hero h1 { font-size: 24px; }
+  }
+
+  .legend { margin-top: 14px; font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; vertical-align: 2px; margin-right: 4px; }
+  .tag.todo { background: var(--warn-bg); color: var(--warn-border); border: 1px solid var(--warn-border); }
+  .tag.prompt { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+  .tag.ok { background: var(--surface); color: var(--ok); border: 1px solid var(--ok); }
+  ul.checks { list-style: none; padding-left: 0; margin: 6px 0 12px; }
+  ul.checks li { margin-bottom: 6px; }
+  ul.checks label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  ul.checks input { margin-top: 6px; width: 16px; height: 16px; accent-color: var(--ok); flex: none; }
+  ul.checks input:checked + * , ul.checks label:has(input:checked) { color: var(--muted); }
+  .toc-progress { margin: 14px 0 0 10px; font-weight: 600; color: var(--ok); }
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; counter-reset: f; }
+  .flow div { counter-increment: f; background: var(--accent-soft); border: 1px solid var(--border); border-radius: 10px; padding: 6px 12px; font-size: 14px; }
+  .flow div::before { content: counter(f) ". "; font-weight: 700; color: var(--accent); }
+  .arch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 8px 0 14px; }
+  .arch-col { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14.5px; }
+  .arch-col ul { padding-left: 18px; margin: 0; }
+  .arch-title { font-weight: 700; margin: 0 0 6px; color: var(--accent); }
+  @media (max-width: 860px) { .arch { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+  <p class="toc-title">목차</p>
+  <a href="#overview">0. 만들 시스템 한눈에</a>
+  <a href="#prepare">1. 준비 (PC 마다 한 번)</a>
+  <a href="#create">2. 프로젝트 만들기</a>
+  <a href="#first-run">3. 첫 실행과 API 키</a>
+  <a href="#run-modes">3-1. 확인할 때 실행하는 법</a>
+  <a href="#ollama"><b>3-2. Ollama 로 무료 LLM 쓰기 (로컬 CPU · 원격 GPU)</b></a>
+  <a href="#plan">4. 설계 문서 만들기</a>
+  <a href="#design">5. 디자인 준비 (Stitch, 선택)</a>
+  <a href="#s1">6. ① 면접 세트와 질문 생성</a>
+  <a href="#s2">7. ② 카메라·마이크 점검</a>
+  <a href="#s3">8. ③ 자세·표정 분석</a>
+  <a href="#s4">9. ④ 음성 인식과 말하기 지표</a>
+  <a href="#s5">10. ⑤ 면접 진행 화면</a>
+  <a href="#s6">11. ⑥ 피드백과 결과 리포트</a>
+  <a href="#s7">12. ⑦ 기록과 대시보드</a>
+  <a href="#design-final">13. 디자인 마무리</a>
+  <a href="#final">14. 전체 확인</a>
+  <a href="#trouble">15. 문제 해결</a>
+  <a href="#next">16. 다음에 해볼 것</a>
+  <p class="toc-progress" id="progress">확인 0 / 0</p>
+</nav>
+
+<main>
+<header class="hero">
+  <button class="theme-toggle" type="button" onclick="toggleTheme()">밝게 / 어둡게</button>
+  <h1>웹캠 모의 면접 + AI 피드백 만들기</h1>
+  <p>dev-harness 로 프로젝트를 만들고, Claude Code 에 단계별 프롬프트를 넣어 "분야별 질문 생성 → 카메라 앞에서 답변 → 말하기·자세·표정 분석 → 종합 피드백" 서비스를 완성하는 순서입니다. 위에서부터 차례로 따라 하면 됩니다.</p>
+  <p class="hero-note">2026-10-07 보완: 개발 전문가 점검(백그라운드 처리, JSON 검증, 인덱스, 테스트, 보안), 디자인 확장(상태 토큰, 배지, 다크 모드), Ollama 로 무료 LLM 쓰기(3-2)가 반영되었습니다. 3-2 는 기태 님 환경에 맞춰 <b>로컬 PC(CPU)</b> 와 <b>원격 서버(NVIDIA GPU)</b> 중 고르는 구성이고, 로컬 모델은 <code>exaone3.5</code> 기준으로 적었습니다. 템플릿 수정은 <a href="https://github.com/kitae104/dev-harness/pull/4">dev-harness PR</a> 에 있으니 1단계에서 최신으로 받으세요. 이 문서는 저장소의 <code>docs/mock-interview-guide.html</code> 에도 같은 내용으로 들어 있습니다.</p>
+  <div class="legend">
+    <span class="tag todo">할 일</span> 내가 직접 하는 것
+    <span class="tag prompt">프롬프트</span> Claude 패널에 그대로 붙여 넣기
+    <span class="tag ok">확인</span> 다음 단계로 가기 전에 체크 (체크 표시는 이 브라우저에 저장됩니다)
+  </div>
+</header>
+
+<!-- 0 -->
+<section id="overview">
+  <h2><span class="num">0</span>만들 시스템 한눈에</h2>
+  <p class="lead">무엇을 어디서 처리하는지 먼저 정해 두었습니다. 이 결정은 4단계에서 Claude 가 쓰는 설계 문서(<code>docs/PLAN.md</code>)에 그대로 들어갑니다.</p>
+
+  <h3>사용자 흐름</h3>
+  <div class="flow">
+    <div>분야·수준 입력</div><div>AI 질문 생성</div><div>카메라·마이크 점검</div><div>질문 듣고 답변 (녹음 + 분석)</div><div>종합 피드백 리포트</div><div>기록 다시 보기</div>
+  </div>
+
+  <h3>어디서 무엇을 하나</h3>
+  <div class="arch">
+    <div class="arch-col">
+      <p class="arch-title">브라우저 (React)</p>
+      <ul>
+        <li>카메라·마이크 (<code>getUserMedia</code>)</li>
+        <li>질문 읽어 주기 (<code>speechSynthesis</code>, 한국어 목소리)</li>
+        <li><b>자세·표정·시선·제스처 분석</b>: MediaPipe (<code>@mediapipe/tasks-vision</code>) 얼굴·자세 인식</li>
+        <li>답변 음성 녹음 (<code>MediaRecorder</code>)</li>
+        <li>질문마다 <b>영상 대신 요약 지표(JSON)</b>와 음성 파일만 전송</li>
+      </ul>
+    </div>
+    <div class="arch-col">
+      <p class="arch-title">백엔드 (FastAPI)</p>
+      <ul>
+        <li>회원·로그인 (이미 있음)</li>
+        <li>면접 세트·질문·답변 저장 (PostgreSQL 18)</li>
+        <li>음성 → 텍스트 (단어별 시각 포함), 오디오는 저장하지 않음</li>
+        <li><b>말하기 지표</b>: 속도(분당 음절), 첫 발화까지 시간, 침묵, 군말</li>
+        <li>질문 생성, 답변별 피드백, 종합 리포트 (기존 <code>app/ai</code> 모델 호출 구조, JSON 모드 + 검증 + 재시도)</li>
+        <li>오래 걸리는 피드백·리포트는 백그라운드 작업으로 돌리고 상태(진행 중/완료/실패)를 저장, 화면은 다시 조회</li>
+      </ul>
+    </div>
+    <div class="arch-col">
+      <p class="arch-title">AI 모델 (OpenAI 기본, 설정으로 무료 전환)</p>
+      <ul>
+        <li>대화 모델(질문 생성·피드백): <code>AI_PROVIDER=openai</code>(기본, <code>gpt-4.1-mini</code>) 또는 <code>ollama</code>(내 PC 또는 원격 GPU 서버, 무료, 3-2 절)</li>
+        <li>음성 인식: <code>STT_PROVIDER=openai</code>(기본, <code>whisper-1</code>) 또는 <code>groq</code>(무료 등급) / <code>local</code>(내 PC, 9단계)</li>
+        <li>OpenAI 만 쓰면 키 하나(<code>OPENAI_API_KEY</code>)로 둘 다. 전부 무료로 하려면 Ollama + Groq(또는 local)</li>
+        <li>제공자가 바뀌어도 코드는 같습니다. 바꾸는 것은 <code>.env</code> 뿐</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note"><b>고른 조합: <code>/f-r-setup mock-interview --addons llm</code> (FastAPI + React + AI 채팅 모듈).</b> 음성 인식·지표 계산·LLM 호출을 파이썬 백엔드 한곳에서 처리하고 영상 분석은 브라우저에서 하므로, Spring 백엔드와 PyTorch 작업 공간(<code>ml</code>)은 필요 없습니다. (이 명령은 <code>/ai-setup mock-interview --addons llm</code> 과 똑같은 프로젝트를 만듭니다. 생성 결과를 직접 비교해 확인했습니다.) 이 문서는 2026-10-07 에 고친 템플릿(<a href="https://github.com/kitae104/dev-harness/pull/4">PR</a>)을 기준으로 하므로, 그 PR 이 머지된 뒤 1단계에서 dev-harness 를 최신으로 받아야 합니다.</div>
+
+  <h3>분석 항목</h3>
+  <table>
+    <tr><th>구분</th><th>지표</th><th>어떻게</th></tr>
+    <tr><td>말하기</td><td>답변 시간, 분당 음절 수, 첫 발화까지 걸린 시간, 2초 이상 침묵 횟수·시간, 군말(음, 어, 그, 저, 약간, 뭐랄까…) 횟수</td><td>음성 인식의 단어별 시각으로 백엔드에서 계산</td></tr>
+    <tr><td>시선·표정</td><td>얼굴 보임 비율, 카메라 응시 비율, 머리 흔들림, 미소 비율, 분당 눈 깜빡임</td><td>MediaPipe FaceLandmarker (표정 값 blendshapes, 머리 방향)</td></tr>
+    <tr><td>자세·제스처</td><td>어깨 기울기, 기준 자세 대비 무너짐, 손 제스처 빈도·과다 움직임</td><td>MediaPipe PoseLandmarker (어깨·코·손목 위치)</td></tr>
+    <tr><td>내용</td><td>질문 의도에 맞는지, 구조(결론→근거→사례), 구체성, 더 나은 답변 예시</td><td>LLM 이 답변 텍스트 + 위 지표를 함께 보고 평가</td></tr>
+  </table>
+  <div class="note">자세·표정 지표는 카메라 영상으로 <b>추정한 참고값</b>입니다. 결과 화면에도 그렇게 표시하도록 프롬프트에 넣어 두었습니다. 영상은 서버로 보내지 않고, 음성과 답변 텍스트는 고른 제공자(OpenAI 또는 내 PC 의 Ollama·Whisper)로 보냅니다. OpenAI 는 사용량만큼 과금됩니다.</div>
+
+  <h3>전문가 점검에서 보완한 것 (2026-10-07)</h3>
+  <p>처음 문서를 그대로 따라 해도 동작은 하지만, 아래는 실제 서비스로 키울 때 나중에 고치기 어려운 부분이라 지금 넣었습니다.</p>
+  <table>
+    <tr><th>보완</th><th>왜</th><th>어디에</th></tr>
+    <tr><td>질문 생성·피드백·리포트를 백그라운드 작업으로</td><td>LLM 호출이 한 번에 수십 초(로컬 CPU 모델은 몇 분)라 요청 안에서 기다리면 시간 초과·이중 요청이 생김</td><td>4단계 PLAN, 6·11단계</td></tr>
+    <tr><td>JSON 모드 + pydantic 검증 + 1회 재시도</td><td>작은 모델일수록 형식이 깨짐. 템플릿 <code>ChatModel</code> 에 <code>json_mode</code> 추가</td><td>템플릿, 4·6·11단계</td></tr>
+    <tr><td>OpenAI ↔ Ollama 를 <code>.env</code> 로 전환, 로컬 CPU·원격 NVIDIA GPU 중 선택</td><td>비용 없이 개발·시연. 코드는 그대로</td><td>템플릿, 3-2 절</td></tr>
+    <tr><td>업로드 경로 4가지 빈틈 수정</td><td><code>client.ts</code> FormData, nginx 25MB·300초, <code>python-multipart</code>, <code>AI_MAX_TOKENS</code> 전달</td><td>템플릿 (6·9단계 프롬프트에서 우회 코드 제거)</td></tr>
+    <tr><td>지표는 JSONB 컬럼, <code>user_id</code>·<code>created_at</code> 인덱스, 프롬프트 버전 저장</td><td>지표 항목이 계속 늘어나고, 기록이 쌓이면 목록이 느려지며, 프롬프트를 고친 뒤 결과 비교가 필요</td><td>4·6단계</td></tr>
+    <tr><td>면접 시작 전 동의 화면과 데이터 삭제</td><td>카메라·음성·외부 전송은 고지와 동의가 필요. 기록 삭제가 실제로 지워지는지도</td><td>4·12단계</td></tr>
+    <tr><td>프론트엔드 순수 함수 단위 테스트(vitest)</td><td>비언어 지표 요약 함수는 눈으로만 확인하기 어려움. 종료 훅이 <code>npm test</code> 도 돌리게 템플릿 수정</td><td>템플릿, 8단계</td></tr>
+    <tr><td>상태·판정 색 토큰(<code>success</code>, <code>warning</code>)과 <code>Badge</code> 컴포넌트</td><td>결과 화면의 적정/주의 표시에 직접 색을 쓰면 린트에 막히고 디자인 교체가 안 됨</td><td>템플릿, 11·13단계</td></tr>
+    <tr><td>운영 배포 전 확인(HTTPS 필수, 비밀값, 사용량 제한)</td><td>카메라는 localhost 밖에서는 HTTPS 에서만 동작</td><td>16단계</td></tr>
+  </table>
+</section>
+
+<!-- 1 -->
+<section id="prepare">
+  <h2><span class="num">1</span>준비 (PC 마다 한 번)</h2>
+  <p class="lead">기존 가이드의 "VS Code 로 시작하기" 1~4단계를 이미 했다면 아래 세 가지만 확인하면 됩니다.</p>
+
+  <h3><span class="tag todo">할 일</span> 프로그램 확인</h3>
+  <p>VS Code, Claude Code 확장, Git(Windows 는 Git for Windows), Node.js 22, Docker Desktop(실행 중), <b>uv</b> 가 필요합니다. 이 프로젝트는 백엔드가 FastAPI 라서 JDK 는 없어도 됩니다. uv 가 없으면 Claude 의 종료 훅이 백엔드 검사를 건너뛰므로 꼭 설치하세요.</p>
+  <div class="block"><div class="label">Windows (PowerShell) — uv 설치</div><pre><code>powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</code></pre></div>
+  <div class="block"><div class="label">macOS — uv 설치</div><pre><code>curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre></div>
+  <div class="block"><div class="label">VS Code 터미널 (새 터미널을 열고 확인)</div><pre><code>git --version
+node -v
+docker compose version
+uv --version</code></pre></div>
+
+  <h3><span class="tag todo">할 일</span> dev-harness 최신으로 받고 스킬 다시 설치</h3>
+  <p>이 문서가 기대는 템플릿 수정(업로드, Ollama 전환, JSON 모드, 디자인 토큰)은 <a href="https://github.com/kitae104/dev-harness/pull/4">dev-harness PR</a> 에 있습니다. PR 이 main 에 머지된 것을 확인한 뒤 아래처럼 최신으로 받고 스킬 설치를 한 번 더 합니다. (<code>/f-r-setup</code> 자체도 최근에 추가된 명령입니다.)</p>
+  <div class="block"><div class="label">Windows (PowerShell)</div><pre><code>cd $HOME\dev-harness
+git pull
+powershell -ExecutionPolicy Bypass -File scripts\install-skills.ps1</code></pre></div>
+  <div class="block"><div class="label">macOS</div><pre><code>cd ~/dev-harness
+git pull
+scripts/install-skills.sh</code></pre></div>
+  <p>명령 팔레트(Ctrl+Shift+P, macOS Cmd+Shift+P)에서 <b>Developer: Reload Window</b> 를 실행합니다.</p>
+
+  <h3><span class="tag todo">할 일</span> OpenAI API 키 만들기 (Ollama 만 쓸 거면 건너뛰기)</h3>
+  <ol class="steps">
+    <li>https://platform.openai.com 에 로그인하고 결제 수단(크레딧)을 등록합니다. 크레딧이 없으면 키가 있어도 요청이 실패합니다.</li>
+    <li>API keys 메뉴에서 새 키를 만들고 복사해 둡니다 (3단계에서 <code>.env</code> 에 넣습니다). 키는 프롬프트나 채팅에 붙여 넣지 않습니다.</li>
+  </ol>
+  <p>비용 없이 진행하려면 대화 모델은 Ollama(3-2 절), 음성 인식은 Groq 무료 등급이나 내 PC(9단계)로 고르면 됩니다. 처음 따라 할 때는 OpenAI 가 가장 빠르고 결과가 안정적이라, OpenAI 로 한 번 끝까지 간 뒤 무료 조합으로 바꿔 보는 순서를 권합니다.</p>
+
+  <h3><span class="tag ok">확인</span></h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="p1"> <span>네 명령의 버전이 모두 나온다 (<code>uv --version</code> 포함)</span></label></li>
+    <li><label><input type="checkbox" data-k="p2"> <span>Claude 패널에 <code>/</code> 를 치면 <code>f-r-setup</code> 이 목록에 보인다</span></label></li>
+    <li><label><input type="checkbox" data-k="p3"> <span>OpenAI API 키를 복사해 두었다 (또는 Ollama 로 가기로 정했다)</span></label></li>
+    <li><label><input type="checkbox" data-k="p4"> <span>dev-harness 폴더에서 <code>git log -1</code> 에 2026-10-07 이후 커밋이 보인다 (템플릿 수정이 들어온 상태)</span></label></li>
+  </ul>
+</section>
+
+<!-- 2 -->
+<section id="create">
+  <h2><span class="num">2</span>프로젝트 만들기</h2>
+  <h3><span class="tag todo">할 일</span></h3>
+  <ol class="steps">
+    <li>VS Code 에서 File → Open Folder 로 프로젝트를 모아 두는 폴더(예: 홈 폴더의 <code>projects</code>)를 엽니다.</li>
+    <li>Claude 패널에 아래를 넣습니다. <code>node … generate.mjs</code> 실행 허락을 구하면 허용합니다.</li>
+  </ol>
+  <div class="block prompt"><div class="label">프롬프트</div><pre><code>/f-r-setup mock-interview --addons llm</code></pre></div>
+  <p><code>projects/mock-interview</code> 폴더가 첫 커밋까지 된 상태로 생깁니다. 구성은 FastAPI 백엔드 + React 19(Vite, Tailwind 4) + PostgreSQL 18 + AI 채팅(OpenAI) 입니다.</p>
+
+  <h3><span class="tag ok">확인</span></h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="c1"> <span>Claude 의 보고에 <code>구성 backend=fastapi, frontend=react</code>, <code>확장 모듈 llm (aiProvider=openai)</code> 가 나온다</span></label></li>
+    <li><label><input type="checkbox" data-k="c2"> <span>폴더에 <code>.harness.json</code>, <code>CLAUDE.md</code>, <code>backend/app/ai/router.py</code>, <code>frontend/src/pages/ChatPage.tsx</code> 가 있다</span></label></li>
+  </ul>
+</section>
+
+<!-- 3 -->
+<section id="first-run">
+  <h2><span class="num">3</span>첫 실행과 API 키</h2>
+  <h3><span class="tag todo">할 일</span> 프로젝트 폴더 열기 (중요)</h3>
+  <p>File → Open Folder 로 <code>projects/mock-interview</code> 를 엽니다. 이 창에서부터 프로젝트의 <code>CLAUDE.md</code>, 규칙, 훅, <code>/add-domain</code>, <code>/apply-design</code>, <code>/verify</code> 가 적용됩니다. 이후 모든 프롬프트는 <b>이 창의 Claude 패널</b>에 넣습니다.</p>
+
+  <h3><span class="tag todo">할 일</span> API 키 넣기</h3>
+  <p>왼쪽 탐색기에서 <code>.env</code> 를 열고 <code>OPENAI_API_KEY=</code> 뒤에 키를 붙여 넣고 저장합니다. Claude 는 규칙상 <code>.env</code> 를 읽거나 고치지 못하므로 이 일은 직접 합니다. Ollama 로 갈 거면 키는 비워 두고 3-2 절대로 <code>AI_PROVIDER</code> 와 <code>COMPOSE_PROFILES</code> 를 바꿉니다.</p>
+
+  <h3><span class="tag todo">할 일</span> 처음 한 번 준비하고 실행</h3>
+  <div class="block"><div class="label">Windows (PowerShell)</div><pre><code>cd frontend; npm install; cd ..
+docker compose up -d --build</code></pre></div>
+  <div class="block"><div class="label">macOS</div><pre><code>cd frontend && npm install && cd ..
+make up</code></pre></div>
+
+  <h3><span class="tag ok">확인</span></h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="r1"> <span>http://localhost:3000 에서 랜딩 → 회원가입 → 로그인 → 대시보드가 된다</span></label></li>
+    <li><label><input type="checkbox" data-k="r2"> <span>메뉴의 AI 채팅(<code>/chat</code>)에서 "안녕" 에 답이 온다 (OpenAI 면 키와 크레딧이 정상이라는 뜻. Ollama 면 3-2 절을 마친 뒤)</span></label></li>
+    <li><label><input type="checkbox" data-k="r3"> <span>http://localhost:8080/api/docs 에 API 문서가 열린다</span></label></li>
+  </ul>
+  <div class="note">채팅이 "AI 응답을 받지 못했습니다" 오류면 키·크레딧을 확인하고, <code>.env</code> 를 고친 뒤에는 반드시 다시 실행합니다 (macOS <code>make up</code>, Windows <code>docker compose up -d --build</code>). 컨테이너는 시작할 때만 <code>.env</code> 를 읽습니다.</div>
+</section>
+
+<!-- 3-1 -->
+<section id="run-modes">
+  <h2><span class="num sub">3-1</span>확인할 때 실행하는 법</h2>
+  <p class="lead">단계마다 결과를 눈으로 확인할 때는 고친 코드가 바로 반영되는 <b>개발 모드</b>가 편합니다. nginx·Dockerfile 이 바뀐 단계와 마지막 확인은 <b>Docker 전체 실행</b>으로 합니다.</p>
+  <h3>A. 개발 모드 (단계별 확인용, 화면 http://localhost:5173)</h3>
+  <p>Docker 의 백엔드가 8080 포트를 쓰고 있으면 개발 서버가 뜨지 않으니, 먼저 전체 스택을 내리고 DB 만 띄웁니다. 터미널 두 개를 씁니다 (터미널 패널의 + 버튼).</p>
+  <div class="block"><div class="label">macOS 터미널 1 (백엔드, 마이그레이션 자동 적용)</div><pre><code>make down
+make db
+make backend-dev</code></pre></div>
+  <div class="block"><div class="label">Windows 터미널 1 (PowerShell)</div><pre><code>docker compose down
+docker compose up -d db
+cd backend; uv sync; uv run alembic upgrade head; uv run uvicorn app.main:app --reload --port 8080</code></pre></div>
+  <div class="block"><div class="label">터미널 2 (Windows, macOS 같음)</div><pre><code>cd frontend
+npm run dev</code></pre></div>
+  <p>백엔드는 루트의 <code>.env</code> 를 직접 읽으므로 API 키도 그대로 쓰입니다. 끝낼 때는 각 터미널에서 Ctrl+C.</p>
+
+  <h3>B. Docker 전체 실행 (마지막 확인용, 화면 http://localhost:3000)</h3>
+  <p>개발 서버를 Ctrl+C 로 끈 뒤 macOS <code>make up</code>, Windows <code>docker compose up -d --build</code>. 코드를 바꿀 때마다 이미지를 다시 빌드해야 반영됩니다.</p>
+
+  <h3>단계마다 반복하는 일</h3>
+  <ol class="steps">
+    <li>단계의 프롬프트를 Claude 패널에 넣고, 파일 수정·명령 실행 허락 요청을 확인하며 허용합니다.</li>
+    <li>Claude 가 끝나면 종료 훅이 바뀐 부분의 린트·테스트를 자동으로 돌립니다. 실패하면 Claude 가 이어서 고칩니다.</li>
+    <li>단계의 <span class="tag ok">확인</span> 항목을 직접 해 봅니다. 안 되는 항목은 증상을 그대로 Claude 에게 말합니다 (예: "면접 시작을 누르면 화면이 하얗게 돼. 브라우저 콘솔 오류는 …").</li>
+    <li>확인이 끝나면 커밋합니다. 왼쪽 소스 제어(Ctrl+Shift+G)에서 메시지를 쓰고 커밋하거나 아래 명령을 씁니다.</li>
+  </ol>
+  <div class="block"><div class="label">커밋 (Windows PowerShell)</div><pre><code>git add -A; git commit -m "면접 세트와 질문 생성"</code></pre></div>
+  <div class="block"><div class="label">커밋 (macOS)</div><pre><code>git add -A && git commit -m "면접 세트와 질문 생성"</code></pre></div>
+  <div class="note">단계마다 Claude 패널에서 새 대화를 시작해도 됩니다 (대화가 길어지면 오히려 권장). 4단계에서 만드는 <code>docs/PLAN.md</code> 가 단계 사이의 맥락을 이어 주도록 프롬프트를 짰습니다.</div>
+</section>
+
+<!-- 3-2 -->
+<section id="ollama">
+  <h2><span class="num sub">3-2</span>Ollama 로 무료 LLM 쓰기 (선택, 생성 후 언제든)</h2>
+  <p class="lead">질문 생성과 피드백에 쓰는 대화 모델을 OpenAI 대신 Ollama 로 돌립니다. 코드는 바꾸지 않고 <code>.env</code> 몇 줄로 전환하며, Ollama 를 <b>로컬 PC(CPU)</b> 에서 돌릴지 <b>원격 서버(NVIDIA GPU)</b> 에서 돌릴지도 <code>.env</code> 로만 고릅니다. <code>.env</code> 는 커밋되지 않으므로 같은 프로젝트를 두 곳에 두고 각자 다른 값을 써도 됩니다. 모델은 <code>exaone3.5</code>(LG AI 연구원의 한국어·영어 모델)를 기준으로 적었고, 생성 직후 <code>.env</code> 에는 템플릿 기본값 <code>gemma3:4b</code> 가 들어 있으니 아래 값으로 고쳐 적습니다.</p>
+
+  <h3><span class="tag todo">할 일</span> 내 환경 고르기</h3>
+  <p>내 PC 에서 개발할 때는 <b>A</b>(원격이 없거나 오프라인) 또는 <b>C</b>(원격 GPU 가 켜져 있을 때), 원격 서버에 올려서 돌릴 때는 <b>B</b> 입니다. 언제든 <code>.env</code> 만 바꾸고 다시 실행하면 됩니다.</p>
+  <table>
+    <tr><th>어디서 돌리나</th><th><code>.env</code> 에 쓰는 값</th><th>비고</th></tr>
+    <tr><td><b>A. 로컬 PC, CPU</b><br>Ollama 를 이 프로젝트의 컨테이너로 함께 띄움</td><td><code>AI_PROVIDER=ollama</code><br><code>COMPOSE_PROFILES=ollama</code><br><code>OLLAMA_MODEL=exaone3.5:7.8b</code></td><td>가장 쉬움. <code>exaone3.5:7.8b</code>(약 4.8GB) 는 메모리 12GB 이상 권장이고, CPU 에서는 질문 5개 생성에 2~4분, 피드백도 질문당 1분 안팎 걸릴 수 있음. 너무 느리거나 메모리가 8GB 면 <code>exaone3.5:2.4b</code>(약 1.6GB). <code>AI_TIMEOUT_SECONDS</code> 는 600 으로 늘려 둠 (질문 생성·피드백은 백그라운드라 화면은 기다리지 않음)</td></tr>
+    <tr><td><b>B. 원격 GPU 서버에서 프로젝트 전체 실행</b><br>서버에서 <code>make up</code>, Ollama 컨테이너가 GPU 사용</td><td><code>AI_PROVIDER=ollama</code><br><code>COMPOSE_PROFILES=ollama-gpu</code><br><code>OLLAMA_MODEL=exaone3.5:7.8b</code></td><td>Linux 서버는 NVIDIA 드라이버 + NVIDIA Container Toolkit, Windows 면 Docker Desktop(WSL2) + 최신 드라이버. 먼저 서버에서 <code>docker run --rm --gpus all ubuntu nvidia-smi</code> 가 GPU 표를 보여 주는지 확인. 포트는 서버의 127.0.0.1 에만 열리므로 내 PC 브라우저에서 보려면 SSH 터널(<code>ssh -N -L 3000:localhost:3000 사용자@서버주소</code> 뒤 http://localhost:3000)이나 16단계의 HTTPS 배포가 필요. 카메라는 localhost 또는 HTTPS 에서만 켜짐</td></tr>
+    <tr><td><b>C. 로컬 PC 에서 개발, 원격 서버의 Ollama(GPU) 사용</b><br>앱은 내 PC, 모델만 원격</td><td><code>AI_PROVIDER=ollama</code><br><code>COMPOSE_PROFILES=</code> (비움)<br><code>OLLAMA_MODEL=exaone3.5:7.8b</code><br><code>OLLAMA_DOCKER_URL=http://host.docker.internal:11434</code> (앞의 <code>#</code> 지우기)<br><code>OLLAMA_BASE_URL=http://localhost:11434</code></td><td>원격 서버의 Ollama 포트(11434)를 SSH 터널로 내 PC 의 11434 에 연결해 두고 씁니다(아래 명령). 원격 Ollama 가 이미 네트워크에 열려 있으면(<code>OLLAMA_HOST=0.0.0.0</code> 으로 실행) 터널 없이 두 URL 모두 <code>http://&lt;서버주소&gt;:11434</code> 로 적습니다. 모델은 원격 서버에서 받습니다</td></tr>
+    <tr><td>D. macOS Apple Silicon 에서 GPU 로</td><td><code>AI_PROVIDER=ollama</code><br><code>COMPOSE_PROFILES=</code> (비움)<br><code>OLLAMA_MODEL=exaone3.5:7.8b</code><br><code>OLLAMA_DOCKER_URL=http://host.docker.internal:11434</code></td><td>Docker 는 Apple GPU 를 못 쓰므로 https://ollama.com 에서 Ollama 앱을 설치하고 터미널에서 <code>ollama pull exaone3.5:7.8b</code>. 앱이 켜져 있어야 함</td></tr>
+  </table>
+  <div class="block"><div class="label">.env 예시 A (로컬 PC, CPU)</div><pre><code>AI_PROVIDER=ollama
+COMPOSE_PROFILES=ollama
+OLLAMA_MODEL=exaone3.5:7.8b
+AI_TIMEOUT_SECONDS=600    # CPU 는 한 번의 호출이 길어질 수 있어 기본 240 에서 늘림</code></pre></div>
+  <div class="block"><div class="label">.env 예시 B (원격 GPU 서버에서 전체 실행)</div><pre><code>AI_PROVIDER=ollama
+COMPOSE_PROFILES=ollama-gpu
+OLLAMA_MODEL=exaone3.5:7.8b</code></pre></div>
+  <div class="block"><div class="label">.env 예시 C (로컬 개발 + 원격 Ollama, SSH 터널)</div><pre><code>AI_PROVIDER=ollama
+COMPOSE_PROFILES=
+OLLAMA_MODEL=exaone3.5:7.8b
+OLLAMA_DOCKER_URL=http://host.docker.internal:11434
+OLLAMA_BASE_URL=http://localhost:11434</code></pre></div>
+
+  <h3><span class="tag todo">할 일</span> A·B: 다시 실행하고 모델 받기</h3>
+  <div class="block"><div class="label">macOS·Linux (프로젝트 폴더)</div><pre><code>make up          # Ollama 컨테이너도 함께 실행 (B 는 GPU 컨테이너)
+make ai-model    # .env 의 OLLAMA_MODEL 내려받기 (처음 한 번, 약 5GB)
+make ai-models   # 받은 모델 목록</code></pre></div>
+  <div class="block"><div class="label">Windows (PowerShell, 프로젝트 폴더)</div><pre><code>docker compose up -d --build
+docker compose exec ollama ollama pull exaone3.5:7.8b     # B 는 ollama 대신 ollama-gpu
+docker compose exec ollama ollama list</code></pre></div>
+
+  <h3><span class="tag todo">할 일</span> C: 원격 서버에서 모델 받고, 내 PC 에서 터널 열기</h3>
+  <div class="block"><div class="label">원격 서버 (SSH 로 들어간 터미널)</div><pre><code>ollama pull exaone3.5:7.8b     # 서버에 Ollama 가 직접 설치된 경우
+ollama list
+# 서버에서 이 프로젝트를 B 구성으로 띄워 둔 경우라면 대신:
+#   docker compose exec ollama-gpu ollama pull exaone3.5:7.8b
+# 직접 설치한 Ollama 는 기본 5분 뒤 모델을 메모리에서 내려 첫 답이 느려짐.
+# 서버의 Ollama 실행 환경에 OLLAMA_KEEP_ALIVE=30m 을 넣어 두면 좋음 (systemd 면 Environment= 줄).</code></pre></div>
+  <div class="block"><div class="label">내 PC — 터널 (Windows PowerShell · macOS 터미널 모두 같음, 이 창은 켜 둔 채로)</div><pre><code>ssh -N -L 11434:localhost:11434 사용자@서버주소</code></pre></div>
+  <div class="block"><div class="label">내 PC — 다른 터미널 (프로젝트 폴더)</div><pre><code>make up                       # Windows: docker compose up -d --build
+# 브라우저에서 http://localhost:11434/api/tags 를 열어 모델 목록 JSON 이 오면 터널 정상</code></pre></div>
+  <p>개발 모드(3-1 의 A)에서는 백엔드가 루트 <code>.env</code> 의 <code>OLLAMA_BASE_URL</code> 로 Ollama 에 붙습니다. 구성 A 면 <code>make db</code> 대신 <code>docker compose up -d db ollama</code> 로 DB 와 Ollama 만 띄우고, 구성 C 면 터널을 열어 둔 채 <code>make db</code> 만 하면 됩니다.</p>
+
+  <h3>모델 고르기 (<code>OLLAMA_MODEL</code>, 바꾼 뒤 모델을 다시 받고 <code>make up</code>)</h3>
+  <table>
+    <tr><th>모델</th><th>크기</th><th>한국어·JSON</th><th>권장 환경</th></tr>
+    <tr><td><code>exaone3.5:7.8b</code> (이 문서의 기본)</td><td>약 4.8GB</td><td>LG AI 연구원의 한국어·영어 모델, 한국어 자연스럽고 JSON 형식 대체로 안정적</td><td>A(메모리 12GB 이상), B·C(VRAM 8GB 이상)</td></tr>
+    <tr><td><code>exaone3.5:2.4b</code></td><td>약 1.6GB</td><td>가볍고 빠름, 피드백 문장이 단순해짐</td><td>A 에서 7.8b 가 너무 느릴 때</td></tr>
+    <tr><td><code>exaone3.5:32b</code></td><td>약 19GB</td><td>이 계열에서 품질 가장 좋음</td><td>B·C 에서 VRAM 24GB 이상</td></tr>
+    <tr><td><code>gemma3:4b</code> (템플릿 기본값)</td><td>약 3.3GB</td><td>Google, 한국어 가능, JSON 형식은 가끔 틀림 (재시도로 대부분 해결)</td><td>exaone 라이선스가 걸릴 때의 대안</td></tr>
+    <tr><td><code>gemma3:12b</code></td><td>약 8GB</td><td>한국어 품질 좋고 형식 안정적</td><td>VRAM 12GB 이상</td></tr>
+    <tr><td><code>qwen3:8b</code></td><td>약 5GB</td><td>좋음. 생각 과정(<code>&lt;think&gt;</code>)은 템플릿이 자동으로 지움</td><td>VRAM 8GB 이상</td></tr>
+  </table>
+  <div class="note"><code>exaone3.5</code> 는 EXAONE AI Model License(비상업) 로 배포됩니다. 학습·연구·개인 프로젝트는 되지만 상업 서비스로 내놓을 때는 라이선스를 확인하고, 필요하면 <code>.env</code> 의 <code>OLLAMA_MODEL</code> 만 <code>gemma3:12b</code> 등으로 바꾸면 됩니다 (코드 변경 없음).</div>
+  <p>처음 요청은 모델을 메모리에 올리느라 느리고, 그 뒤 <code>OLLAMA_KEEP_ALIVE</code>(기본 30분) 동안은 빠릅니다. 긴 채용 공고를 넣어 입력이 잘리면 <code>OLLAMA_CONTEXT_LENGTH</code>(기본 8192)를 늘립니다. 작은 모델은 피드백 문장이 단조롭거나 점수가 후할 수 있으니, 최종 품질 비교는 OpenAI 와 나란히 해 보세요.</p>
+
+  <h3><span class="tag ok">확인</span></h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="o1"> <span>모델 목록에 <code>exaone3.5:7.8b</code> 가 보인다 (A·B: <code>make ai-models</code> 또는 Windows <code>docker compose exec ollama ollama list</code>, C: 원격 서버에서 <code>ollama list</code>)</span></label></li>
+    <li><label><input type="checkbox" data-k="o5"> <span>(C) 내 PC 브라우저에서 http://localhost:11434/api/tags 를 열면 모델 목록 JSON 이 나온다 (터널 정상)</span></label></li>
+    <li><label><input type="checkbox" data-k="o2"> <span>http://localhost:3000 의 AI 채팅에서 "안녕" 에 한국어로 답이 온다 (첫 답은 느릴 수 있음)</span></label></li>
+    <li><label><input type="checkbox" data-k="o3"> <span>(B·C) 답하는 동안 서버의 <code>nvidia-smi</code> 에 ollama 프로세스가 GPU 메모리를 쓰고 있다</span></label></li>
+    <li><label><input type="checkbox" data-k="o4"> <span><code>AI_PROVIDER=openai</code> 로 되돌리고 다시 실행하면 다시 OpenAI 로 답한다 (전환이 <code>.env</code> 만으로 되는지)</span></label></li>
+  </ul>
+  <div class="note">6단계부터의 프롬프트는 "OpenAI 와 Ollama 둘 다에서 동작"하도록 짜여 있습니다 (JSON 모드, 검증, 재시도, 백그라운드 처리). 그래도 작은 모델에서 질문 생성이 자주 실패하면 모델을 키우거나(원격 GPU 라면 <code>exaone3.5:32b</code>) 그 단계만 OpenAI 로 돌리세요.</div>
+</section>
+
+<!-- 4 -->
+<section id="plan">
+  <h2><span class="num">4</span>설계 문서 만들기 (<code>docs/PLAN.md</code>)</h2>
+  <p class="lead">코드를 쓰기 전에 화면, 테이블, API, 지표 계산식, LLM 프롬프트를 한 문서로 정합니다. 이후 모든 프롬프트가 이 문서를 기준으로 움직입니다.</p>
+  <div class="block prompt"><div class="label">프롬프트</div><pre><code>웹캠 모의 면접 + AI 피드백 서비스를 이 프로젝트에 만들려고 해. 아직 코드는 쓰지 말고 설계 문서 docs/PLAN.md 만 작성해줘.
+
+[서비스]
+- 사용자가 분야(예: 백엔드 개발자, 마케팅, 간호사, 공기업 행정), 수준(신입/경력), 질문 수(3~10), 채용 공고 내용(선택)을 입력하면 AI 가 면접 질문 세트를 만든다. 질문마다 평가 의도(무엇을 보려는 질문인지)도 만든다.
+- 면접자가 카메라·마이크를 점검하고 준비되면 면접을 시작한다. 질문을 화면에 띄우고 음성으로 읽어 준 뒤 답변을 녹음한다 (질문당 최대 답변 시간 기본 120초, "답변 완료" 버튼).
+- 답변하는 동안 브라우저에서 영상으로 자세·표정·시선·제스처를 분석하고, 답변 음성은 서버에서 텍스트로 바꿔 말하기 속도·침묵·군말을 계산한다.
+- 모든 질문이 끝나면 답변 내용 + 말하기 지표 + 비언어 지표를 종합한 피드백 리포트를 보여 준다. 지난 면접 기록을 다시 볼 수 있다.
+
+[정해 둔 기술 결정] 이대로 설계해줘.
+- 영상은 서버로 보내지 않는다. 브라우저에서 @mediapipe/tasks-vision 의 FaceLandmarker(blendshapes, 얼굴 변환 행렬)와 PoseLandmarker(lite)로 분석하고, 질문마다 요약 지표 JSON 만 보낸다.
+- 음성은 질문마다 MediaRecorder 로 녹음해 multipart 로 업로드하고, 백엔드가 OpenAI 호환 음성 인식 API(response_format=verbose_json, 단어 타임스탬프)로 텍스트와 단어별 시각을 받는다. 제공자는 STT_PROVIDER 설정 하나로 고른다: openai(기본, whisper-1), groq(무료 등급, whisper-large-v3-turbo), local(Compose 의 speaches 컨테이너에서 faster-whisper 실행, 무료). 오디오 파일은 인식 후 저장하지 않는다.
+- 질문 읽기는 브라우저 speechSynthesis(ko-KR).
+- 질문 생성·피드백은 기존 app/ai 의 ChatModel(ChatModelDep)로만 부르고, model.complete(..., json_mode=True) 로 JSON 을 받아 pydantic 으로 검증한다. 검증 실패 시 1회 재시도, 그래도 실패하면 상태 FAILED 와 한국어 오류 메시지를 저장한다 (요청 안에서 바로 답하는 호출이면 502). 프롬프트는 OpenAI 와 Ollama 의 로컬 모델(exaone3.5:7.8b 등 7B 급) 둘 다에서 통하도록 짧고 구체적으로 쓰고 출력 예시 JSON 을 넣는다. 제공자는 .env 의 AI_PROVIDER 로만 바뀌고 코드에 제공자 분기를 두지 않는다.
+- 오래 걸리는 작업(질문 생성, 답변별 피드백, 종합 리포트)은 요청 안에서 기다리지 않고 FastAPI BackgroundTasks 로 돌린다. 상태(PENDING/RUNNING/DONE/FAILED)와 오류 메시지를 저장하고, 화면은 상태를 다시 조회(폴링 2~3초)한다. 같은 작업이 겹쳐 돌지 않게 한다.
+- 지표 판정 기준(임계값)은 백엔드 상수·설정과 프론트 상수 한곳에 모아 바꿀 수 있게 한다. 비언어 지표는 "카메라 영상으로 추정한 참고값"이라고 화면에 표시한다.
+
+[PLAN.md 에 넣을 것]
+1. 화면 목록, 라우트 경로, 화면 사이 흐름
+2. DB 테이블과 컬럼(interviews, interview_questions, interview_answers 를 기준으로 다듬기), 면접 상태 값(GENERATING, READY, IN_PROGRESS, COMPLETED, FAILED)
+3. API 표(메서드, 경로, 요청, 응답, 오류). 경로는 /api/interviews 아래
+4. 말하기 지표 정의와 계산식: 답변 시간, 분당 음절 수(한글 음절 기준), 첫 발화까지 걸린 시간, 2초 이상 침묵 횟수·총 시간, 군말(음, 어, 그, 저, 약간, 뭐랄까 등) 횟수. 판정 구간(느림/적정/빠름 등)은 예시 기본값으로
+5. 비언어 지표 정의와 계산식: 얼굴 보임 비율, 카메라 응시 비율(머리 방향 + 눈 방향 blendshapes), 머리 흔들림, 어깨 기울기, 자세 무너짐(점검 때 잰 기준 자세 대비), 미소 비율, 분당 눈 깜빡임, 손 제스처 빈도·과다 움직임
+6. LLM 프롬프트 설계: 질문 생성, 답변별 피드백, 종합 리포트 각각의 입력, 출력 JSON 스키마, 점수 기준(루브릭), 실패 시 처리
+7. 개인정보·보안: 영상 미전송, 오디오 미저장, 본인 면접만 접근, 외부 전송 데이터(음성, 텍스트) 안내 문구
+8. 구현 단계(이 순서 그대로): ① 면접 세트와 질문 생성 ② 카메라·마이크 점검 화면 ③ 비언어 분석 모듈 ④ 음성 인식과 말하기 지표 ⑤ 면접 진행 화면 ⑥ 피드백과 결과 리포트 ⑦ 기록과 대시보드
+9. 새 환경 변수 목록 (.env.example, docker-compose.yml backend environment, 백엔드 Settings 에 함께 넣을 것). 템플릿에 이미 있는 것(client.ts 의 FormData 처리, nginx 25MB·300초, python-multipart, AI_MAX_TOKENS)은 확인만 한다
+10. 저장 설계: 말하기·비언어 지표와 피드백은 PostgreSQL JSONB 컬럼(SQLAlchemy JSON 타입, SQLite 테스트 호환)에 두고 자주 조회하는 컬럼만 분리, interviews(user_id, created_at) 와 interview_answers(interview_id) 인덱스, 피드백·리포트에 prompt_version 저장
+11. 동의와 삭제: 면접 시작 전 동의 화면(카메라·마이크 사용, 음성·텍스트가 어디로 가는지, 영상 미전송, 오디오 미저장) 문구와 동의 시각 저장, 면접 삭제 시 답변·피드백까지 함께 삭제(cascade)
+12. 확장 자리: 나중에 넣을 기능(꼬리 질문, 질문 은행 캐시, 면접관 페르소나, 영어 면접, 결과 공유 링크, 운영 배포 HTTPS)이 어느 모듈에 들어갈지 한 줄씩
+
+CLAUDE.md 와 .claude/rules 를 먼저 읽고 기존 구조(backend/app/&lt;도메인&gt;/, frontend/src/api/&lt;도메인&gt;.ts, src/pages/)에 맞춰 써줘. 정하지 않은 부분은 합리적인 기본값을 정하고 PLAN.md 끝의 "정한 기본값" 목록에 적어줘. 마지막으로 CLAUDE.md 에 "기능 설계는 docs/PLAN.md 를 따른다"는 한 줄을 추가해줘.</code></pre></div>
+
+  <h3><span class="tag ok">확인</span></h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="d1"> <span><code>docs/PLAN.md</code> 에 위 1~9 절이 모두 있다</span></label></li>
+    <li><label><input type="checkbox" data-k="d2"> <span>API 경로가 모두 <code>/api/interviews</code> 로 시작하고, 답변 업로드가 multipart 로 되어 있다</span></label></li>
+    <li><label><input type="checkbox" data-k="d3"> <span>"정한 기본값" 목록을 읽어 보고, 바꾸고 싶은 것은 지금 말해서 고쳤다 (예: "질문 수 기본은 5개, 답변 시간은 90초로")</span></label></li>
+    <li><label><input type="checkbox" data-k="d4"> <span>커밋했다</span></label></li>
+  </ul>
+</section>
+
+<!-- 5 -->
+<section id="design">
+  <h2><span class="num">5</span>디자인 준비 (Google Stitch, 선택)</h2>
+  <p class="lead">지금 디자인을 넣어 두면 이후 단계에서 만드는 화면이 그 디자인을 참고합니다. 건너뛰고 13단계에서 한 번에 해도 됩니다.</p>
+  <h3><span class="tag todo">할 일</span> Stitch 에서 화면 만들기</h3>
+  <p>https://stitch.withgoogle.com 에서 <b>한 프로젝트 안에</b> 아래 화면을 같은 스타일로 만듭니다. 먼저 공통 스타일 문장을 넣고, 화면마다 설명을 덧붙이면 됩니다.</p>
+  <div class="block"><div class="label">Stitch 에 넣을 공통 스타일 (예시, 원하는 대로 바꾸기)</div><pre><code>한국어 웹 서비스 "AI 모의 면접". 데스크톱 웹 화면. 차분하고 신뢰감 있는 남색 주 색과 밝은 회색 바탕, 둥근 카드, 얇은 테두리, 약한 그림자, 글꼴은 Pretendard 느낌의 깔끔한 고딕.</code></pre></div>
+  <table>
+    <tr><th>폴더 이름</th><th>Stitch 화면 설명</th></tr>
+    <tr><td><code>landing</code></td><td>서비스 소개: 웹캠으로 모의 면접, AI 가 말하기·자세·표정·답변 내용을 분석해 피드백. 시작하기 버튼</td></tr>
+    <tr><td><code>login</code>, <code>signup</code></td><td>이메일·비밀번호 로그인 / 이름·이메일·비밀번호 회원가입</td></tr>
+    <tr><td><code>dashboard</code></td><td>최근 면접 5개, 점수 추이 막대, 새 모의 면접 버튼</td></tr>
+    <tr><td><code>interview-new</code></td><td>분야 입력과 자주 쓰는 분야 버튼, 신입/경력, 질문 수, 채용 공고 입력칸, 질문 만들기 버튼</td></tr>
+    <tr><td><code>interview-check</code></td><td>카메라 미리보기, 마이크 소리 크기 막대, 장치 선택, 음성 출력 테스트, 기준 자세 측정, 준비 완료 버튼</td></tr>
+    <tr><td><code>interview-run</code></td><td>큰 카메라 화면, 위에 질문 텍스트, 진행 3/5, 남은 시간, 녹음 중 표시, 답변 완료 버튼</td></tr>
+    <tr><td><code>interview-result</code></td><td>종합 점수, 영역별 점수 막대, 강점·개선점, 말하기·자세 지표 표, 질문별 접이식 피드백 카드</td></tr>
+    <tr><td><code>interview-history</code></td><td>면접 기록 표: 날짜, 분야, 수준, 상태, 점수, 결과 보기</td></tr>
+  </table>
+  <h3><span class="tag todo">할 일</span> Stitch 에서 내려받기</h3>
+  <ol class="steps">
+    <li>모든 화면의 "Generating Screen…" 표시가 사라질 때까지 기다립니다. 생성 중에 받으면 빈 화면이 들어갑니다.</li>
+    <li>캔버스에서 가져올 화면을 모두 선택합니다 (드래그로 감싸거나 Shift+클릭). 하나만 선택하면 그 화면만 나갑니다.</li>
+    <li>오른쪽 위 <b>내보내기</b> → <b>ZIP</b>(코드 다운로드)을 고릅니다. 화면별 HTML(<code>code.html</code>, Tailwind 설정 포함)과 화면 이미지(<code>screen.png</code>)가 들어 있습니다. Figma, AI Studio, 클립보드 복사 같은 다른 항목은 쓰지 않습니다. (메뉴 이름은 Stitch 업데이트에 따라 조금 다를 수 있습니다.)</li>
+    <li>받은 ZIP 을 프로젝트의 <code>design/stitch/_import</code> 에 그대로 풉니다. 폴더 이름 정리는 Claude 에게 맡깁니다.</li>
+  </ol>
+  <div class="block"><div class="label">Windows (PowerShell, 프로젝트 폴더에서. 파일 이름은 실제 받은 이름으로)</div><pre><code>Expand-Archive -Path "$HOME\Downloads\stitch.zip" -DestinationPath design\stitch\_import</code></pre></div>
+  <div class="block"><div class="label">macOS (프로젝트 폴더에서)</div><pre><code>unzip ~/Downloads/stitch.zip -d design/stitch/_import</code></pre></div>
+  <p>터미널 대신 탐색기(Finder)에서 ZIP 을 풀고, 풀린 폴더를 VS Code 왼쪽 탐색기의 <code>design/stitch</code> 위로 끌어다 놓아도 됩니다. 이름은 <code>_import</code> 가 아니어도 아래 프롬프트에 실제 이름을 쓰면 됩니다.</p>
+  <div class="block prompt"><div class="label">프롬프트 (화면 폴더 정리)</div><pre><code>design/stitch/_import 에 Google Stitch 에서 받은 ZIP 을 풀어 두었어. 각 화면의 screen.png 와 code.html 을 보고 design/stitch/&lt;이름&gt;/code.html, screen.png 로 옮겨줘. 이름은 landing, login, signup, dashboard, interview-new, interview-check, interview-run, interview-result, interview-history 중 맞는 것으로 하고, 맞는 게 없으면 영문 소문자 하이픈 이름으로 새로 정해줘. 옮긴 뒤 _import 는 지우고 어떤 화면을 어디로 옮겼는지 표로 보여줘. 아직 디자인 적용은 하지 마.</code></pre></div>
+  <div class="block prompt"><div class="label">프롬프트 (색과 글꼴 먼저)</div><pre><code>/apply-design 색과 글꼴만</code></pre></div>
+  <div class="block prompt"><div class="label">프롬프트 (지금 있는 화면에 적용. 받은 화면만 적기)</div><pre><code>/apply-design design/stitch/landing
+Stitch 화면의 숫자 통계, 사용자 후기, 회사 로고 같은 예시 내용은 실제 데이터가 아니니 그대로 옮기지 말고 빼거나 자리표시로 바꿔줘. 사람 사진 같은 외부 이미지도 자리표시로.</code></pre></div>
+  <p>나머지 <code>interview-*</code> 화면은 아직 짝이 될 화면이 없으니 그대로 두면, 6~12단계 프롬프트가 해당 폴더를 참고해 만듭니다.</p>
+  <h3><span class="tag ok">확인</span></h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="g1"> <span>Claude 가 "원본 값 → 토큰" 대응표를 보고했고, 개발 모드 화면 색·글꼴이 Stitch 이미지와 비슷하다</span></label></li>
+    <li><label><input type="checkbox" data-k="g2"> <span>로그인·회원가입이 여전히 동작한다. 커밋했다</span></label></li>
+  </ul>
+</section>
+
+<!-- 6 -->
+<section id="s1">
+  <h2><span class="num">6</span>① 면접 세트와 질문 생성</h2>
+  <p class="lead">면접 데이터 구조를 만들고, 분야를 입력하면 AI 가 질문을 만들어 저장합니다. 업로드·대기 시간 설정도 이 단계에서 미리 넣습니다.</p>
+  <div class="block prompt"><div class="label">프롬프트</div><pre><code>docs/PLAN.md 의 구현 단계 ①(면접 세트와 질문 생성)을 진행해줘. /add-domain 절차를 따르되 아래를 지켜줘.
+
+[백엔드 app/interviews/]
+- 모델: PLAN 의 interviews, interview_questions, interview_answers 세 테이블을 모두 만든다 (답변 테이블은 이번엔 만들기만). 지표·피드백 컬럼은 JSON 타입, PLAN 10절의 인덱스, 면접 삭제 시 cascade. Alembic 마이그레이션, tests/test_migrations.py 확인 추가.
+- POST /api/interviews: 분야·수준·질문 수·채용 공고(선택)를 검증해 면접을 status=GENERATING 으로 먼저 저장하고 202 로 돌려준다. 질문 생성은 BackgroundTasks 에서 ChatModel 의 json_mode=True 로 질문과 평가 의도를 만들어 pydantic 으로 검증해 저장하고 READY 로 바꾼다 (로컬 CPU 모델은 몇 분 걸릴 수 있으므로 요청 안에서 기다리지 않는다). 사용자 입력(분야, 채용 공고)은 system 프롬프트가 아니라 user 메시지에 넣고, 채용 공고는 4000자로 자른다. 응답이 JSON 이 아니거나 질문 수가 맞지 않으면 한 번 다시 요청하고, 그래도 실패하면 FAILED 와 한국어 오류 메시지를 저장한다. POST /api/interviews/{id}/regenerate 는 FAILED 인 면접만 다시 GENERATING 으로 돌려 생성을 재시도한다 (RUNNING 중 중복 호출은 409). 프롬프트에 출력 예시 JSON 을 넣고 prompt_version 상수를 둔다 (작은 Ollama 모델에서도 통하게).
+- GET /api/interviews(본인 것만 최신순, 페이지네이션), GET /api/interviews/{id}(질문 포함), DELETE /api/interviews/{id}. 다른 사용자의 면접은 404.
+- 테스트는 get_chat_model 을 가짜 모델로 바꿔서 (BackgroundTasks 는 TestClient 가 응답 뒤 바로 실행함): 정상 생성 후 READY, JSON 깨짐 후 재시도 성공, 두 번 실패 FAILED 저장과 regenerate 로 복구, 인증 없음 401, 검증 실패 400, 다른 사용자 404.
+
+[공용 설정 확인]
+- docker-compose.yml backend environment 에 AI_MAX_TOKENS 가 있고, frontend/nginx.conf 의 location /api/ 에 proxy_read_timeout 300s 와 client_max_body_size 25m 이 있는지 확인한다. 없으면(예전 템플릿) 추가한다.
+
+[프론트엔드]
+- src/api/interviews.ts, "새 면접" 화면 /interviews/new: 분야 입력 + 자주 쓰는 분야 버튼, 신입/경력, 질문 수, 채용 공고(여러 줄). 만들기를 누르면 바로 상세 화면으로 이동하고, GENERATING 동안 2~3초마다 다시 조회하며 진행 표시(OpenAI 는 수십 초, 로컬 모델은 몇 분 걸릴 수 있다는 안내). FAILED 면 오류 메시지와 "다시 만들기" 버튼. 다른 화면으로 갔다 와도 생성은 서버에서 이어진다.
+- 생성 후 상세 화면 /interviews/:id: 분야·수준, 질문 목록(평가 의도는 접어 두기), "면접 시작" 버튼(다음 단계에서 연결, 지금은 비활성), 삭제.
+- 메뉴에 "모의 면접" 추가. design/stitch/interview-new 가 있으면 그 레이아웃을 참고해 토큰 클래스로 옮긴다.</code></pre></div>
+  <h3><span class="tag ok">확인</span> (개발 모드)</h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="a1"> <span>새 면접에서 "백엔드 개발자 / 신입 / 5개" 로 만들면 "생성 중" 표시 뒤 질문 5개가 한국어로 나온다</span></label></li>
+    <li><label><input type="checkbox" data-k="a2"> <span>다른 분야(예: 간호사, 마케팅)로 만들면 분야에 맞는 질문이 나온다</span></label></li>
+    <li><label><input type="checkbox" data-k="a3"> <span>분야를 비우고 만들면 입력칸 아래에 한국어 오류가 보인다</span></label></li>
+    <li><label><input type="checkbox" data-k="a4"> <span>다른 계정으로 로그인하면 내 면접이 목록에 없고, 주소로 직접 열어도 "찾을 수 없음"이 나온다</span></label></li>
+    <li><label><input type="checkbox" data-k="a5"> <span>Claude 보고에 테스트 통과(pytest), 프론트엔드 lint·build 통과가 있다. 커밋했다</span></label></li>
+    <li><label><input type="checkbox" data-k="a6"> <span>(Ollama 로 바꿔 둔 경우) 몇 분 걸려도 시간 초과 없이 질문이 나오고, 기다리는 동안 다른 화면에 갔다 돌아와도 "생성 중" 이 이어지다가 완성된다</span></label></li>
+  </ul>
+</section>
+
+<!-- 7 -->
+<section id="s2">
+  <h2><span class="num">7</span>② 카메라·마이크 점검 화면</h2>
+  <div class="block prompt"><div class="label">프롬프트</div><pre><code>docs/PLAN.md 의 구현 단계 ②(카메라·마이크 점검 화면 /interviews/:id/check)를 진행해줘.
+
+- 카메라·마이크 스트림 관리는 src/features/interview/useMediaStream.ts 훅으로 분리한다 (getUserMedia 로 video 1280x720 정도 + audio, 장치 목록, 장치 바꾸기, 화면을 떠나면 모든 트랙 stop). src/features/ 폴더를 새로 쓰는 규칙을 .claude/rules/frontend.md 에 한 줄로 추가해줘.
+- 권한 거부, 장치 없음, 다른 앱이 사용 중, 보안 연결이 아님(localhost 가 아닌 http 주소)을 구분해서 한국어 안내와 해결 방법을 보여 준다.
+- 카메라 미리보기(좌우 반전), 마이크 소리 크기 막대(AudioContext + AnalyserNode), 카메라·마이크 선택 목록.
+- 음성 출력 테스트: speechSynthesis 로 "안녕하세요. 모의 면접을 시작하겠습니다." 를 ko-KR 목소리로 읽는다. 질문 읽기는 src/features/interview/speech.ts 로 분리(목소리 고르기, 읽기 끝 Promise, 취소). 한국어 목소리가 없으면 OS 별 설치 방법을 안내하고 텍스트로만 진행할 수 있게 한다.
+- 상세 화면의 "면접 시작" 버튼을 이 화면으로 연결한다. "준비 완료" 버튼은 /interviews/:id/run 으로 이동만 한다 (진행 화면은 단계 ⑤).
+- design/stitch/interview-check 가 있으면 참고한다. 색은 토큰 클래스만.</code></pre></div>
+  <h3><span class="tag ok">확인</span> (개발 모드, Chrome 또는 Edge 권장)</h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="b1"> <span>처음 들어가면 브라우저가 카메라·마이크 권한을 묻고, 허용하면 내 모습이 거울처럼 보인다</span></label></li>
+    <li><label><input type="checkbox" data-k="b2"> <span>말하면 소리 막대가 움직인다</span></label></li>
+    <li><label><input type="checkbox" data-k="b3"> <span>음성 출력 테스트에서 한국어 목소리로 문장이 들린다</span></label></li>
+    <li><label><input type="checkbox" data-k="b4"> <span>주소창 왼쪽 자물쇠(사이트 설정)에서 카메라를 차단하고 새로고침하면 한국어 안내가 나온다 (확인 후 다시 허용)</span></label></li>
+    <li><label><input type="checkbox" data-k="b5"> <span>다른 화면으로 이동하면 카메라 표시등이 꺼진다. 커밋했다</span></label></li>
+  </ul>
+</section>
+
+<!-- 8 -->
+<section id="s3">
+  <h2><span class="num">8</span>③ 자세·표정 분석 (브라우저)</h2>
+  <p class="lead">가장 확인이 필요한 부분이라, 분석 값을 눈으로 볼 수 있는 개발용 화면을 함께 만듭니다.</p>
+  <div class="block prompt"><div class="label">프롬프트</div><pre><code>docs/PLAN.md 의 구현 단계 ③(비언어 분석 모듈)을 진행해줘.
+
+- npm install @mediapipe/tasks-vision. wasm 은 jsdelivr CDN 의 설치한 버전과 같은 버전 경로, 모델(.task)은 Google 공식 mediapipe-models 주소에서 받는다. 주소는 src/features/interview/analyzer/config.ts 상수로 모은다.
+- src/features/interview/analyzer/: FaceLandmarker(VIDEO 모드, outputFaceBlendshapes, outputFacialTransformationMatrixes)와 PoseLandmarker lite 를 한 번만 만들어 재사용하고, 초당 약 10회 detectForVideo 한다. 실패해도 화면이 멈추지 않게 한다.
+- 프레임별 값(얼굴 보임, 머리 yaw/pitch, 눈 방향, 미소, 눈 깜빡임, 어깨 기울기, 코-어깨 높이, 손목 위치)을 모으는 부분과, start()/stop() 사이 구간을 PLAN 5절의 요약 지표 JSON 으로 바꾸는 순수 함수(summarize)를 분리한다. 임계값은 config.ts 한곳에.
+- vitest 를 devDependency 로 추가하고 package.json 에 "test": "vitest run" 스크립트를 둔 뒤, summarize 를 고정 입력(정면 응시만, 옆 보기 절반, 손 흔들기, 얼굴 없음)으로 검증하는 summarize.test.ts 를 만든다. 종료 훅이 npm test 를 함께 돌린다.
+- 점검 화면(/interviews/:id/check)에 "기준 자세 측정"(3초 동안 바르게 앉기)을 추가하고, 기준값을 sessionStorage 에 저장해 진행 화면에서 쓴다. 측정 전에는 준비 완료를 누를 수 없게 한다.
+- 개발 확인용 화면 /dev/analyzer (import.meta.env.DEV 일 때만 라우트 등록, 로그인 필요): 카메라 위 캔버스에 얼굴 윤곽 일부·어깨·손목 점을 그리고 실시간 값(응시 여부, yaw/pitch, 미소, 어깨 기울기, 손 움직임)을 숫자로 보여 준다. "10초 기록" 버튼을 누르면 요약 지표 JSON 을 화면에 보여 준다. 캔버스 색은 theme.css 토큰을 getComputedStyle 로 읽어 쓴다 (직접 색 금지 규칙).
+- 모델 로딩 실패(네트워크 차단 등) 시 분석 없이 면접은 진행할 수 있게 하고 안내 문구를 띄운다.</code></pre></div>
+  <h3><span class="tag ok">확인</span> (개발 모드, http://localhost:5173/dev/analyzer)</h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="v1"> <span>몇 초 안에 모델이 로딩되고 얼굴·어깨·손목 위에 점이 따라 움직인다</span></label></li>
+    <li><label><input type="checkbox" data-k="v2"> <span>카메라를 보면 "응시", 고개를 옆으로 돌리면 "응시 아님"으로 바뀐다</span></label></li>
+    <li><label><input type="checkbox" data-k="v3"> <span>웃으면 미소 값이 올라가고, 한쪽 어깨를 내리면 어깨 기울기가 커진다</span></label></li>
+    <li><label><input type="checkbox" data-k="v4"> <span>10초 기록: 가만히 카메라를 본 경우와 손을 크게 흔들며 옆을 본 경우의 JSON 이 확실히 다르다 (응시 비율, 손 제스처 값)</span></label></li>
+    <li><label><input type="checkbox" data-k="v6"> <span><code>cd frontend &amp;&amp; npm test</code> 가 통과한다</span></label></li>
+    <li><label><input type="checkbox" data-k="v5"> <span>점검 화면에서 기준 자세 측정 후에만 준비 완료가 눌린다. 작업 관리자(macOS 활동 모니터)에서 CPU 가 계속 100% 로 붙어 있지 않다. 커밋했다</span></label></li>
+  </ul>
+  <div class="note">값이 이상하면 숫자를 그대로 알려 주면 됩니다. 예: "정면을 보는데도 응시 비율이 0.3 이야. 안경을 쓰고 있어." Claude 가 config.ts 의 임계값을 조정합니다.</div>
+</section>
+
+<!-- 9 -->
+<section id="s4">
+  <h2><span class="num">9</span>④ 음성 인식과 말하기 지표</h2>
+  <div class="block prompt"><div class="label">프롬프트</div><pre><code>docs/PLAN.md 의 구현 단계 ④(음성 인식과 말하기 지표)를 진행해줘.
+
+[백엔드]
+- backend/pyproject.toml 에 python-multipart 가 없으면 uv add python-multipart (새 템플릿에는 이미 있음).
+- app/ai 의 구조(providers.py 의 ChatModel)를 따라 app/ai/speech.py 에 SpeechToText 프로토콜, OpenAI 호환 구현 하나, get_speech_to_text 의존성을 만든다. 요청은 httpx 로 POST {base_url}/audio/transcriptions, language=ko, response_format=verbose_json, timestamp_granularities[]=word, 그리고 군말이 빠지지 않게 prompt="음... 어... 그, 저, 뭐랄까, 약간 그러니까" 를 넣는다 (Whisper 는 기본적으로 군말을 지우는 경향이 있음). 키가 필요한데 없거나 실패하면 ModelError.
+- 제공자는 STT_PROVIDER 하나로 고르고, 제공자마다 주소·키·모델만 다르다 (Provider Literal 과 get_speech_to_text 에 연결):
+  · openai (기본): base_url=OPENAI_BASE_URL, 키 OPENAI_API_KEY, 모델 OPENAI_STT_MODEL=whisper-1
+  · groq (무료 등급): base_url=GROQ_BASE_URL=https://api.groq.com/openai/v1, 키 GROQ_API_KEY, 모델 GROQ_STT_MODEL=whisper-large-v3-turbo. 429(사용량 초과)는 "무료 사용량을 넘었습니다" 한국어 메시지로.
+  · local (무료, 내 PC): base_url=LOCAL_STT_BASE_URL(컨테이너 안에서는 http://stt:8000/v1, 개발 모드는 http://localhost:${STT_PORT}/v1), 키 없음, 모델 LOCAL_STT_MODEL=Systran/faster-whisper-small. 첫 요청은 모델 로딩으로 오래 걸리니 이 제공자일 때만 타임아웃을 길게(300초).
+- docker-compose.yml 에 stt 서비스 추가: 이미지 ghcr.io/speaches-ai/speaches 의 CPU 태그(latest-cpu 말고 지금 버전 태그로 고정), profiles: ["stt"], container_name ${COMPOSE_PROJECT_NAME}-stt, 포트 127.0.0.1:${STT_PORT:-8001}:8000, 모델 캐시 볼륨 ${COMPOSE_PROJECT_NAME}-stt-models 를 /home/ubuntu/.cache/huggingface/hub 에, 환경 변수 PRELOAD_MODELS='["${LOCAL_STT_MODEL}"]' 로 시작할 때 모델을 받게 한다. Makefile 에 stt-up(docker compose --profile stt up -d stt) 추가, README 에 Windows 용 같은 명령도 적기.
+- 새 설정(STT_PROVIDER, GROQ_*, LOCAL_STT_*, STT_PORT)은 AiSettings, .env.example(제공자별 설명 주석 포함), docker-compose.yml backend environment 에 함께 추가한다. 기본값은 openai.
+- app/interviews/speech_metrics.py: 단어 타임스탬프와 녹음 길이로 PLAN 4절 지표를 계산하는 순수 함수 + 고정 입력으로 값을 검증하는 단위 테스트(침묵, 군말, 분당 음절, 빈 답변).
+- POST /api/interviews/{id}/questions/{questionId}/answer (multipart: audio 파일, durationMs, nonverbal JSON 문자열): 형식(webm, ogg, mp4, m4a, wav)·크기(25MB) 검사, 음성 인식, 지표 계산, 답변 저장(같은 질문에 다시 보내면 덮어쓰기), 응답에 transcript 와 지표. 오디오는 저장하지 않는다. 인식 결과가 비어도 저장하고 빈 답변으로 표시한다.
+- 테스트: 음성 인식은 dependency_overrides 로 가짜로 바꾸고, OpenAI 호환 구현은 httpx.post 를 monkeypatch 해 세 제공자 각각의 주소·키·모델·form 필드만 확인한다 (.claude/rules/ai.md). 인증 없음 401, 다른 사용자 404, 잘못된 형식 400.
+
+[프론트엔드]
+- src/api/client.ts 의 api() 가 body 가 FormData 일 때 Content-Type 을 넣지 않는지 확인한다 (새 템플릿은 이미 그렇게 되어 있음. 아니면 고친다).
+- interviewsApi.submitAnswer 추가. 녹음은 src/features/interview/recorder.ts 로 분리(오디오 트랙만, MediaRecorder.isTypeSupported 로 webm/opus → mp4 순서로 고르기).
+- /dev/analyzer 화면에 "녹음 테스트" 영역: 내 면접 하나와 질문을 고르고 10초 녹음 → 업로드 → transcript 와 말하기 지표를 보여 준다.</code></pre></div>
+  <h3>음성 인식 제공자 고르기</h3>
+  <p>기본은 OpenAI <code>whisper-1</code> 이고, <code>.env</code> 의 <code>STT_PROVIDER</code> 한 줄로 바꿉니다. 셋 다 단어별 시각을 주므로 말하기 속도·침묵 계산은 똑같이 동작합니다. 바꾼 뒤에는 백엔드를 다시 시작합니다 (Docker 면 <code>make up</code>, Windows <code>docker compose up -d --build</code>).</p>
+  <table>
+    <tr><th><code>STT_PROVIDER</code></th><th>비용</th><th>한국어 품질</th><th>단어 시각</th><th>내 PC 에 필요한 것</th></tr>
+    <tr><td><code>openai</code> (기본)</td><td>사용량 과금</td><td>좋음 (whisper-1)</td><td>지원</td><td>없음. <code>OPENAI_API_KEY</code></td></tr>
+    <tr><td><code>groq</code></td><td>무료 등급 있음 (시간당·일당 오디오 길이 한도, 넘으면 429)</td><td>좋음. whisper-1 과 비슷하거나 나음 (large-v3 계열)</td><td>지원</td><td>없음. https://console.groq.com 에서 무료 키를 만들어 <code>GROQ_API_KEY</code></td></tr>
+    <tr><td><code>local</code></td><td>무료 (내 PC 에서 실행, 음성이 밖으로 나가지 않음)</td><td>모델에 따라: <code>small</code> 은 쓸 만하지만 whisper-1 보다 오인식이 많음, <code>large-v3-turbo</code> 는 whisper-1 에 가까움</td><td>지원</td><td>Docker 이미지와 모델 내려받기 수 GB, 메모리 여유(대략 small 2GB, turbo 4GB 이상). CPU 만으로는 1분 답변 인식에 수십 초가 걸릴 수 있고 turbo 는 더 느림. NVIDIA GPU 가 있으면 빠름</td></tr>
+  </table>
+  <div class="block"><div class="label">.env 예시 (무료로 쓰기: 둘 중 하나)</div><pre><code># Groq 무료 등급
+STT_PROVIDER=groq
+GROQ_API_KEY=발급받은키
+
+# 내 PC 에서 실행 (먼저 make stt-up, Windows: docker compose --profile stt up -d stt)
+STT_PROVIDER=local
+LOCAL_STT_MODEL=Systran/faster-whisper-small</code></pre></div>
+  <p>로컬 품질이 부족하면 <code>LOCAL_STT_MODEL=deepdml/faster-whisper-large-v3-turbo-ct2</code> 로 바꿔 봅니다. 시간·메모리는 더 듭니다. 위 사양과 속도는 대략적인 값이라 내 PC 에서 직접 재 보는 게 정확합니다.</p>
+  <div class="note">질문 생성·피드백(대화 모델)도 무료로 하려면 기존 설정으로 바꿀 수 있습니다: <code>AI_PROVIDER=ollama</code>(내 PC 또는 원격 GPU 서버, 3-2 절) 또는 <code>OPENAI_BASE_URL</code> 을 Groq 주소로 바꾸고 Groq 키·모델을 쓰는 방법. 한국어 피드백 품질은 OpenAI 보다 떨어질 수 있습니다.</div>
+
+  <h3><span class="tag ok">확인</span> (개발 모드)</h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="t1"> <span>녹음 테스트에서 "저는 음, 백엔드 개발자로서 어 성능 개선 경험이 있습니다" 처럼 말하면 텍스트가 거의 그대로 나오고 군말이 잡힌다 (Whisper 가 군말을 일부 지울 수 있어 1개 이상이면 통과)</span></label></li>
+    <li><label><input type="checkbox" data-k="t2"> <span>말하다가 3초 쉬면 침묵 횟수가 1 이상, 아무 말도 안 하면 빈 답변으로 표시된다</span></label></li>
+    <li><label><input type="checkbox" data-k="t3"> <span>빠르게 읽을 때와 천천히 읽을 때 분당 음절 수가 확실히 다르다</span></label></li>
+    <li><label><input type="checkbox" data-k="t6"> <span>무료 선택지 하나 이상 확인: <code>STT_PROVIDER=groq</code> 또는 <code>local</code> 로 바꾸고 백엔드를 다시 시작한 뒤 같은 녹음 테스트에서 텍스트와 분당 음절 수가 나온다. 확인 후 원하는 값으로 되돌린다</span></label></li>
+    <li><label><input type="checkbox" data-k="t7"> <span>키를 비운 채 <code>groq</code> 로 두면 업로드가 앱을 멈추지 않고 한국어 오류 메시지를 보여 준다</span></label></li>
+    <li><label><input type="checkbox" data-k="t5"> <span>백엔드 테스트 통과. 커밋했다</span></label></li>
+  </ul>
+</section>
+
+<!-- 10 -->
+<section id="s5">
+  <h2><span class="num">10</span>⑤ 면접 진행 화면</h2>
+  <div class="block prompt"><div class="label">프롬프트</div><pre><code>docs/PLAN.md 의 구현 단계 ⑤(면접 진행 화면 /interviews/:id/run)를 진행해줘. 지금까지 만든 useMediaStream, speech, analyzer, recorder 를 조합한다.
+
+- 질문마다: 질문 텍스트 표시 + 음성으로 읽기 → 읽기가 끝나면 3초 카운트다운 → 녹음 + 비언어 분석 start → "답변 완료" 또는 최대 시간 도달 → stop. 업로드는 백그라운드로 보내고 바로 다음 질문으로 간다.
+- 화면: 내 카메라(좌우 반전, 크게), 진행 표시(3/5), 남은 시간, 녹음 중 표시, "질문 다시 듣기"(녹음 시작 전만), "면접 중단"(확인 후 상세 화면으로).
+- 답변 중 분석 결과는 기본으로 보여 주지 않는다 (긴장 방지). 설정 토글 "시선·자세 알림"을 켜면 화면 모서리에 짧은 안내만 띄운다.
+- 업로드 실패는 자동 재시도 최대 2회, 끝까지 실패한 질문은 마지막 화면에서 "다시 보내기"를 제공한다.
+- 백엔드: POST /api/interviews/{id}/start(IN_PROGRESS), POST /api/interviews/{id}/finish(이번 단계에선 모든 질문에 답변이 있는지 확인하고 COMPLETED 로 바꾸는 최소 버전, 리포트는 단계 ⑥). 완료된 면접을 다시 시작하면 409. 테스트 추가.
+- 마지막 질문이 끝나고 업로드가 모두 끝나면 finish 를 부르고 결과 화면 /interviews/:id/result 로 이동한다 (결과 화면은 지금은 질문별 transcript 와 말하기·비언어 지표 표만).
+- 진행 중 새로고침·탭 닫기 경고, 화면을 떠나면 카메라·마이크·음성 읽기·분석을 모두 멈춘다.
+- design/stitch/interview-run 이 있으면 참고한다.</code></pre></div>
+  <h3><span class="tag ok">확인</span> (개발 모드로 한 번, Docker 전체 실행으로 한 번)</h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="i1"> <span>질문 3개짜리 면접을 처음부터 끝까지 진행할 수 있다: 질문 음성 → 카운트다운 → 녹음 → 답변 완료 → 다음 질문</span></label></li>
+    <li><label><input type="checkbox" data-k="i2"> <span>답변 완료를 누르지 않으면 최대 시간에 자동으로 넘어간다 (PLAN 에서 정한 시간)</span></label></li>
+    <li><label><input type="checkbox" data-k="i3"> <span>마지막 질문 뒤 결과 화면에 질문별 내 답변 텍스트와 지표가 보인다</span></label></li>
+    <li><label><input type="checkbox" data-k="i4"> <span>진행 중 "면접 중단"을 누르면 확인 후 나가지고 카메라 표시등이 꺼진다</span></label></li>
+    <li><label><input type="checkbox" data-k="i5"> <span><b>Docker 전체 실행</b>(http://localhost:3000)에서도 같은 흐름이 되고, 1분 이상 길게 답해도 업로드가 413·504 없이 끝난다</span></label></li>
+    <li><label><input type="checkbox" data-k="i6"> <span>커밋했다</span></label></li>
+  </ul>
+</section>
+
+<!-- 11 -->
+<section id="s6">
+  <h2><span class="num">11</span>⑥ 피드백과 결과 리포트</h2>
+  <div class="block prompt"><div class="label">프롬프트</div><pre><code>docs/PLAN.md 의 구현 단계 ⑥(피드백과 결과 리포트)을 진행해줘. 모든 LLM 호출은 json_mode=True + pydantic 검증 + 1회 재시도, 오래 걸리는 작업은 BackgroundTasks 로 (PLAN 의 기술 결정).
+
+[백엔드: 답변별 피드백]
+- 답변 업로드(단계 ④ 엔드포인트)가 저장을 마치면 BackgroundTasks 로 답변별 피드백을 만든다. 입력: 질문, 평가 의도, transcript, 말하기 지표, 비언어 지표. 출력 JSON: scores{content, structure, delivery, nonverbal}(0~100), strengths[], improvements[], betterAnswer(더 나은 답변 예시). 답변 행에 feedback_status(PENDING/RUNNING/DONE/FAILED), feedback(JSON), prompt_version 을 저장한다. 업로드 응답은 기다리지 않고 바로 돌려준다.
+- 지표를 그대로 LLM 에 넘기지 말고, 판정 기준 상수(PLAN 4·5절)로 먼저 "말하기 속도: 빠름(분당 380음절, 기준 250~350)"처럼 판정 문장으로 바꿔서 넣는다. 기준값은 한 파일에 모은다. 빈 답변은 LLM 을 부르지 않고 내용 점수 0 과 "답변 없음" 피드백으로 저장한다.
+
+[백엔드: 종합 리포트]
+- POST /api/interviews/{id}/finish: 상태를 COMPLETED 로 바꾸고 BackgroundTasks 로 리포트 생성을 시작한다 (report_status PENDING → RUNNING → DONE/FAILED). 리포트 작업은 아직 피드백이 없거나 실패한 답변을 먼저 만들고(최대 3개씩 순서대로), 답변별 피드백 + 지표 평균으로 종합 리포트 JSON(overallScore, summary, categoryScores, topStrengths[3], topImprovements[3], practicePlan[]) 을 만들어 저장한다. 루브릭(점수 기준)은 프롬프트에 명시한다. 이미 RUNNING 이면 다시 시작하지 않는다(409 대신 현재 상태 반환).
+- GET /api/interviews/{id}/report: report_status, 리포트, 답변별 피드백 상태를 함께 돌려준다. 실패했으면 오류 메시지(한국어)와 다시 만들기 가능 여부.
+- 테스트: 가짜 모델로 정상, JSON 깨짐 재시도 성공, 두 번 실패 FAILED 저장, 빈 답변 질문, RUNNING 중 중복 finish, 다른 사용자 404. BackgroundTasks 는 TestClient 가 응답 뒤 바로 실행하므로 그대로 검증 가능.
+
+[프론트엔드: 결과 화면 /interviews/:id/result]
+- report_status 가 DONE 이 될 때까지 2~3초마다 다시 조회하며 "피드백 만드는 중 (3/5 답변 완료)" 진행 표시. FAILED 면 오류와 "다시 만들기" 버튼(finish 재호출). 로컬 모델에서는 몇 분 걸릴 수 있다는 안내 문구.
+- 종합 점수, 영역별 점수 막대(차트 라이브러리 없이, 색은 점수 구간에 따라 success / warning / destructive 토큰), 요약, 강점·개선점 Top 3, 연습 계획.
+- 말하기 지표 표와 비언어 지표 표: 값, 기준 범위, 판정은 components/ui 의 Badge(tone: success=적정, warning=주의). "자세·표정 지표는 카메라 영상으로 추정한 참고값입니다" 문구.
+- 질문별 접이식 카드: 질문, 내 답변 텍스트, 점수, 피드백, 더 나은 답변 예시. 피드백이 아직이면 카드 안에 진행 표시.
+- design/stitch/interview-result 가 있으면 참고한다.</code></pre></div>
+  <h3><span class="tag ok">확인</span></h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="f1"> <span>면접 한 번을 끝까지 하면 결과 화면에 종합 점수와 질문별 피드백이 나온다</span></label></li>
+    <li><label><input type="checkbox" data-k="f2"> <span>일부러 성의 없이 짧게 답한 질문은 내용 점수가 낮고, 개선점이 그 내용을 짚는다</span></label></li>
+    <li><label><input type="checkbox" data-k="f3"> <span>일부러 옆을 보거나 손을 많이 움직인 면접은 비언어 지표 판정과 피드백에 반영된다</span></label></li>
+    <li><label><input type="checkbox" data-k="f4"> <span>피드백이 한국어이고, 지표 숫자와 피드백 내용이 서로 모순되지 않는다 (예: 속도 "적정"인데 "너무 빠르다"고 하지 않음)</span></label></li>
+    <li><label><input type="checkbox" data-k="f5"> <span>결과 화면을 새로고침해도 리포트가 다시 만들어지지 않고 저장된 것이 보인다. 커밋했다</span></label></li>
+    <li><label><input type="checkbox" data-k="f6"> <span>마지막 답변 뒤 결과 화면으로 바로 넘어오고, "만드는 중" 진행 표시가 보이다가 리포트로 바뀐다 (요청이 멈춰 있지 않음)</span></label></li>
+    <li><label><input type="checkbox" data-k="f7"> <span>(선택) <code>AI_PROVIDER=ollama</code> 로 바꿔 백엔드를 다시 시작한 뒤 면접을 한 번 더 하면 느려도 리포트가 만들어진다. FAILED 가 나면 "다시 만들기"로 복구된다</span></label></li>
+  </ul>
+</section>
+
+<!-- 12 -->
+<section id="s7">
+  <h2><span class="num">12</span>⑦ 기록과 대시보드</h2>
+  <div class="block prompt"><div class="label">프롬프트</div><pre><code>docs/PLAN.md 의 구현 단계 ⑦(기록과 대시보드)을 진행해줘.
+
+- /interviews 목록: 날짜, 분야, 수준, 상태, 종합 점수, 동작(이어서 하기 / 결과 보기 / 삭제 확인). 페이지네이션. 삭제는 답변·피드백까지 함께 지워지는지 테스트로 확인한다.
+- 점검 화면(/interviews/:id/check) 맨 위에 PLAN 11절의 동의 문구와 체크박스를 넣고, 동의해야 다음으로 갈 수 있게 한다. 동의 시각은 interviews 에 저장(POST /api/interviews/{id}/consent).
+- 같은 질문으로 다시 하기: POST /api/interviews/{id}/retry 로 질문을 복사한 새 면접을 만들고 점검 화면으로 이동. 테스트 추가.
+- 대시보드(DashboardPage): 최근 면접 5개, 종합 점수 추이(최근 10회, 토큰 클래스 막대), "새 모의 면접" 버튼.
+- src/config/site.ts 의 서비스 이름·소개 문구와 랜딩 페이지 문구를 "AI 모의 면접" 서비스에 맞게 바꾼다. 랜딩에 카메라·음성 사용과 데이터 처리(영상은 브라우저에서만 분석, 음성·텍스트는 AI 분석을 위해 OpenAI 로 전송, 오디오는 저장 안 함) 안내를 넣는다.
+- 기존 AI 채팅 메뉴는 이름을 "면접 코치에게 묻기"로 바꾸고, 시스템 프롬프트를 면접 준비 도우미로 바꾼다.
+- README.md 의 API 표와 실행 방법을 갱신한다.
+- design/stitch/dashboard, interview-history 가 있으면 참고한다.</code></pre></div>
+  <h3><span class="tag ok">확인</span></h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="h1"> <span>기록 목록에 지금까지 한 면접이 보이고, 결과 보기·삭제가 된다</span></label></li>
+    <li><label><input type="checkbox" data-k="h2"> <span>"같은 질문으로 다시 하기"로 새 면접이 만들어지고 점검 화면으로 간다</span></label></li>
+    <li><label><input type="checkbox" data-k="h3"> <span>대시보드에 최근 면접과 점수 추이가 보인다. 랜딩 문구가 서비스에 맞게 바뀌었다</span></label></li>
+    <li><label><input type="checkbox" data-k="h4"> <span>커밋했다</span></label></li>
+  </ul>
+</section>
+
+<!-- 13 -->
+<section id="design-final">
+  <h2><span class="num">13</span>디자인 마무리</h2>
+  <p class="lead">5단계를 건너뛰었다면 지금 5단계의 "할 일"대로 Stitch 화면을 만들어 <code>design/stitch/</code> 에 넣습니다. 이제 모든 화면이 있으니 한 번에 짝을 맞출 수 있습니다.</p>
+  <div class="block prompt"><div class="label">프롬프트 (5단계를 건너뛴 경우: 색과 글꼴 먼저)</div><pre><code>/apply-design 색과 글꼴만</code></pre></div>
+  <div class="block prompt"><div class="label">프롬프트 (전체 화면)</div><pre><code>/apply-design design/stitch
+화면 짝: interview-new → /interviews/new, interview-check → 점검 화면, interview-run → 진행 화면, interview-result → 결과 화면, interview-history → /interviews 목록. 카메라·녹음·분석·업로드 동작과 상태 처리는 그대로 두고 마크업과 클래스만 바꿔줘.</code></pre></div>
+  <h3>디자인 확장 (선택)</h3>
+  <p>템플릿의 디자인 구조는 세 층(토큰 → UI 컴포넌트 → 화면)이라, 아래는 모두 화면 코드를 거의 건드리지 않고 됩니다. 이번 템플릿 수정으로 상태 토큰(<code>success</code>, <code>warning</code>)과 <code>Badge</code> 가 기본으로 들어갔습니다.</p>
+  <div class="block prompt"><div class="label">프롬프트 (다크 모드)</div><pre><code>헤더에 밝게/어둡게 토글을 추가해줘. &lt;html class="dark"&gt; 를 켜고 끄며 localStorage 에 기억하고, 처음엔 OS 설정을 따라가게. theme.css 의 .dark 값이 Stitch 디자인과 안 맞으면 .dark 값만 조정하고 화면 코드는 바꾸지 마.</code></pre></div>
+  <div class="block prompt"><div class="label">프롬프트 (결과 화면 시각 요소를 컴포넌트로)</div><pre><code>결과 화면의 점수 막대와 점수 원형 표시를 components/ui/ScoreBar.tsx, ScoreRing.tsx 로 빼서 대시보드 추이 그래프와 같은 모양을 쓰게 해줘. 색은 success/warning/destructive 토큰과 getComputedStyle 로만. 디자인 규칙(.claude/rules/design.md)에 두 컴포넌트를 추가해줘.</code></pre></div>
+  <div class="block prompt"><div class="label">프롬프트 (두 번째 테마)</div><pre><code>design/theme/ 에 넣은 tweakcn 테마를 두 번째 테마로 추가하고, 설정 화면에서 기본/두 번째 테마를 고를 수 있게 해줘. theme.css 에 [data-theme="calm"] 블록으로 값만 추가하고 토큰 이름은 바꾸지 마.</code></pre></div>
+  <p>새 화면을 만들 때마다 Stitch 에서 같은 프로젝트로 화면을 하나 더 만들어 <code>design/stitch/&lt;이름&gt;</code> 에 넣고 <code>/apply-design design/stitch/&lt;이름&gt;</code> 을 실행하면 같은 방식으로 들어옵니다.</p>
+
+  <h3><span class="tag ok">확인</span></h3>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="z1"> <span>화면들이 Stitch 이미지와 비슷하고, 면접 한 번을 다시 끝까지 진행해도 동작이 그대로다</span></label></li>
+    <li><label><input type="checkbox" data-k="z2"> <span>커밋했다</span></label></li>
+  </ul>
+</section>
+
+<!-- 14 -->
+<section id="final">
+  <h2><span class="num">14</span>전체 확인</h2>
+  <div class="block prompt"><div class="label">프롬프트</div><pre><code>/verify</code></pre></div>
+  <div class="block prompt"><div class="label">프롬프트 (코드 검토)</div><pre><code>code-reviewer 에이전트로 이번에 추가한 면접 기능 전체(backend/app/interviews, backend/app/ai/speech.py, frontend/src/features/interview, 면접 화면들)를 검토해줘. 보안(남의 면접 접근, 업로드 검사, 프롬프트 주입), 자원 정리(카메라·마이크 트랙, 분석 루프), 에러 처리를 중심으로. 고칠 것은 목록으로 먼저 보여줘.</code></pre></div>
+  <h3><span class="tag todo">할 일</span> Docker 전체 실행으로 처음부터 끝까지</h3>
+  <p>개발 서버를 모두 끄고 Docker 전체 실행(3-1의 B) 후, 새 계정으로 가입해서 아래를 순서대로 해 봅니다.</p>
+  <ul class="checks">
+    <li><label><input type="checkbox" data-k="e1"> <span><code>/verify</code> 표가 backend, frontend, compose 모두 통과</span></label></li>
+    <li><label><input type="checkbox" data-k="e2"> <span>새 계정 가입 → 새 면접(분야 자유) → 점검(권한, 소리, 목소리, 기준 자세) → 5문항 진행 → 결과 리포트까지 오류 없이 된다</span></label></li>
+    <li><label><input type="checkbox" data-k="e3"> <span>결과 리포트의 말하기·자세 지표가 실제로 한 행동과 대체로 맞는다</span></label></li>
+    <li><label><input type="checkbox" data-k="e4"> <span>기록 → 같은 질문으로 다시 하기 → 대시보드 점수 추이에 두 번째 기록이 더해진다</span></label></li>
+    <li><label><input type="checkbox" data-k="e5"> <span>다른 계정으로 첫 계정 면접 주소를 열면 볼 수 없다</span></label></li>
+    <li><label><input type="checkbox" data-k="e6"> <span>끝내기: macOS <code>make down</code>, Windows <code>docker compose down</code> 으로 이 프로젝트만 내려가고 다른 프로젝트 컨테이너는 그대로다</span></label></li>
+  </ul>
+  <p>내 GitHub 저장소로 올리는 방법은 기존 가이드(<code>guide.html</code>)의 "빠른 시작 5. 내 GitHub 저장소로 올리기"를 따릅니다. 올리면 CI(<code>.github/workflows/ci.yml</code>)가 같은 검사를 돌립니다.</p>
+</section>
+
+<!-- 15 -->
+<section id="trouble">
+  <h2><span class="num">15</span>문제 해결</h2>
+  <table>
+    <tr><th>증상</th><th>원인과 해결</th></tr>
+    <tr><td>카메라가 검은 화면이거나 권한을 묻지 않음</td><td>OS 가 브라우저를 막고 있을 수 있습니다. Windows: 설정 → 개인 정보 및 보안 → 카메라(마이크) → 데스크톱 앱 접근 허용. macOS: 시스템 설정 → 개인정보 보호 및 보안 → 카메라(마이크) → Chrome 켜기 후 브라우저 재시작. Zoom·Teams 처럼 카메라를 쓰는 앱도 닫습니다.</td></tr>
+    <tr><td>휴대폰이나 다른 PC 에서 <code>http://192.168…</code> 로 열면 카메라가 안 됨</td><td>브라우저는 <code>localhost</code> 나 https 에서만 카메라를 허용합니다. 같은 PC 의 localhost 로 확인하세요.</td></tr>
+    <tr><td>한국어 목소리가 안 나옴</td><td>Windows: 설정 → 시간 및 언어 → 음성 → 음성 추가 → 한국어. macOS: 시스템 설정 → 손쉬운 사용 → 읽기 및 말하기 → 시스템 목소리에서 한국어(예: Yuna) 받기. 설치 후 브라우저를 다시 시작합니다.</td></tr>
+    <tr><td>자세·표정 분석 모델이 로딩되지 않음</td><td>회사·학교 네트워크가 <code>cdn.jsdelivr.net</code> 이나 <code>storage.googleapis.com</code> 을 막는 경우입니다. 프롬프트: "MediaPipe wasm 과 모델 파일을 frontend/public/mediapipe/ 에 두고 거기서 읽도록 바꿔줘. 내려받는 스크립트도 만들어줘."</td></tr>
+    <tr><td>업로드할 때 413 오류, 또는 질문 생성이 504 로 끊김 (Docker 실행에서만)</td><td>예전 템플릿으로 만든 프로젝트입니다. <code>frontend/nginx.conf</code> 의 <code>location /api/</code> 에 <code>client_max_body_size 25m</code> 과 <code>proxy_read_timeout 300s</code> 를 넣고 Docker 를 다시 빌드합니다 (새 템플릿은 기본 포함).</td></tr>
+    <tr><td>업로드가 400 "JSON 형식을 확인해 주세요"</td><td><code>client.ts</code> 가 FormData 에도 <code>Content-Type: application/json</code> 을 넣고 있습니다. 새 템플릿은 고쳐져 있고, 예전 템플릿이면 9단계 프롬프트의 client.ts 항목이 고칩니다.</td></tr>
+    <tr><td>백엔드 시작 시 "Form data requires python-multipart"</td><td>예전 템플릿입니다. <code>cd backend</code> 후 <code>uv add python-multipart</code>, <code>pyproject.toml</code> 과 <code>uv.lock</code> 둘 다 커밋.</td></tr>
+    <tr><td>Ollama: AI 요청이 502 이고 로그에 "연결 실패 (http://ollama:11434…)"</td><td><code>.env</code> 의 <code>COMPOSE_PROFILES</code> 가 비어 있어 Ollama 컨테이너가 안 떴습니다 (구성 A·B). <code>ollama</code> 또는 <code>ollama-gpu</code> 로 두고 다시 <code>make up</code>. 구성 C·D 로 쓰려던 것이면 <code>OLLAMA_DOCKER_URL</code> 줄의 <code>#</code> 을 지웠는지 확인.</td></tr>
+    <tr><td>Ollama(C): <code>ssh</code> 가 "bind: Address already in use" 로 터널을 못 엶</td><td>내 PC 에 Ollama 앱이 설치되어 11434 포트를 이미 쓰고 있습니다. 앱을 끄거나, 터널을 <code>-L 11435:localhost:11434</code> 로 열고 <code>.env</code> 의 <code>OLLAMA_DOCKER_URL</code>·<code>OLLAMA_BASE_URL</code> 포트를 11435 로 맞춥니다.</td></tr>
+    <tr><td>Ollama(C): 502 이고 로그에 "연결 실패 (http://host.docker.internal:11434…)"</td><td>SSH 터널 창이 닫혔거나 PC 가 절전에서 깨어나며 끊긴 경우가 대부분입니다. <code>ssh -N -L 11434:localhost:11434 사용자@서버주소</code> 를 다시 실행하고 브라우저에서 http://localhost:11434/api/tags 가 열리는지 확인. 서버 주소를 직접 적은 경우는 서버의 Ollama 가 <code>OLLAMA_HOST=0.0.0.0</code> 으로 떠 있는지와 방화벽의 11434 포트를 확인. macOS 앱(D)은 앱이 켜져 있는지.</td></tr>
+    <tr><td>Ollama: 로그에 "HTTP 404 … model … not found"</td><td>모델을 아직 안 받았습니다. A·B 는 <code>make ai-model</code>(Windows <code>docker compose exec ollama ollama pull exaone3.5:7.8b</code>, B 는 <code>ollama-gpu</code>), C 는 원격 서버에서 <code>ollama pull exaone3.5:7.8b</code>. <code>OLLAMA_MODEL</code> 을 바꿨다면 그 이름으로 다시 받고, <code>.env</code> 의 이름과 <code>ollama list</code> 의 이름(태그 포함)이 같은지 확인.</td></tr>
+    <tr><td>Ollama: GPU 프로필(B)인데 느리고 서버의 <code>nvidia-smi</code> 에 안 보임</td><td>서버에서 <code>docker run --rm --gpus all ubuntu nvidia-smi</code> 가 실패하면 Docker 가 GPU 를 못 씁니다. Windows 는 Docker Desktop 설정에서 WSL2 백엔드 확인과 NVIDIA 드라이버 업데이트, Linux 는 NVIDIA Container Toolkit 설치 후 Docker 재시작.</td></tr>
+    <tr><td>Ollama: 질문 생성이 자주 502 (JSON 형식 오류)</td><td>모델이 작아 형식을 못 지키는 경우입니다. <code>OLLAMA_MODEL</code> 을 <code>exaone3.5:32b</code>(원격 GPU) 나 <code>gemma3:12b</code> 로 올리거나, 그 단계만 <code>AI_PROVIDER=openai</code> 로 돌립니다. 백엔드 로그에 모델 응답 앞부분이 남습니다.</td></tr>
+    <tr><td>Ollama: 메모리 부족으로 컨테이너가 꺼짐</td><td>Docker Desktop 의 메모리 한도(설정 → Resources)를 모델 크기 + 2GB 이상으로 올리거나 더 작은 모델(<code>exaone3.5:2.4b</code>)로 바꿉니다.</td></tr>
+    <tr><td>로컬 음성 인식(<code>local</code>)이 연결 실패</td><td><code>make stt-up</code>(Windows <code>docker compose --profile stt up -d stt</code>)으로 stt 컨테이너를 켰는지, 처음 실행에서 모델 내려받기가 끝났는지 <code>docker compose logs -f stt</code> 로 확인합니다. 개발 모드면 <code>LOCAL_STT_BASE_URL=http://localhost:8001/v1</code>.</td></tr>
+    <tr><td>Groq 음성 인식이 429</td><td>무료 등급 사용량 한도를 넘었습니다. 잠시 뒤 다시 하거나 <code>STT_PROVIDER</code> 를 <code>local</code>·<code>openai</code> 로 바꿉니다.</td></tr>
+    <tr><td>AI 기능이 502</td><td><code>.env</code> 의 <code>OPENAI_API_KEY</code>, OpenAI 크레딧을 확인합니다. Docker 실행이면 <code>.env</code> 수정 후 다시 실행해야 반영됩니다. 백엔드 로그(<code>make logs</code>, Windows <code>docker compose logs -f backend</code>)에 원인이 남습니다.</td></tr>
+    <tr><td>Safari 에서 녹음이 안 되거나 형식 오류</td><td>Safari 는 webm 대신 mp4 로 녹음합니다. 프롬프트대로 만들었다면 처리되지만, 확인은 Chrome·Edge 로 하는 것을 권장합니다.</td></tr>
+    <tr><td>개발 모드 백엔드가 "address already in use"</td><td>Docker 의 백엔드가 8080 을 쓰고 있습니다. <code>make down</code>(Windows <code>docker compose down</code>) 후 <code>make db</code> 부터 다시.</td></tr>
+    <tr><td>Claude 작업 끝에 "[verify] 도구가 없어 검증을 건너뜀"</td><td>uv 나 npm 을 못 찾은 것입니다. 1단계의 uv 설치를 확인하고 VS Code 를 다시 시작합니다.</td></tr>
+    <tr><td>Windows 에서 <code>npm.ps1 을 로드할 수 없습니다</code></td><td><code>npm.cmd install</code> 로 실행하거나 <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> 를 한 번 실행합니다.</td></tr>
+  </table>
+  <p>막힌 단계가 있으면 단계 번호, 넣은 프롬프트, 화면·터미널 오류를 그대로 이 프로젝트 스레드에 남겨 주세요. 원인을 찾아 하네스나 이 문서를 고치겠습니다.</p>
+</section>
+
+<!-- 16 -->
+<section id="next">
+  <h2><span class="num">16</span>다음에 해볼 것 (선택)</h2>
+  <table>
+    <tr><th>하고 싶은 것</th><th>프롬프트 예시</th></tr>
+    <tr><td>꼬리 질문</td><td>"답변이 끝나면 transcript 를 보고 필요할 때만 꼬리 질문 1개를 만들어 이어서 묻도록 해줘. PLAN.md 에 먼저 반영하고 진행해줘."</td></tr>
+    <tr><td>AI 면접관 목소리를 더 자연스럽게</td><td>"질문 읽기를 OpenAI 음성 합성 API 로 바꾸는 옵션을 추가해줘. 설정으로 브라우저 음성과 고를 수 있게."</td></tr>
+    <tr><td>내 영상 다시 보기</td><td>"답변 영상을 브라우저에만 저장(IndexedDB)해서 결과 화면에서 다시 볼 수 있게 해줘. 서버로는 보내지 않아."</td></tr>
+    <tr><td>표정 분류 모델 직접 학습</td><td>dev-harness 의 <code>ml</code> 확장 모듈(PyTorch, Jupyter)이 필요합니다. 새로 만들 때 <code>/f-r-setup 이름 --addons llm,ml</code>.</td></tr>
+    <tr><td>질문 은행과 비용 절감</td><td>"같은 분야·수준으로 만든 질문 세트를 question_bank 테이블에 저장하고, 새 면접을 만들 때 70% 는 은행에서 고르고 30% 만 새로 생성하게 해줘. 사용자가 '새 질문만' 을 고를 수도 있게."</td></tr>
+    <tr><td>면접관 페르소나·난이도</td><td>"면접관 스타일(온화한 / 압박 / 기술 심층)과 난이도를 고르면 질문 생성과 피드백 프롬프트가 달라지게 해줘. 프롬프트는 app/interviews/prompts.py 한곳에 모으고 prompt_version 을 올려."</td></tr>
+    <tr><td>영어 면접</td><td>"면접 언어(ko/en)를 고르면 질문 읽기 목소리(en-US), 음성 인식 language, 피드백 언어가 함께 바뀌게 해줘. 분당 음절 대신 분당 단어 수(WPM)로 계산."</td></tr>
+    <tr><td>결과 공유 링크</td><td>"결과 리포트를 읽기 전용 공유 링크(만료 7일, 토큰 기반, 로그인 불필요)로 볼 수 있게 해줘. 공유 끄기도. 비언어 지표는 공유본에서 빼는 옵션."</td></tr>
+    <tr><td>사용량 제한과 비용 보기</td><td>"사용자당 하루 면접 횟수 제한(.env 로 설정)과 LLM 호출 횟수·소요 시간을 ai_usage 테이블에 기록해 대시보드에 보여줘."</td></tr>
+    <tr><td>운영 배포 (HTTPS 필수)</td><td>카메라·마이크는 localhost 밖에서는 HTTPS 에서만 동작합니다. "Caddy 리버스 프록시 서비스를 docker-compose.prod.yml 에 추가해 도메인으로 자동 HTTPS 를 받고 frontend 로 넘기게 해줘. JWT_SECRET·API 키는 .env 에만, DB 볼륨 백업 명령(make db-backup)과 운영 전 점검표(README)도 만들어줘." 배포 전에 <code>guide.html</code>(기존 가이드)의 "운영 배포 전에 확인할 것"도 보세요.</td></tr>
+  </table>
+</section>
+
+</main>
+</div>
+<script>
+  document.querySelectorAll('.block').forEach(function (block) {
+    var pre = block.querySelector('pre');
+    if (!pre) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy';
+    btn.type = 'button';
+    btn.textContent = '복사';
+    btn.addEventListener('click', function () {
+      var text = pre.innerText;
+      var done = function () { btn.textContent = '복사됨'; setTimeout(function () { btn.textContent = '복사'; }, 1500); };
+      if (navigator.clipboard) { navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); }); }
+      else { fallback(text); done(); }
+    });
+    block.appendChild(btn);
+  });
+  function fallback(text) {
+    var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+  function toggleTheme() {
+    var root = document.documentElement;
+    var dark = root.getAttribute('data-theme') === 'dark' ||
+      (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    root.setAttribute('data-theme', dark ? 'light' : 'dark');
+  }
+  // 확인 체크 상태를 이 브라우저에 저장합니다.
+  (function () {
+    var KEY = 'mock-interview-guide-checks';
+    var state = {};
+    try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+    var boxes = document.querySelectorAll('ul.checks input[data-k]');
+    var progress = document.getElementById('progress');
+    function update() {
+      var n = 0; boxes.forEach(function (b) { if (b.checked) n++; });
+      progress.textContent = '확인 ' + n + ' / ' + boxes.length;
+    }
+    boxes.forEach(function (b) {
+      b.checked = !!state[b.dataset.k];
+      b.addEventListener('change', function () {
+        state[b.dataset.k] = b.checked;
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        update();
+      });
+    });
+    update();
+  })();
+</script>
+</body>
+</html>

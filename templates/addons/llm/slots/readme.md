@@ -21,6 +21,7 @@ FastAPI 백엔드에서 LLM 을 부르는 채팅 API 와 화면(`/chat`)입니�
 | Windows + NVIDIA GPU | `AI_PROVIDER=ollama`, `COMPOSE_PROFILES=ollama-gpu` | Docker Desktop(WSL2) + 최신 NVIDIA 드라이버. `docker run --rm --gpus all ubuntu nvidia-smi` 로 먼저 확인 |
 | Linux + NVIDIA GPU | 위와 같음 | NVIDIA Container Toolkit 필요 |
 | macOS (Apple Silicon) 에서 GPU 로 빠르게 | `AI_PROVIDER=ollama`, `COMPOSE_PROFILES=` (비움), `OLLAMA_DOCKER_URL=http://host.docker.internal:11434` | Docker 는 Apple GPU 를 못 쓰므로 https://ollama.com 앱을 PC 에 설치하고 `ollama pull gemma3:4b` |
+| 다른 서버(원격 GPU 등)의 Ollama 쓰기 | `AI_PROVIDER=ollama`, `COMPOSE_PROFILES=` (비움), `OLLAMA_DOCKER_URL` 과 `OLLAMA_BASE_URL` 둘 다 `http://<서버주소>:11434` | 서버의 Ollama 가 네트워크에 열려 있어야 함(`OLLAMA_HOST=0.0.0.0`). 안 열려 있으면 `ssh -N -L 11434:localhost:11434 사용자@서버` 터널을 켜 두고 `host.docker.internal` 주소를 씀. 모델은 서버에서 `ollama pull` |
 
 ```bash
 make up          # COMPOSE_PROFILES 에 따라 Ollama 컨테이너도 함께 실행

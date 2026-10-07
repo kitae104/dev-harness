@@ -8,6 +8,6 @@
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-5-5}
       # 기본은 이 프로젝트의 Ollama 컨테이너. PC 에 직접 설치한 Ollama(macOS 앱 등)를 쓰려면 .env 에서
-      # OLLAMA_DOCKER_URL=http://host.docker.internal:11434 로 바꿉니다.
+      # OLLAMA_DOCKER_URL=http://host.docker.internal:11434 로, 다른 서버의 Ollama 면 http://<서버주소>:11434 로 바꿉니다.
       OLLAMA_BASE_URL: ${OLLAMA_DOCKER_URL:-http://ollama:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
