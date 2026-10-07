@@ -1,0 +1,52 @@
+  # Ollama (로컬 LLM). .env 의 COMPOSE_PROFILES 로 켭니다: ollama(CPU) 또는 ollama-gpu(NVIDIA). 둘 중 하나만.
+  # 두 서비스 모두 백엔드에서 http://ollama:11434 로 보이고, 모델은 같은 볼륨에 저장됩니다.
+  ollama:
+    profiles: ["ollama"]
+    image: ollama/ollama:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-app}-ollama
+    environment:
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}  # make ai-model 이 내려받을 모델
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-8192}
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
+    ports:
+      - "127.0.0.1:${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - app-net
+
+  ollama-gpu:
+    profiles: ["ollama-gpu"]
+    image: ollama/ollama:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-app}-ollama
+    environment:
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}  # make ai-model 이 내려받을 모델
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-8192}
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
+    ports:
+      - "127.0.0.1:${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      app-net:
+        aliases:
+          - ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

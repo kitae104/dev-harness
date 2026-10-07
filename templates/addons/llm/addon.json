@@ -15,7 +15,7 @@
         "ollama"
       ],
       "default": "openai",
-      "description": "모델 제공자. 생성 후에도 AI_PROVIDER 환경 변수로 바꿀 수 있습니다."
+      "description": "기본 모델 제공자. 생성 후에도 .env 의 AI_PROVIDER 하나로 바꿀 수 있습니다 (Ollama 컨테이너는 COMPOSE_PROFILES 로 켬)."
     }
   },
   "slots": {
@@ -23,10 +23,10 @@
     "py-router-imports": "slots/py-router-imports.py",
     "py-routers": "slots/py-routers.py",
     "compose-backend-env": "slots/compose-backend-env.{aiProvider}.yml",
-    "compose-services": "slots/compose-services.{aiProvider}.yml",
-    "compose-volumes": "slots/compose-volumes.{aiProvider}.yml",
+    "compose-services": "slots/compose-services.yml",
+    "compose-volumes": "slots/compose-volumes.yml",
     "env": "slots/env.{aiProvider}",
-    "make-targets": "slots/make-targets.{aiProvider}.mk",
+    "make-targets": "slots/make-targets.mk",
     "landing-features": "slots/landing-features.tsx",
     "readme": "slots/readme.md",
     "claude-md": "slots/claude-md.md"

@@ -5,7 +5,7 @@ paths:
 
 # 프론트엔드 규칙 (Next.js 16 App Router, React 19, TypeScript, Tailwind v4)
 
-- API 호출은 `src/api/<도메인>.ts` 에 `xxxApi` 객체로 모으고 반드시 `client.ts` 의 `api<T>()` 를 거칩니다. 컴포넌트에서 `fetch` 를 직접 쓰지 않습니다 (토큰, 에러 형식 처리가 여기 있음).
+- API 호출은 `src/api/<도메인>.ts` 에 `xxxApi` 객체로 모으고 반드시 `client.ts` 의 `api<T>()` 를 거칩니다. 컴포넌트에서 `fetch` 를 직접 쓰지 않습니다 (토큰, 에러 형식 처리가 여기 있음). 파일 업로드는 `body` 에 `FormData` 를 넘기면 `api()` 가 Content-Type 을 비워 브라우저가 multipart 로 보냅니다.
 - 서버 응답 타입은 `src/api/<도메인>.ts` 에 `interface` 로 선언하고 백엔드 응답과 필드 이름(camelCase)을 맞춥니다.
 - 에러 표시: `catch (err) { err instanceof ApiError ? err.message : '요청을 처리하지 못했습니다.' }` 를 `<Alert>` 로 보여 줍니다. 필드별 메시지는 `err.errors[필드]` 로 `FormField` 의 `error` 에 넘깁니다 (`src/app/signup/page.tsx` 참고).
 
@@ -34,6 +34,7 @@ paths:
 - 서비스 이름과 소개 문구는 `src/config/site.ts` 에서 가져옵니다.
 - 화면 문구는 한국어.
 - import 경로에 확장자(`.tsx`, `.ts`)를 붙입니다 (기존 코드와 동일). `src/` 아래는 `@/` 별칭으로 가져옵니다: `import Card from '@/components/ui/Card.tsx'`.
+- 단위 테스트가 필요하면(순수 계산 함수, 훅 등) vitest 를 추가하고 `package.json` 에 `"test": "vitest run"` 스크립트를 둡니다. 종료 훅과 `/verify` 가 `test` 스크립트가 있으면 함께 돌립니다. 테스트 파일은 대상 옆에 `*.test.ts`.
 - 검증: `cd frontend && npm run lint && npm run build` (`next build` 가 타입 검사까지 합니다)
 
 ## 새 도메인 추가

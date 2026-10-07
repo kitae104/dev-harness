@@ -49,3 +49,18 @@ export function inputClass(invalid = false, className?: string) {
 }
 
 export const linkClass = 'font-medium text-primary hover:underline'
+
+export type BadgeTone = 'neutral' | 'primary' | 'success' | 'warning' | 'destructive'
+
+const badgeTones: Record<BadgeTone, string> = {
+  neutral: 'bg-muted text-muted-foreground',
+  primary: 'bg-accent text-accent-foreground',
+  success: 'bg-success/15 text-success',
+  warning: 'bg-warning/20 text-warning-foreground',
+  destructive: 'bg-destructive/15 text-destructive',
+}
+
+// 작은 상태 표시. <Badge tone="success">적정</Badge> 또는 다른 요소에 badgeClass('warning') 로 씁니다.
+export function badgeClass(tone: BadgeTone = 'neutral', className?: string) {
+  return cn('inline-flex items-center rounded-control px-2 py-0.5 text-xs font-medium', badgeTones[tone], className)
+}

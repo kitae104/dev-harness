@@ -12,6 +12,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  servlet:
+    multipart:
+      # 파일 업로드 최대 크기 (기본 1MB). 프런트엔드 nginx 의 client_max_body_size 와 맞춥니다.
+      max-file-size: ${MAX_UPLOAD_SIZE:25MB}
+      max-request-size: ${MAX_UPLOAD_SIZE:25MB}
   # @addon:spring-yml
 
 server:

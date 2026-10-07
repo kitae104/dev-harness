@@ -1,6 +1,6 @@
 // Stop 훅: Claude 가 작업을 끝내려 할 때, git 기준으로 바뀐 영역만 검증합니다.
 //   backend/  → Spring: ./gradlew test · FastAPI: ruff check, ruff format --check, pytest
-//   frontend/ → npm run lint (oxlint + 디자인 규칙) + 타입 검사
+//   frontend/ → npm run lint (oxlint + 디자인 규칙) + 타입 검사 + npm test (test 스크립트가 있을 때만)
 //   fastapi/, ml/ → ruff check, ruff format --check, pytest
 // 실패하면 exit 2 로 끝내기를 막고 실패 내용을 Claude 에게 돌려줍니다.
 // 같은 변경으로 이미 통과했다면 다시 돌리지 않습니다 (.claude/.verify-cache).
@@ -59,7 +59,12 @@ const AREAS = {
   frontend: {
     match: (p) => p.startsWith('frontend/'),
     available: () => exists('frontend', 'node_modules'),
-    checks: [{ name: 'npm run lint', cmd: 'npm', args: ['run', 'lint', '--silent'], cwd: 'frontend' }, typecheck],
+    checks: [
+      { name: 'npm run lint', cmd: 'npm', args: ['run', 'lint', '--silent'], cwd: 'frontend' },
+      typecheck,
+      // 단위 테스트(예: vitest)를 추가해 package.json 에 "test" 스크립트가 생기면 함께 돌립니다.
+      { name: 'npm test', cmd: 'npm', args: ['run', 'test', '--if-present', '--silent'], cwd: 'frontend' },
+    ],
   },
   fastapi: pythonArea('fastapi'),
   ml: pythonArea('ml'),

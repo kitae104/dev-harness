@@ -2,7 +2,7 @@
 
 늘 비슷한 형태로 시작하는 프로젝트를 명령 하나로 만들고, 그 위에서 Claude Code 가 일관되게 기능을 추가하도록 규칙(하네스)까지 함께 넣어 주는 템플릿 모음입니다.
 
-처음이라면 [docs/guide.html](docs/guide.html) (단계별 따라하기와 Claude Code 프롬프트 모음)을 브라우저로 열어 보세요.
+처음이라면 [docs/guide.html](docs/guide.html) (단계별 따라하기와 Claude Code 프롬프트 모음)을 브라우저로 열어 보세요. 이 틀로 실제 서비스를 끝까지 만드는 예시는 [docs/mock-interview-guide.html](docs/mock-interview-guide.html) (웹캠 모의 면접 + AI 피드백, Ollama 로컬·원격 GPU 구성 포함)에 있습니다.
 
 ## 명령
 

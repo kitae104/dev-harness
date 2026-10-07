@@ -27,7 +27,8 @@ export const tokenStorage = {
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers)
-  if (init.body && !headers.has('Content-Type')) {
+  // FormData(파일 업로드)는 브라우저가 boundary 가 붙은 multipart Content-Type 을 직접 넣어야 하므로 건드리지 않습니다.
+  if (init.body && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
   const token = tokenStorage.get()
